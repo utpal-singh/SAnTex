@@ -50,9 +50,9 @@ if __name__ == "__main__":
     tensor = tensor_conversion.voigt_to_tensor(M)
     print(np.array(tensor_conversion.tensor_to_voigt(tensor)))
 
-    alpha = 60 # Rotation angle around x axis in degrees
-    beta = 40 # Rotation angle around y axis in degrees
-    gamma = 30    # Rotation angle around z axis in degrees
+    alpha = 30 # Rotation angle around x axis in degrees
+    beta = 50 # Rotation angle around y axis in degrees
+    gamma = 80    # Rotation angle around z axis in degrees
     output = rotate_tensor(tensor, alpha, beta, gamma)
     print("Output tensor:")
 
