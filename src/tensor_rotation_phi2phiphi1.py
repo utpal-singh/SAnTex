@@ -12,7 +12,7 @@ def euler_to_rotation(phi1, phi, phi2):
     Rx = np.array([[1, 0, 0], [0, np.cos(phi), -np.sin(phi)], [0, np.sin(phi), np.cos(phi)]])
     Rz2 = np.array([[np.cos(phi2), -np.sin(phi2), 0], [np.sin(phi2), np.cos(phi2), 0], [0, 0, 1]])
     # Compute the total rotation matrix by multiplying the matrices in order
-    R = Rz1 @ Rx @ Rz2 # Swap the order of Rz1 and Rz2
+    R = Rz2 @ Rx @ Rz1
     # Return the rotation matrix
     return R
 
