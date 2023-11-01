@@ -63,19 +63,6 @@ def phase_velocity(cijkl, rho):
     # Return vp, vs1 and vs2 as tuples
     return tuple(vp), tuple(vs1), tuple(vs2)
 
-# Test the functions with an example cijkl stiffness tensor and a density value
-
-
-
-
-# Import numpy library for array operations and math library for trigonometric functions
-
-# Import numpy library for array operations and math library for trigonometric functions
-import numpy as np
-import math
-
-# Import matplotlib library for plotting
-import matplotlib.pyplot as plt
 
 def plot_vp_2d(cijkl, rho):
     # Create a figure and a 2d axes object
@@ -117,21 +104,22 @@ def plot_vp_2d(cijkl, rho):
     # Show the plot
     plt.show()
 
-import tensor_conversion
-M = np.array([[198.96,   73.595,  68.185,   0.,      9.735,   0.   ],
-                [ 73.595, 155.94,   62.23,    0.,      6.295,   0.   ],
-                [ 68.185,  62.23,  225.99,    0.,     33.85,    0.   ],
-                [  0.,      0.,      0.,     65.66,    0.,      6.415],
-                [  9.735,   6.295,  33.85,    0.,     60.23,    0.   ],
-                [  0.,      0.,     0.,      6.415,   0.,     65.18 ]])*10**9
+if __name__=="__main__":
+    import tensor_conversion
+    M = np.array([[198.96,   73.595,  68.185,   0.,      9.735,   0.   ],
+                    [ 73.595, 155.94,   62.23,    0.,      6.295,   0.   ],
+                    [ 68.185,  62.23,  225.99,    0.,     33.85,    0.   ],
+                    [  0.,      0.,      0.,     65.66,    0.,      6.415],
+                    [  9.735,   6.295,  33.85,    0.,     60.23,    0.   ],
+                    [  0.,      0.,     0.,      6.415,   0.,     65.18 ]])*10**9
 
-cijkl = tensor_conversion.voigt_to_tensor(M)
+    cijkl = tensor_conversion.voigt_to_tensor(M)
 
-rho = 3500
-
-
-# Define a function to plot the vp in 2d stereographic projection plots with velocity represented by colour
+    rho = 3500
 
 
-# Plot the vp in 2d stereographic projection plots with velocity represented by colour
-plot_vp_2d(cijkl, rho)
+    # Define a function to plot the vp in 2d stereographic projection plots with velocity represented by colour
+
+
+    # Plot the vp in 2d stereographic projection plots with velocity represented by colour
+    plot_vp_2d(cijkl, rho)

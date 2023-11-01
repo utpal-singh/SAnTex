@@ -60,24 +60,25 @@ def phase_velocity(cijkl, rho):
     return tuple(vp), tuple(vs1), tuple(vs2)
 
 # Test the functions with an example cijkl stiffness tensor and a density value
-import numpy as np
-import tensor_conversion
-M = np.array([[198.96,   73.595,  68.185,   0.,      9.735,   0.   ],
-                [ 73.595, 155.94,   62.23,    0.,      6.295,   0.   ],
-                [ 68.185,  62.23,  225.99,    0.,     33.85,    0.   ],
-                [  0.,      0.,      0.,     65.66,    0.,      6.415],
-                [  9.735,   6.295,  33.85,    0.,     60.23,    0.   ],
-                [  0.,      0.,     0.,      6.415,   0.,     65.18 ]])*10**9
+if __name__ == "__main__":
+    import numpy as np
+    import tensor_conversion
+    M = np.array([[198.96,   73.595,  68.185,   0.,      9.735,   0.   ],
+                    [ 73.595, 155.94,   62.23,    0.,      6.295,   0.   ],
+                    [ 68.185,  62.23,  225.99,    0.,     33.85,    0.   ],
+                    [  0.,      0.,      0.,     65.66,    0.,      6.415],
+                    [  9.735,   6.295,  33.85,    0.,     60.23,    0.   ],
+                    [  0.,      0.,     0.,      6.415,   0.,     65.18 ]])*10**9
 
-cijkl = tensor_conversion.voigt_to_tensor(M)
-rho = 3500
+    cijkl = tensor_conversion.voigt_to_tensor(M)
+    rho = 3500
 
-# Calculate vp, vs1 and vs2 over all the directions possible
-vp, vs1, vs2 = phase_velocity(cijkl, rho)
-# Print vp, vs1 and vs2
-print("The values of vp are:")
-print(min(vp))
-print("The values of vs1 are:")
-print(min(vs1))
-print("The values of vs2 are:")
-print(min(vs2))
+    # Calculate vp, vs1 and vs2 over all the directions possible
+    vp, vs1, vs2 = phase_velocity(cijkl, rho)
+    # Print vp, vs1 and vs2
+    print("The values of vp are:")
+    print(min(vp))
+    print("The values of vs1 are:")
+    print(min(vs1))
+    print("The values of vs2 are:")
+    print(min(vs2))
