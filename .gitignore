@@ -10,6 +10,11 @@ __pycache__/
 # C extensions
 *.so
 
+#Files
+*.ctf
+*.crc
+*.cpc
+
 **/.DS_Store
 
 # Distribution / packaging
