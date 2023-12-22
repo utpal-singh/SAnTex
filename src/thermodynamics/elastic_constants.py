@@ -79,9 +79,9 @@ class ElasticConstant:
         return e_nk, g_nk, l_nk
 
     def nl(self):
-        e_nl = l(1+n)(1-2n)/n
-        g_nl = l(1-2n)/2(1+n)
-        k_nl = l(1+n)/3n
+        e_nl = self.l*(1+self.n)*(1 - 2*self.n)/self.n
+        g_nl = self.l*(1 - 2*self.n)/(2*self.n)
+        k_nl = self.l*(1+self.n)/(3*self.n)
         return e_nl, g_nl, k_nl
 
     def gk(self):
@@ -98,9 +98,9 @@ class ElasticConstant:
 
     def gl(self):
         # For G, l input case
-        E_gl = self.R - 2*self.G - self.l
-        n_gl = (self.R - 2*self.G - self.l) / (4*self.G)
-        K_gl = (self.R + 2*self.G + self.l) / 3
+        E_gl = self.G*(3*self.l+2*self.G)/(self.l+self.G)
+        n_gl = self.l/(2*(self.l + self.G))
+        K_gl = (3*self.l + 2*self.G)/3
 
         # Check the output to satisfy the limit
         if E_gl <= 0 or n_gl < -1 or n_gl > 0.5 or K_gl <= 0:
@@ -110,9 +110,9 @@ class ElasticConstant:
 
     def kl(self):
         # For K, l input case
-        E_kl = (3*self.K - self.l) / (1 - self.n)
-        n_kl = (3*self.K - self.l - self.R) / (6*self.K - 2*self.l)
-        G_kl = (3*self.K - self.l - self.R) / 2
+        E_kl = 9*self.K*(self.K-self.l)/(3*self.K - self.l) 
+        n_kl = self.l/(3*self.K - self.l)
+        G_kl = 1.5*(self.K - self.l)
 
         # Check the output to satisfy the limit
         if E_kl <= 0 or n_kl < -1 or n_kl > 0.5 or G_kl <= 0:
@@ -122,8 +122,8 @@ class ElasticConstant:
     
 
 if __name__ == "__main__":
-    elastic = ElasticConstant(n = 0.08, K = 37.6)
-    a, b, c = elastic.nk()
+    elastic = ElasticConstant(K = 37.62, l = 8.35)
+    a, b, c = elastic.kl()
     print("e: ", a)
-    print("g: ", b)
+    print("n: ", b)
     print("l: ", c)
