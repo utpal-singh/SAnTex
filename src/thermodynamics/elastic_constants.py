@@ -122,8 +122,8 @@ class ElasticConstant:
     
 
 if __name__ == "__main__":
-    elastic = ElasticConstant(K = 37.62, l = 8.35)
-    a, b, c = elastic.kl()
+    elastic = ElasticConstant(K = 16.1, G = 0.01)
+    a, b, c = elastic.gk()
     print("e: ", a)
     print("n: ", b)
     print("l: ", c)
