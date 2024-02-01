@@ -51,17 +51,17 @@ While existing solutions predominantly utilize MATLAB for such calculations, its
 
 # Package Summary
 
-'SAGE' (Seismic Anisotropy and Geodynamics) is a comprehensive Python-based package designed for calculation of seismic anisotropy by providing a versatile, open-source toolkit for researchers. SAGE caters to the dynamic nature of crystal properties, integrating functionalities for seismic anisotropy calculations, pressure-temperature effects, melt presence, and phase density variations.
+`SAGE` (Seismic Anisotropy and Geodynamics) is a comprehensive Python-based package designed for calculation of seismic anisotropy by providing a versatile, open-source toolkit for researchers. SAGE caters to the dynamic nature of crystal properties, integrating functionalities for seismic anisotropy calculations, pressure-temperature effects, melt presence, and phase density variations.
 
-Within 'sage', 'EBSD' is the class which deals with ebsd based calculations. The relevant functions for users are 'EBSD.load(filename)', 'EBSD.filterByPhase(phases)', 'EBSD.orientations()', 'EBSD.plot()'
+Within `sage`, `EBSD` is the class which deals with ebsd based calculations. The relevant functions for users are `EBSD.load(filename)`, `EBSD.filterByPhase(phases)`, `EBSD.orientations()`, `EBSD.plot()`
 
-'Tensor' is the class which deals with tensor calculations. 'Tensor.rotate()' will rotate the orientations obtained from 'EBSD.orientations()' to sample reference frame. 'Tensor.voigtToTensor()' converts a voigt 6*6 tensor to 3*3*3*3 tensor notation, and 'Tensor.tensorToVoigt()' converts a 3*3*3*3 tensor notation to voigt notation.
+`Tensor` is the class which deals with tensor calculations. `Tensor.rotate()` will rotate the orientations obtained from `EBSD.orientations()` to sample reference frame. `Tensor.voigtToTensor()` converts a voigt 6*6 tensor to 3*3*3*3 tensor notation, and `Tensor.tensorToVoigt()` converts a 3*3*3*3 tensor notation to voigt notation.
 
-'Material' is the class that outputs an user defined material object. The user can input if they want isotropic velocities, or anisotropic velocities, they get the library of predefined values of thermodynamic constants, stiffness tensors. The user also gets to decide the pressure, temperature and melt percentage if they want to include that in their material class. The user can choose their own density or get the density calculated from 'Material.thermodynamics.calculateDensity()' 
+`Material` is the class that outputs an user defined material object. The user can input if they want isotropic velocities, or anisotropic velocities, they get the library of predefined values of thermodynamic constants, stiffness tensors. The user also gets to decide the pressure, temperature and melt percentage if they want to include that in their material class. The user can choose their own density or get the density calculated from `Material.thermodynamics.calculateDensity()` 
 
-'Anisotropy' is the class that calculates seismic anisotropy. The 'Tensor.rotate()' object and 'Material' object is taken as input into Anisotropy.getVelocity() and Anisotropy.getAnisotropyPlot()
+`Anisotropy` is the class that calculates seismic anisotropy. The `Tensor.rotate()` object and `Material` object is taken as input into `Anisotropy.getVelocity()` and `Anisotropy.getAnisotropyPlot()`
 
-'Isotropy' is the class that calculates vp, vs, density, bulk modulus from library values at any chosen pressure and temperature.
+`Isotropy` is the class that calculates vp, vs, density, bulk modulus from library values at any chosen pressure and temperature.
 
 ![Workflow Chart for SAGE \label{fig:SAGE_wflow}](docs/images/SAGE_workflow.png)
 
