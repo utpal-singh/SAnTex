@@ -63,7 +63,7 @@ Within `sage`, `EBSD` is the class which deals with ebsd based calculations. The
 
 `Isotropy` is the class that calculates vp, vs, density, bulk modulus from library values at any chosen pressure and temperature.
 
-![Workflow Chart for SAGE \label{fig:SAGE_wflow}](docs/images/SAGE_workflow.png)
+![Workflow Chart for SAGE \label{fig:SAGE_wflow}](docs/images/SAGE_workflow.jpg)
 
 # Acknowledgements
 This study is supported by the Australian Research Council (ARC)Linkage Grant #Grantnumber and ARC DP Grant #Grantnumber. 
