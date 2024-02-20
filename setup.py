@@ -1,13 +1,12 @@
 from setuptools import setup, find_packages
 
 setup(
-  name="anisotropy",
-  version="0.1.0",
-  description="A Python package to calculate seismic anisotropy",
-  packages=find_packages(),
-  install_requires=["numpy", "pandas", "matplotlib"],
-  classifiers=[
-    "Programming Language :: Python :: 3",
-    "Operating System :: OS Independent",
-  ],
+    name='sage',
+    version='0.1',
+    packages=find_packages(),
+    install_requires=[
+        # List your dependencies here
+    ],
+    package_data={'sage': ['material/data/*']},
+    include_package_data=True,
 )
