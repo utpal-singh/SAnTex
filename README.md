@@ -12,4 +12,5 @@ Sage is a Python library for analysing seismic anisotropy
 You can install Sage using pip:
 
 ```bash
-pip install sage
+git clone https://github.com/utpal-singh/sage.git
+pip install .
