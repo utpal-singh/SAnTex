@@ -13,4 +13,5 @@ You can install Sage using pip:
 
 ```bash
 git clone https://github.com/utpal-singh/sage.git
+cd sage
 pip install .
