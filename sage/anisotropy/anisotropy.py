@@ -119,6 +119,7 @@ class Anisotropy:
         plt.show()
 
 
+
 if __name__ == "__main__":
     stiffness_matrix = np.array([[198.96, 73.595, 68.185, 0., 9.735, 0.],
                                 [73.595, 155.94, 62.23, 0., 6.295, 0.],
