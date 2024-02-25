@@ -24,8 +24,6 @@ authors:
     affiliation: 1
   - name: Patrice F. Rey
     affiliation: 1
-  - name: Maria Constanza Manassero
-    affiliation: 3
 
 affiliations:
  - name: School of Geosciences, University of Sydney, Sydney, Australia.
@@ -36,7 +34,7 @@ bibliography: paper.bib
 ---
 
 # Abstract
-Seismic anisotropy, how seismic wave velocities vary in different directions, is a key parameter for understanding the structure and dynamics of the Earth's interior. However, measuring seismic anisotropy is challenging and requires accurate and reliable methods and tools. In this paper, we present SAGE: \textit{Seismic Anisotropy and Geodynamics}, a Python library that calculates seismic anisotropy from mineral phase, modal composition, and crystallographic preferred orientation data collected by electron backscatter diffraction (EBSD). SAGE incorporates mineral phase information, and a crystal stiffness tensor library accounting for the dependency of elasticity with pressure and temperature. The library also also allows for estimation of the volume of melt and its effect on seismic anisotropy. SAGE is an open-source and user-friendly python-based alternative to the MATLAB-based software MTEX, with some additional components with regards to geodynamics. We describe the design, implementation, and validation of SAGE against previous studies and theoretical models. SAGE is the first library for seismic anisotropy calculation that accounts for the effect of pressure and temperature on elastic stiffness tensors.SAGE can produce reliable and consistent results that agree with previous studies, scientific tools and theoretical models.
+Seismic anisotropy, how seismic wave velocities vary in different directions, is a key parameter for understanding the structure and dynamics of the Earth's interior. However, measuring seismic anisotropy is challenging and requires accurate and reliable methods and tools. In this paper, we present SAGE: \textit{Seismic Anisotropy and Geodynamics}, a Python library that calculates seismic anisotropy from mineral phase, modal composition, and crystallographic preferred orientation data collected by electron backscatter diffraction (EBSD). SAGE incorporates mineral phase information, and a crystal stiffness tensor library accounting for the dependency of elasticity with pressure and temperature. The library also allows for estimation of the volume of melt and its effect on seismic anisotropy. SAGE is an open-source and user-friendly python-based alternative to the MATLAB-based software MTEX, with some additional components with regards to geodynamics. We describe the design, implementation, and validation of SAGE against previous studies and theoretical models. SAGE is the first library for seismic anisotropy calculation that accounts for the effect of pressure and temperature on elastic stiffness tensors.SAGE can produce reliable and consistent results that agree with previous studies, scientific tools and theoretical models.
 
 # Statement of need
 Our understanding of the dependency between seismic anisotropy and microstructures relies on laboratory measurements and calculations of seismic properties based on rock microfabric. The microfabric properties such as, crystallographic preferred orientation, grain sizes and distribution of microcracks, caninfluence both seismic velocity and anisotropy  (Almqvist and Mainprice 2017).
