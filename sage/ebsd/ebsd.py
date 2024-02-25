@@ -8,6 +8,7 @@ import pandas as pd  # Importing pandas for data manipulation
 from sklearn.neighbors import KNeighborsClassifier  # Importing KNeighborsClassifier for classification
 from joblib import Parallel, delayed  # Importing Parallel and delayed for parallel execution
 from ..tensor import Tensor
+from scipy.spatial.transform import Rotation
 
 
 class EBSD:
@@ -233,9 +234,37 @@ class EBSD:
         tensor_sum= tensor_sum/sum(len_euler)
 
         return tensor_sum, len_euler
+    
+
+    def euler_to_quaternion(self, phi, phi1, phi2):
+        """
+        Convert Euler angles (Bunge angles) to quaternion.
+
+        Parameters:
+        phi : float
+            First Euler angle (in radians).
+        phi1 : float
+            Second Euler angle (in radians).
+        phi2 : float
+            Third Euler angle (in radians).
+
+        Returns:
+        quaternion : numpy.ndarray
+            Quaternion as [w, x, y, z].
+        """
+        r = Rotation.from_euler('ZXZ', [phi, phi1, phi2], degrees=True)
+        return r.as_quat()
+
 
 
 if __name__ == "__main__":
     # Example usage
     ctfobj = EBSD("ebsd.ctf")
     print(ctfobj.get_euler_angles(3))
+
+    phi = 45
+    phi1 = 30
+    phi2 = 60 
+
+    quaternion = euler_to_quaternion(phi, phi1, phi2)
+    print("Quaternion:", quaternion)
