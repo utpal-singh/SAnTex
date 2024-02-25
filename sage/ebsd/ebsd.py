@@ -242,11 +242,11 @@ class EBSD:
 
         Parameters:
         phi : float
-            First Euler angle (in radians).
+            First Euler angle (in degrees).
         phi1 : float
-            Second Euler angle (in radians).
+            Second Euler angle (in degrees).
         phi2 : float
-            Third Euler angle (in radians).
+            Third Euler angle (in degrees).
 
         Returns:
         quaternion : numpy.ndarray
