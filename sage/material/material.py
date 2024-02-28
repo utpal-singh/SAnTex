@@ -10,24 +10,63 @@ class Material:
         self.materials_data = self.load_materials_data(database_path)
         self.pressure_deriv = self.load_pressure_deriv(database_path2)
         self.temperature_deriv = self.load_temperature_deriv(database_path3)
+        # self.database_path_mat = os.path.join(os.path.dirname(__file__), 'data/materials_database.json')
 
 
     def load_materials_data(self, database_path):
-        with open(database_path, 'r') as file:
-            materials_data = json.load(file)
-        return materials_data
-    
+        try:
+            with open(database_path, 'r') as file:
+                materials_data = json.load(file)
+            return materials_data
+        except FileNotFoundError:
+            print("Database file not found.")
+            return None
+        except json.JSONDecodeError:
+            print("Error decoding JSON data.")
+            return None
+
 
     def load_pressure_deriv(self, database_path2):
-        with open(database_path2, 'r') as file:
-            pressure_data = json.load(file)
-        return pressure_data
-    
+        try:
+            with open(database_path2, 'r') as file:
+                pressure_data = json.load(file)
+            return pressure_data
+        except FileNotFoundError:
+            print("Database file not found.")
+            return None
+        except json.JSONDecodeError:
+            print("Error decoding JSON data.")
+            return None
+
 
     def load_temperature_deriv(self, database_path3):
-        with open(database_path3, 'r') as file:
-            temperature_data = json.load(file)
-        return temperature_data
+        try:
+            with open(database_path3, 'r') as file:
+                temperature_data = json.load(file)
+            return temperature_data
+        except FileNotFoundError:
+            print("Database file not found.")
+            return None
+        except json.JSONDecodeError:
+            print("Error decoding JSON data.")
+            return None
+
+    
+    def load_density(self, phase):
+        try:
+            for material in self.materials_data:
+                try:
+                    if material['Phase'] == phase:
+                        return material["Density(g/cm3)"] * 1000
+                except KeyError:
+                    print("Error: Density data not found or incorrect format.")
+                    return None
+            print(f"Error: Phase '{phase}' not found in materials data.")
+            return None
+        except AttributeError:
+            print("Error: Materials data not available.")
+            return None
+
     
 
     def get_properties_by_phase(self, phase):
@@ -213,7 +252,6 @@ class Material:
     def voigthighPT(self, phase, PRESSURE=0, TEMP=300):
             dCdT = self.get_voigt_matrix_temperature(phase)
             dCdP = self.get_voigt_matrix_pressure(phase)
-            print(density)
             
             tensor_calc = self.get_voigt_matrix(phase) + (dCdT * (TEMP - 300) * 0.001) + (dCdP * PRESSURE)
             return tensor_calc

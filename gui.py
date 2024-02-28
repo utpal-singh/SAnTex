@@ -10,7 +10,6 @@
 #         self.master = master
 #         master.title("Sage Library GUI")
 
-#         # Create instances of your classes
 #         self.material_instance = Material(name="Example Material", properties={"density": 2.5})
 #         self.ebsd_instance = EBSD(data="Sample EBSD Data")
 #         self.tensor_instance = Tensor(values=[1, 2, 3, 4])

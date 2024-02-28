@@ -20,14 +20,6 @@ sage.anisotropy.plot\_seismic\_velocity module
    :undoc-members:
    :show-inheritance:
 
-sage.anisotropy.vtkplots module
--------------------------------
-
-.. automodule:: sage.anisotropy.vtkplots
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Module contents
 ---------------
 

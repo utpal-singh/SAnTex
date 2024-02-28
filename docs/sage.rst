@@ -9,8 +9,6 @@ Subpackages
 
    sage.anisotropy
    sage.ebsd
-   sage.eos
-   sage.isotropy
    sage.material
    sage.tensor
 

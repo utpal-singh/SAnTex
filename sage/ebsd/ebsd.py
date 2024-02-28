@@ -10,6 +10,9 @@ from joblib import Parallel, delayed  # Importing Parallel and delayed for paral
 from ..tensor import Tensor
 from scipy.spatial.transform import Rotation
 
+from .calcGrainBoundary import assign_to_grains_parallel
+import plotly.express as px
+
 
 class EBSD:
     """
@@ -208,7 +211,7 @@ class EBSD:
             data = data[data['Phase'] != index]
         return data
     
-    def getAnisotropyForEBSD(self, cij, euler_angles):
+    def getAnisotropyForEBSD(self, cij, euler_angles, density):
         tensor = Tensor()
         tensor_list = []
         for voigt in cij:
@@ -230,10 +233,12 @@ class EBSD:
                 rotated_tensor_list.append(output)
             x+= 1
 
+        density_averaged = (np.sum(np.multiply(density,len_euler)))/(np.sum(len_euler))
+
         tensor_sum = np.sum(rotated_tensor_list, axis=0)
         tensor_sum= tensor_sum/sum(len_euler)
 
-        return tensor_sum, len_euler
+        return tensor_sum, len_euler, density_averaged
     
 
     def euler_to_quaternion(self, phi, phi1, phi2):
@@ -242,11 +247,11 @@ class EBSD:
 
         Parameters:
         phi : float
-            First Euler angle (in degrees).
+            First Euler angle (in radians).
         phi1 : float
-            Second Euler angle (in degrees).
+            Second Euler angle (in radians).
         phi2 : float
-            Third Euler angle (in degrees).
+            Third Euler angle (in radians).
 
         Returns:
         quaternion : numpy.ndarray
@@ -254,6 +259,99 @@ class EBSD:
         """
         r = Rotation.from_euler('ZXZ', [phi, phi1, phi2], degrees=True)
         return r.as_quat()
+    
+    def calcGrains(self, df, threshold, phase_names, downsampling_factor=20):
+        """
+        this is the df from df = ebsdfile.get_ebsd_data(), 
+        threshold will be the threshold angle in degrees, phase_name will be a 
+        list of phases present and that can be obtained from self.phases_names
+        by default threshold is set to 10 degrees, but can be modified as threshold = 20 and
+        so on and so forth
+        """
+        if df is None:
+            df = self.get_ebsd_data()
+
+        if phase_names is None:
+            phase_names = self.phases_names()['phase'].tolist()
+            phase_names.insert(0, "na")
+
+        if threshold is None:
+            threshold = 10
+
+        # Filter out phase 0
+        df = df[df['Phase'] != 0]
+
+        if downsampling_factor:
+            df = df.iloc[::downsampling_factor]
+        else:
+            df
+
+        grain_indices = assign_to_grains_parallel(df[['Euler1', 'Euler2', 'Euler3']], threshold)
+        df['Grain'] = pd.Series(grain_indices)
+        for grain_idx, group in df.groupby('Grain'):
+            phase_counts = group['Phase'].value_counts()
+            dominant_phase = phase_counts.idxmax()
+            print(f"Grain {grain_idx}: Dominant Phase - {phase_names[dominant_phase]}, Size - {len(group)}")
+
+        self.plotGrains(df)
+        return df
+    
+    def filterByGrainSize(self, df, phases_names):
+        """
+        df is the input from calcGrainsdf, with grain column appended
+        """
+
+        if df is None:
+            df = self.calcGrains()
+
+        if phases_names == None:
+            phases_names = self.phases_names()['phase'].tolist()
+            phases_names.insert(0, "na")
+        
+        # Define the minimum grain size threshold
+        min_grain_size = 100
+
+        # Filter out grains below the minimum size threshold
+        valid_grains = df['Grain'].value_counts()[df['Grain'].value_counts() >= min_grain_size].index
+
+        # Filter the dataframe to include only rows corresponding to valid grains
+        df_filtered = df[df['Grain'].isin(valid_grains)]
+
+        # Display grains with their respective phase names
+        for grain_idx, group in df_filtered.groupby('Grain'):
+            phase_counts = group['Phase'].value_counts()
+            dominant_phase = phase_counts.idxmax()
+            print(f"Grain {grain_idx}: Dominant Phase - {phases_names[dominant_phase]}, Size - {len(group)}")
+
+        self.plotGrains(df_filtered)
+
+        return df_filtered
+    
+    def plotGrains(self, df):
+        # Create a scatter plot using Plotly
+        fig = px.scatter(df, x='X', y='Y', color='Phase', color_continuous_scale='viridis')
+
+        # Customize the marker size pixel (1 pixel here)
+        fig.update_traces(marker=dict(size=2))
+
+        # Customize the layout
+        fig.update_layout(
+            title="2D Scatter Plot with Phase",
+            xaxis_title="X",
+            yaxis_title="Y",
+            coloraxis_colorbar_title="Phase",
+            showlegend=True
+        )
+
+        # Show the plot
+        fig.show()
+
+
+            
+
+
+    
+
 
 
 
@@ -262,9 +360,9 @@ if __name__ == "__main__":
     ctfobj = EBSD("ebsd.ctf")
     print(ctfobj.get_euler_angles(3))
 
-    phi = 45
-    phi1 = 30
-    phi2 = 60 
+    phi = 45  # First Euler angle
+    phi1 = 30 # Second Euler angle
+    phi2 = 60 # Third Euler angle
 
     quaternion = euler_to_quaternion(phi, phi1, phi2)
     print("Quaternion:", quaternion)

@@ -4,14 +4,6 @@ sage.ebsd package
 Submodules
 ----------
 
-sage.ebsd.calcGrainBoundaries module
-------------------------------------
-
-.. automodule:: sage.ebsd.calcGrainBoundaries
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 sage.ebsd.ctf\_parser module
 ----------------------------
 

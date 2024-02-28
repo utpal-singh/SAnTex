@@ -7,6 +7,11 @@ setup(
     install_requires=[
         # List your dependencies here
     ],
-    package_data={'sage': ['material/data/*']},
+    package_data={
+        'sage': [
+            'isotropy/data/*',
+            'material/data/*'
+        ]
+    },
     include_package_data=True,
 )
