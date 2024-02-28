@@ -296,7 +296,7 @@ class EBSD:
         self.plotGrains(df)
         return df
     
-    def filterByGrainSize(self, df, phases_names):
+    def filterByGrainSize(self, df, phases_names, min_grain_size = 100):
         """
         df is the input from calcGrainsdf, with grain column appended
         """
@@ -306,10 +306,7 @@ class EBSD:
 
         if phases_names == None:
             phases_names = self.phases_names()['phase'].tolist()
-            phases_names.insert(0, "na")
-        
-        # Define the minimum grain size threshold
-        min_grain_size = 100
+            phases_names.insert(0, "na")        
 
         # Filter out grains below the minimum size threshold
         valid_grains = df['Grain'].value_counts()[df['Grain'].value_counts() >= min_grain_size].index
@@ -345,12 +342,6 @@ class EBSD:
 
         # Show the plot
         fig.show()
-
-
-            
-
-
-    
 
 
 
