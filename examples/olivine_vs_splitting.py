@@ -1,6 +1,6 @@
 import numpy as np
 
-from sage import Anisotropy
+from satex import Anisotropy
 
 density = 3310
 c = np.array([[323.70, 66.40, 71.60, 0.000, 0.000, 0.000],

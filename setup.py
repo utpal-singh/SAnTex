@@ -1,14 +1,14 @@
 from setuptools import setup, find_packages
 
 setup(
-    name='sage',
+    name='satex',
     version='0.1',
     packages=find_packages(),
     install_requires=[
         # List your dependencies here
     ],
     package_data={
-        'sage': [
+        'satex': [
             'isotropy/data/*',
             'material/data/*'
         ]
