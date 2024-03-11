@@ -13,6 +13,8 @@ from scipy.spatial.transform import Rotation
 from .calcGrainBoundary import assign_to_grains_parallel
 import plotly.express as px
 
+from .melt import calcMelttensor
+
 
 class EBSD:
     """
@@ -20,7 +22,7 @@ class EBSD:
     """
 
     def __init__(self, filename) -> None:
-        """
+        """ 
         Initializes the EBSD object.
 
         Parameters:
@@ -48,20 +50,37 @@ class EBSD:
         euler_angles = phase_df[['Euler1', 'Euler2', 'Euler3']]
         euler_angles = euler_angles.reset_index(drop=True)
         return euler_angles
-    
-    def plot(self, data=None):
+        
+    def plot(self, data=None, rotation_angle=0, inside_plane=True):
         """
         Plots the EBSD map with colors based on phase.
 
         Parameters:
             data (pandas.DataFrame, optional): DataFrame containing EBSD data. If not provided, uses stored data.
+            rotation_angle (int, optional): Angle by which to rotate the EBSD data (in degrees). Default is 0.
+            inside_plane (bool, optional): If True, rotates the EBSD data inside the plane. If False, rotates outside the plane. Default is True.
 
         Returns:
             None
         """
         if data is None:
             data, _ = self.ctf.get_data()
+        
+        # Rotate EBSD data
+        if rotation_angle != 0:
+            theta = np.radians(rotation_angle)
+            if inside_plane:
+                rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
+            else:
+                rotation_matrix = np.array([[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]])
+            xy = np.column_stack((data['X'], data['Y']))
+            xy_rotated = np.dot(xy, rotation_matrix)
+            data['X'], data['Y'] = xy_rotated[:, 0], xy_rotated[:, 1]
+        
+        # Filter data based on phase
         df_new = data[data['Phase'].isin([0, 1, 2])]
+        
+        # Plot
         plt.scatter(df_new['X'], df_new['Y'], c=df_new['Phase'], cmap='viridis')
         plt.xlabel('X')
         plt.ylabel('Y')
@@ -211,7 +230,38 @@ class EBSD:
             data = data[data['Phase'] != index]
         return data
     
-    def getAnisotropyForEBSD(self, cij, euler_angles, density):
+    def getAnisotropyForEBSD(self, cij, euler_angles, density, melt=0):
+        if melt:
+            tensor = Tensor()
+            tensor_list = []
+            for voigt in cij:
+                tensor_list.append(tensor.voigt_to_tensor(voigt))
+
+            rotated_tensor_list = []
+            len_euler = []
+            x = 0
+            for euler_angle in euler_angles:
+                len_euler.append(len(euler_angle))
+                for i in range(len(euler_angle)):
+                    alpha = euler_angle.iloc[i]["Euler1"]
+                    beta = euler_angle.iloc[i]["Euler2"]
+                    gamma = euler_angle.iloc[i]["Euler3"]
+                    output = np.array(tensor.rotate_tensor(tensor_list[x], alpha, beta, gamma))
+                #     print(output)
+                #     print(f"Counter: {counter}")
+                #     counter +=1
+                    rotated_tensor_list.append(output)
+                x+= 1
+
+            density_averaged = (np.sum(np.multiply(density,len_euler)))/(np.sum(len_euler))
+
+            tensor_sum = np.sum(rotated_tensor_list, axis=0)
+            tensor_sum= tensor_sum/sum(len_euler)
+
+            tensor_sum = (1 - melt*0.01)*tensor_sum + melt*0.01*calcMelttensor
+
+            return tensor_sum, len_euler, density_averaged
+
         tensor = Tensor()
         tensor_list = []
         for voigt in cij:
