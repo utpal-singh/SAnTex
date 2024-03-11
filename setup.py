@@ -5,7 +5,14 @@ setup(
     version='0.1',
     packages=find_packages(),
     install_requires=[
-        # List your dependencies here
+        'joblib',
+        'pandas',
+        'matplotlib',
+        'numpy',
+        'vtk',
+        'tqdm',
+        'tabulate'
+        'scikit'
     ],
     package_data={
         'satex': [
