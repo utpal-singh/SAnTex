@@ -11,8 +11,8 @@ setup(
         'numpy',
         'vtk',
         'tqdm',
-        'tabulate'
-        'scikit'
+        'tabulate',
+        'scikit-learn'
     ],
     package_data={
         'satex': [

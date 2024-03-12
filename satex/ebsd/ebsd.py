@@ -14,8 +14,7 @@ from .calcGrainBoundary import assign_to_grains_parallel
 import plotly.express as px
 
 from .melt import calcMelttensor
-
-
+from .rotateEBSD import apply_custom_rotation_to_dataframe
 class EBSD:
     """
     Class for handling Electron Backscatter Diffraction (EBSD) data.
@@ -392,6 +391,10 @@ class EBSD:
 
         # Show the plot
         fig.show()
+
+    def rotateEBSD(self, ebsd_df, angles):
+        return apply_custom_rotation_to_dataframe(ebsd_df, angles)
+
 
 
 
