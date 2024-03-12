@@ -266,28 +266,52 @@ class EBSD:
         for voigt in cij:
             tensor_list.append(tensor.voigt_to_tensor(voigt))
 
-        rotated_tensor_list = []
-        len_euler = []
-        x = 0
-        for euler_angle in euler_angles:
-            len_euler.append(len(euler_angle))
-            for i in range(len(euler_angle)):
-                alpha = euler_angle.iloc[i]["Euler1"]
-                beta = euler_angle.iloc[i]["Euler2"]
-                gamma = euler_angle.iloc[i]["Euler3"]
-                output = np.array(tensor.rotate_tensor(tensor_list[x], alpha, beta, gamma))
-            #     print(output)
-            #     print(f"Counter: {counter}")
-            #     counter +=1
-                rotated_tensor_list.append(output)
-            x+= 1
+        # rotated_tensor_list = []
+        # len_euler = []
+        # x = 0
+        # for euler_angle in euler_angles:
+        #     len_euler.append(len(euler_angle))
+        #     for i in range(len(euler_angle)):
+        #         alpha = euler_angle.iloc[i]["Euler1"]
+        #         beta = euler_angle.iloc[i]["Euler2"]
+        #         gamma = euler_angle.iloc[i]["Euler3"]
+        #         output = np.array(tensor.rotate_tensor(tensor_list[x], alpha, beta, gamma))
+        #     #     print(output)
+        #     #     print(f"Counter: {counter}")
+        #     #     counter +=1
+        #         rotated_tensor_list.append(output)
+        #     x+= 1
 
-        density_averaged = (np.sum(np.multiply(density,len_euler)))/(np.sum(len_euler))
+        # density_averaged = (np.sum(np.multiply(density,len_euler)))/(np.sum(len_euler))
 
-        tensor_sum = np.sum(rotated_tensor_list, axis=0)
-        tensor_sum= tensor_sum/sum(len_euler)
+        # tensor_sum = np.sum(rotated_tensor_list, axis=0)
+        # tensor_sum= tensor_sum/sum(len_euler)
 
-        return tensor_sum, len_euler, density_averaged
+        # return tensor_sum, len_euler, density_averaged
+            
+        tensor = Tensor()
+        rotated_tensor = []
+
+        total_len_euler = []
+
+        for j in (euler_angles):
+            total_len_euler.append(len(j))
+
+        a = np.array(total_len_euler)
+        b = np.array(density)
+        average_density = sum(b*a)/sum(a)
+
+        for i in range(len(euler_angles)):
+            for index, row in euler_angles[i].iterrows():
+                euler1_value = row['Euler1']
+                euler2_value = row['Euler2']
+                euler3_value = row['Euler3']
+            
+                rotated_tensor.append(np.array((tensor.rotate_tensor(tensor.voigt_to_tensor(cij[i]), euler1_value, euler2_value, euler3_value))))
+
+        average_tensor = np.mean(rotated_tensor, axis=0)
+
+        return tensor.tensor_to_voigt(average_tensor), average_density
     
 
     def euler_to_quaternion(self, phi, phi1, phi2):
