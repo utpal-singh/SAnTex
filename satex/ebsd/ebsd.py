@@ -2,6 +2,7 @@
 
 from .ctf_parser import Ctf  # Importing Ctf class from ctf_parser module
 import matplotlib.pyplot as plt  # Importing matplotlib for plotting functionalities
+from tabulate import tabulate
 
 import numpy as np  # Importing numpy for numerical operations
 import pandas as pd  # Importing pandas for data manipulation
@@ -15,6 +16,10 @@ import plotly.express as px
 
 from .melt import calcMelttensor
 from .rotateEBSD import apply_custom_rotation_to_dataframe
+
+from .ebsdrotation import apply_custom_rotation_to_dataframe as rotebsd
+from .ebsdrotation import plot as plotrotebsd
+
 class EBSD:
     """
     Class for handling Electron Backscatter Diffraction (EBSD) data.
@@ -186,7 +191,8 @@ class EBSD:
             df = self.get_ebsd_data()
         df = df[df.index % factor == 0]
         return df
-    
+        
+
     def phases(self, df_phases=None):
         """
         Retrieves phase percentages.
@@ -195,7 +201,7 @@ class EBSD:
             df_phases (pandas.DataFrame, optional): DataFrame containing phase information. Defaults to None.
 
         Returns:
-            dict: Dictionary containing phase percentages.
+            str: Tabulated representation of phase percentages.
         """
         if df_phases is None:
             df_phases = self.ctf.get_data()[0]
@@ -205,7 +211,18 @@ class EBSD:
         phase_counts = phase_counts.sort_index()
         total_count = phase_counts.sum()
         phase_percentages = {phase: (count / total_count) * 100 for phase, count in zip(phases_list, phase_counts)}
-        return phase_percentages
+        
+        # Convert the dictionary to a list of tuples for tabulate
+        data = [(index, phase, percentage) for index, (phase, percentage) in enumerate(phase_percentages.items())]
+        
+        # Table headers
+        headers = ["Index", "Phase", "Percentage"]
+        
+        # Tabulate the data
+        table = tabulate(data, headers=headers, tablefmt="grid")
+        return table
+
+
     
     def filterByPhase(self, phase_list, data=None):
         """
@@ -418,6 +435,44 @@ class EBSD:
 
     def rotateEBSD(self, ebsd_df, angles):
         return apply_custom_rotation_to_dataframe(ebsd_df, angles)
+    
+
+    def plot_rotate_ebsd(self, sample_ref = ["x2east", "zOutOfPlane"], ebsd_df = None):
+        if ebsd_df is None:
+            ebsd_df = self.get_ebsd_data()
+
+        if sample_ref == ["x2east", "zOutOfPlane"]:
+            angle = (0, 0, 0)
+
+        if sample_ref == ["x2west", "zOutOfPlane"]:
+            angle = (0, 0, 180)
+
+        if sample_ref == ["x2north", "zOutOfPlane"]:
+            angle = (0, 0, 90)
+
+        if sample_ref == ["x2south", "zOutOfPlane"]:
+            angle = (0, 0, 270)
+
+        if sample_ref == ["x2east", "zIntoPlane"]:
+            angle = (0, 180, 0)
+
+        if sample_ref == ["x2west", "zIntoPlane"]:
+            angle = (0, 180, 180)
+
+        if sample_ref == ["x2north", "zIntoPlane"]:
+            angle = (0, 180, 90)
+
+        if sample_ref == ["x2south", "zIntoPlane"]:
+            angle = (0, 180, 270)
+
+        
+        rotated_ebsd_df = rotebsd(ebsd_df, angle)
+
+        return rotated_ebsd_df
+
+        
+
+        
 
 
 
