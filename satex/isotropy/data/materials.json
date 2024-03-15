@@ -1,6 +1,7 @@
 {
     "0": {
         "phase": "aqz",
+        "name": "Alpha-Quartz",
         "gram_formula_weight(g/mol)": 60.085,
         "molar_volume(cm3/mol)": 22.76,
         "density_298K(kg/m3)": 2640.0,
@@ -16,6 +17,7 @@
     },
     "1": {
         "phase": "bqz",
+        "name": "Beta-Quartz",
         "gram_formula_weight(g/mol)": 60.085,
         "molar_volume(cm3/mol)": 23.71,
         "density_298K(kg/m3)": 2522.0,
@@ -31,6 +33,7 @@
     },
     "2": {
         "phase": "coe",
+        "name": "Coesite",
         "gram_formula_weight(g/mol)": 60.085,
         "molar_volume(cm3/mol)": 20.064,
         "density_298K(kg/m3)": 2911.0,
@@ -46,6 +49,7 @@
     },
     "3": {
         "phase": "hAb",
+        "name": "High-T Albite",
         "gram_formula_weight(g/mol)": 262.23,
         "molar_volume(cm3/mol)": 101.09,
         "density_298K(kg/m3)": 2620.0,
@@ -61,6 +65,7 @@
     },
     "4": {
         "phase": "lAb",
+        "name": "Low-T Albite",
         "gram_formula_weight(g/mol)": 262.23,
         "molar_volume(cm3/mol)": 100.06,
         "density_298K(kg/m3)": 2620.0,
@@ -76,6 +81,7 @@
     },
     "5": {
         "phase": "an",
+        "name": "Anorthite",
         "gram_formula_weight(g/mol)": 278.169,
         "molar_volume(cm3/mol)": 100.8,
         "density_298K(kg/m3)": 2760.0,
@@ -91,6 +97,7 @@
     },
     "6": {
         "phase": "or",
+        "name": "Orthoclase",
         "gram_formula_weight(g/mol)": 278.33,
         "molar_volume(cm3/mol)": 108.9,
         "density_298K(kg/m3)": 2555.0,
@@ -106,6 +113,7 @@
     },
     "7": {
         "phase": "san",
+        "name": "Sanidine",
         "gram_formula_weight(g/mol)": 278.33,
         "molar_volume(cm3/mol)": 109.0,
         "density_298K(kg/m3)": 2553.0,
@@ -121,6 +129,7 @@
     },
     "8": {
         "phase": "alm",
+        "name": "Almandine",
         "gram_formula_weight(g/mol)": 497.7,
         "molar_volume(cm3/mol)": 115.1,
         "density_298K(kg/m3)": 4324.0,
@@ -136,6 +145,7 @@
     },
     "9": {
         "phase": "gr",
+        "name": "Grossular",
         "gram_formula_weight(g/mol)": 450.4,
         "molar_volume(cm3/mol)": 125.4,
         "density_298K(kg/m3)": 3593.0,
@@ -151,6 +161,7 @@
     },
     "10": {
         "phase": "py",
+        "name": "Pyrope",
         "gram_formula_weight(g/mol)": 403.09,
         "molar_volume(cm3/mol)": 113.2,
         "density_298K(kg/m3)": 3565.0,
@@ -166,6 +177,7 @@
     },
     "11": {
         "phase": "fo",
+        "name": "Forsterite",
         "gram_formula_weight(g/mol)": 140.7,
         "molar_volume(cm3/mol)": 43.7,
         "density_298K(kg/m3)": 3222.0,
@@ -181,6 +193,7 @@
     },
     "12": {
         "phase": "fa",
+        "name": "Fayalite",
         "gram_formula_weight(g/mol)": 203.77,
         "molar_volume(cm3/mol)": 46.3,
         "density_298K(kg/m3)": 4400.0,
@@ -196,6 +209,7 @@
     },
     "13": {
         "phase": "en",
+        "name": "Enstatite",
         "gram_formula_weight(g/mol)": 200.79,
         "molar_volume(cm3/mol)": 62.6,
         "density_298K(kg/m3)": 3196.0,
@@ -211,6 +225,7 @@
     },
     "14": {
         "phase": "fs",
+        "name": "Ferrosillite",
         "gram_formula_weight(g/mol)": 263.86,
         "molar_volume(cm3/mol)": 65.9,
         "density_298K(kg/m3)": 4003.0,
@@ -226,6 +241,7 @@
     },
     "15": {
         "phase": "mgts",
+        "name": "Mg-Tschermak",
         "gram_formula_weight(g/mol)": 202.4,
         "molar_volume(cm3/mol)": 58.9,
         "density_298K(kg/m3)": 3436.332767402377,
@@ -241,6 +257,7 @@
     },
     "16": {
         "phase": "di",
+        "name": "Diopside",
         "gram_formula_weight(g/mol)": 216.56,
         "molar_volume(cm3/mol)": 66.19,
         "density_298K(kg/m3)": 3268.0,
@@ -256,6 +273,7 @@
     },
     "17": {
         "phase": "hed",
+        "name": "Hedenbergite",
         "gram_formula_weight(g/mol)": 248.09,
         "molar_volume(cm3/mol)": 67.95,
         "density_298K(kg/m3)": 3657.0,
@@ -271,6 +289,7 @@
     },
     "18": {
         "phase": "jd",
+        "name": "Jadeite",
         "gram_formula_weight(g/mol)": 202.11,
         "molar_volume(cm3/mol)": 60.4,
         "density_298K(kg/m3)": 3346.0,
@@ -286,6 +305,7 @@
     },
     "19": {
         "phase": "ac",
+        "name": "Acmite",
         "gram_formula_weight(g/mol)": 231.0,
         "molar_volume(cm3/mol)": 64.6,
         "density_298K(kg/m3)": 3575.8513931888547,
@@ -301,6 +321,7 @@
     },
     "20": {
         "phase": "cats",
+        "name": "Ca-Tschermak",
         "gram_formula_weight(g/mol)": 218.1,
         "molar_volume(cm3/mol)": 63.56,
         "density_298K(kg/m3)": 3431.4033983637505,
@@ -316,6 +337,7 @@
     },
     "21": {
         "phase": "gl",
+        "name": "Glaucophane",
         "gram_formula_weight(g/mol)": 783.6,
         "molar_volume(cm3/mol)": 260.5,
         "density_298K(kg/m3)": 3008.0,
@@ -331,6 +353,7 @@
     },
     "22": {
         "phase": "fgl",
+        "name": "Ferroglaucophane",
         "gram_formula_weight(g/mol)": 878.13,
         "molar_volume(cm3/mol)": 265.9,
         "density_298K(kg/m3)": 3302.0,
@@ -346,6 +369,7 @@
     },
     "23": {
         "phase": "tr",
+        "name": "Tremolite",
         "gram_formula_weight(g/mol)": 812.37,
         "molar_volume(cm3/mol)": 272.7,
         "density_298K(kg/m3)": 2979.0,
@@ -361,6 +385,7 @@
     },
     "24": {
         "phase": "fact",
+        "name": "Ferroactinolite",
         "gram_formula_weight(g/mol)": 970.07,
         "molar_volume(cm3/mol)": 282.8,
         "density_298K(kg/m3)": 3430.0,
@@ -376,6 +401,7 @@
     },
     "25": {
         "phase": "ts",
+        "name": "Tschermakite",
         "gram_formula_weight(g/mol)": 815.436,
         "molar_volume(cm3/mol)": 268.0,
         "density_298K(kg/m3)": 3043.0,
@@ -391,6 +417,7 @@
     },
     "26": {
         "phase": "parg",
+        "name": "Pargasite",
         "gram_formula_weight(g/mol)": 835.769,
         "molar_volume(cm3/mol)": 271.9,
         "density_298K(kg/m3)": 3074.0,
@@ -406,6 +433,7 @@
     },
     "27": {
         "phase": "hb",
+        "name": "Hornblende",
         "gram_formula_weight(g/mol)": 873.7583333333333,
         "molar_volume(cm3/mol)": 274.2333333333333,
         "density_298K(kg/m3)": 3182.3333333333335,
@@ -421,6 +449,7 @@
     },
     "28": {
         "phase": "anth",
+        "name": "Anthophyllite",
         "gram_formula_weight(g/mol)": 780.8,
         "molar_volume(cm3/mol)": 265.4,
         "density_298K(kg/m3)": 2942.0,
@@ -436,6 +465,7 @@
     },
     "29": {
         "phase": "phl",
+        "name": "Phlogopite",
         "gram_formula_weight(g/mol)": 417.24,
         "molar_volume(cm3/mol)": 149.7,
         "density_298K(kg/m3)": 2788.0,
@@ -451,6 +481,7 @@
     },
     "30": {
         "phase": "ann",
+        "name": "Annite",
         "gram_formula_weight(g/mol)": 511.866,
         "molar_volume(cm3/mol)": 154.3,
         "density_298K(kg/m3)": 3317.0,
@@ -466,6 +497,7 @@
     },
     "31": {
         "phase": "mu",
+        "name": "Muscovite",
         "gram_formula_weight(g/mol)": 398.248,
         "molar_volume(cm3/mol)": 140.8,
         "density_298K(kg/m3)": 2828.0,
@@ -481,6 +513,7 @@
     },
     "32": {
         "phase": "cel",
+        "name": "Celadonite",
         "gram_formula_weight(g/mol)": 396.74,
         "molar_volume(cm3/mol)": 140.4,
         "density_298K(kg/m3)": 2825.7834757834758,
@@ -496,6 +529,7 @@
     },
     "33": {
         "phase": "ta",
+        "name": "Talc",
         "gram_formula_weight(g/mol)": 379.65,
         "molar_volume(cm3/mol)": 136.4,
         "density_298K(kg/m3)": 2784.0,
@@ -511,6 +545,7 @@
     },
     "34": {
         "phase": "clin",
+        "name": "Clinochlore",
         "gram_formula_weight(g/mol)": 555.575,
         "molar_volume(cm3/mol)": 210.8,
         "density_298K(kg/m3)": 2635.0,
@@ -526,6 +561,7 @@
     },
     "35": {
         "phase": "daph",
+        "name": "Daphnite",
         "gram_formula_weight(g/mol)": 713.46698,
         "molar_volume(cm3/mol)": 213.4,
         "density_298K(kg/m3)": 3343.0,
@@ -541,6 +577,7 @@
     },
     "36": {
         "phase": "atg",
+        "name": "Antigorite",
         "gram_formula_weight(g/mol)": 4535.95,
         "molar_volume(cm3/mol)": 1754.0,
         "density_298K(kg/m3)": 2585.0,
@@ -556,6 +593,7 @@
     },
     "37": {
         "phase": "zo",
+        "name": "Zoisite",
         "gram_formula_weight(g/mol)": 454.36,
         "molar_volume(cm3/mol)": 135.8,
         "density_298K(kg/m3)": 3347.0,
@@ -571,6 +609,7 @@
     },
     "38": {
         "phase": "cz",
+        "name": "Clinozoisite",
         "gram_formula_weight(g/mol)": 454.36,
         "molar_volume(cm3/mol)": 136.3,
         "density_298K(kg/m3)": 3333.0,
@@ -586,6 +625,7 @@
     },
     "39": {
         "phase": "ep",
+        "name": "Epidote",
         "gram_formula_weight(g/mol)": 483.22,
         "molar_volume(cm3/mol)": 138.1,
         "density_298K(kg/m3)": 3498.0,
@@ -601,6 +641,7 @@
     },
     "40": {
         "phase": "law",
+        "name": "Lawsonite",
         "gram_formula_weight(g/mol)": 314.24,
         "molar_volume(cm3/mol)": 101.3,
         "density_298K(kg/m3)": 3101.0,
@@ -616,6 +657,7 @@
     },
     "41": {
         "phase": "pre",
+        "name": "Prehnite",
         "gram_formula_weight(g/mol)": 412.391,
         "molar_volume(cm3/mol)": 140.3,
         "density_298K(kg/m3)": 2940.0,
@@ -631,6 +673,7 @@
     },
     "42": {
         "phase": "pump",
+        "name": "Pumpellyte",
         "gram_formula_weight(g/mol)": 943.0,
         "molar_volume(cm3/mol)": 295.5,
         "density_298K(kg/m3)": 3191.0,
@@ -646,6 +689,7 @@
     },
     "43": {
         "phase": "lmt",
+        "name": "Laumontite",
         "gram_formula_weight(g/mol)": 470.44,
         "molar_volume(cm3/mol)": 203.7,
         "density_298K(kg/m3)": 2309.0,
@@ -661,6 +705,7 @@
     },
     "44": {
         "phase": "wrk",
+        "name": "Wairakite",
         "gram_formula_weight(g/mol)": 434.44,
         "molar_volume(cm3/mol)": 190.4,
         "density_298K(kg/m3)": 2281.0,
@@ -676,6 +721,7 @@
     },
     "45": {
         "phase": "br",
+        "name": "Brucite",
         "gram_formula_weight(g/mol)": 58.32,
         "molar_volume(cm3/mol)": 24.63,
         "density_298K(kg/m3)": 2380.0,
@@ -691,6 +737,7 @@
     },
     "46": {
         "phase": "chum",
+        "name": "Clinohumite",
         "gram_formula_weight(g/mol)": 621.09,
         "molar_volume(cm3/mol)": 197.4,
         "density_298K(kg/m3)": 3146.0,
@@ -706,6 +753,7 @@
     },
     "47": {
         "phase": "phA",
+        "name": "Phase A",
         "gram_formula_weight(g/mol)": 456.345,
         "molar_volume(cm3/mol)": 154.4,
         "density_298K(kg/m3)": 2955.0,
@@ -721,6 +769,7 @@
     },
     "48": {
         "phase": "sill",
+        "name": "Sillimanite",
         "gram_formula_weight(g/mol)": 162.006,
         "molar_volume(cm3/mol)": 49.9,
         "density_298K(kg/m3)": 3249.0,
@@ -736,6 +785,7 @@
     },
     "49": {
         "phase": "ky",
+        "name": "Kyanite",
         "gram_formula_weight(g/mol)": 162.006,
         "molar_volume(cm3/mol)": 44.14,
         "density_298K(kg/m3)": 3670.0,
@@ -751,6 +801,7 @@
     },
     "50": {
         "phase": "sp",
+        "name": "Mg-Spinel",
         "gram_formula_weight(g/mol)": 142.27,
         "molar_volume(cm3/mol)": 39.78,
         "density_298K(kg/m3)": 3575.0,
@@ -766,6 +817,7 @@
     },
     "51": {
         "phase": "herc",
+        "name": "hercynite",
         "gram_formula_weight(g/mol)": 173.81,
         "molar_volume(cm3/mol)": 40.75,
         "density_298K(kg/m3)": 4264.0,
@@ -781,6 +833,7 @@
     },
     "52": {
         "phase": "mt",
+        "name": "Magnetite",
         "gram_formula_weight(g/mol)": 231.54,
         "molar_volume(cm3/mol)": 44.52,
         "density_298K(kg/m3)": 5201.0,
@@ -796,6 +849,7 @@
     },
     "53": {
         "phase": "ilm",
+        "name": "Ilmenite",
         "gram_formula_weight(g/mol)": 151.7,
         "molar_volume(cm3/mol)": 31.69,
         "density_298K(kg/m3)": 4788.0,
@@ -811,6 +865,7 @@
     },
     "54": {
         "phase": "rut",
+        "name": "Rutile",
         "gram_formula_weight(g/mol)": 79.9,
         "molar_volume(cm3/mol)": 18.82,
         "density_298K(kg/m3)": 4245.0,
@@ -826,6 +881,7 @@
     },
     "55": {
         "phase": "ttn",
+        "name": "Titanite",
         "gram_formula_weight(g/mol)": 196.06,
         "molar_volume(cm3/mol)": 55.65,
         "density_298K(kg/m3)": 3523.0,
@@ -841,6 +897,7 @@
     },
     "56": {
         "phase": "crd",
+        "name": "Cordierite",
         "gram_formula_weight(g/mol)": 611.1,
         "molar_volume(cm3/mol)": 23.3,
         "density_298K(kg/m3)": 2623.0,
@@ -856,6 +913,7 @@
     },
     "57": {
         "phase": "scap",
+        "name": "Scapolite",
         "gram_formula_weight(g/mol)": 93.46,
         "molar_volume(cm3/mol)": 339.85,
         "density_298K(kg/m3)": 2750.0,
@@ -871,6 +929,7 @@
     },
     "58": {
         "phase": "cc",
+        "name": "Calcite",
         "gram_formula_weight(g/mol)": 100.09,
         "molar_volume(cm3/mol)": 36.89,
         "density_298K(kg/m3)": 2713.0,
@@ -886,6 +945,7 @@
     },
     "59": {
         "phase": "arag",
+        "name": "Aragonite",
         "gram_formula_weight(g/mol)": 100.09,
         "molar_volume(cm3/mol)": 34.15,
         "density_298K(kg/m3)": 2931.0,
@@ -901,6 +961,7 @@
     },
     "60": {
         "phase": "mag",
+        "name": "Magnesite",
         "gram_formula_weight(g/mol)": 84.3,
         "molar_volume(cm3/mol)": 28.03,
         "density_298K(kg/m3)": 3007.0,

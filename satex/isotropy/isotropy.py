@@ -17,6 +17,9 @@ class Isotropy:
 
     def get_available_phases(self):
         try:
+            for key in range(0,len(self.data)):
+                print('######################Available Phases######################')
+                print('Material id: ' + str(self.data[str(key)]['phase'] + '       ' + 'Material name: ' + str(self.data[str(key)]['name'])))
             return [self.data[key]['phase'] for key in self.data]
         except (KeyError, TypeError) as e:
             print(f"Error accessing data: {e}")
@@ -27,7 +30,8 @@ class Isotropy:
             phase_data = next(item for item in self.data.values() if item.get('phase') == phase)
             if phase_data:
                 return {
-                    'name': phase_data['phase'],
+                    'id': phase_data['phase'],
+                    'name': phase_data['name'],
                     'rho0': phase_data['density_298K(kg/m3)'],
                     'ao': phase_data['expansivity(/K)_a0'],
                     'akt0': phase_data['isothermal_bulk_modulus(P)_KT'],
@@ -56,6 +60,7 @@ class Isotropy:
         
         density in kg/m3
         vp, vs, vbulk in km/s
+        
         
         
         """
