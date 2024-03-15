@@ -6,9 +6,10 @@ import json
 import os
 
 class Isotropy:
-    def __init__(self, json_file):
+    def __init__(self):
         try:
-            json_path = os.path.join('data', json_file)
+            json_file = 'materials.json'
+            json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', json_file)
             with open(json_path, 'r') as f:
                 self.data = json.load(f)
         except (FileNotFoundError, json.JSONDecodeError) as e:
@@ -136,9 +137,3 @@ class Isotropy:
             return pdif
         except ZeroDivisionError as e:
             print(f"Error in pressure function: {e}")
-
-if __name__ == "__main__":
-    isotropy = Isotropy('materials.json')
-    x = isotropy.get_phase_constants('coe')
-    density, aks, amu, vp, vs, vbulk, akt = isotropy.calculate_seismic_properties('coe', temperature=2000, pressure=2e9, return_vp_vs_vbulk=True, return_aktout=True)
-    print(vp, vs)
