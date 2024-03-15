@@ -52,6 +52,12 @@ class Isotropy:
         temperature (in K)
         pressure (in GPa)
         
+        Outputs:
+        
+        density in kg/m3
+        vp, vs, vbulk in km/s
+        
+        
         """
         #Unit conversion from GPa
         
