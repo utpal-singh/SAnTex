@@ -47,7 +47,16 @@ class Isotropy:
     def calculate_seismic_properties(self, phase, temperature, pressure, return_vp_vs_vbulk=False, return_aktout=False):
         """
         Calculate velocities at P,T for a mineral given parameters.
+        
+        Inputs:
+        temperature (in K)
+        pressure (in GPa)
+        
         """
+        #Unit conversion from GPa
+        
+        pressure = pressure * 1e9 #conversion to GPa to Pa
+        
         try:
             phase_constants = self.get_phase_constants(phase)
             if phase_constants:
