@@ -157,3 +157,28 @@ class Isotropy:
             return pdif
         except ZeroDivisionError as e:
             print(f"Error in pressure function: {e}")
+                    
+    def set_modal_composition(self, phase_list, fraction_list):
+        
+        """
+        
+        Inputs:
+        
+        phase_list - list of phase ids to be included in the rock. 
+        Example: ['fo', 'en'] -- Forsterite and Enstatite
+        
+        fraction_list - list of fraction lists to be included in the rock
+        Example: [0.8, 0.2] -- 0.8 fo and 0.2 en
+        
+        """
+        
+        phase_constant_list = []
+        
+        for item in phase_list:
+        
+            phase_constant = self.get_phase_constants(phase = item)
+            phase_constant_list.append(phase_constant)
+            
+        return phase_constant_list, fraction_list
+        
+        
