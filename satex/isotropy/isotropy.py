@@ -61,83 +61,103 @@ class Isotropy:
         density in kg/m3
         vp, vs, vbulk in km/s
         
-        
-        
         """
+        
+        if isinstance(temperature,(int,float)):
+            if isinstance(pressure,(int,float)):
+                method_calc = 'scalar'
+            else:
+                raise ValueError('While temperature is a scalar, pressure is an array.')
+        else:
+            if len(temperature) != len(pressure):
+                raise ValueError('Length of the temperature and pressure arrays do not match!')
+            else:
+                method_calc = 'array'
+        
         #Unit conversion from GPa
         
         pressure = pressure * 1e9 #conversion to GPa to Pa
         
-        try:
-            phase_constants = self.get_phase_constants(phase)
-            if phase_constants:
-                if phase_constants['name'] in ['aqz', 'bqz', 'qz']:
-                    density, aks, amu, akt = ah16_mineral_quartz(temperature, pressure, self.mineral_properties)
-                    if return_vp_vs_vbulk:
-                        vbulk, vp, vs = self.calculate_velocities(density, aks, amu)
-                        if return_aktout:
-                            return density, aks, amu, vp, vs, vbulk, akt
-                        return density, aks, amu, vp, vs, vbulk
-                    return density, aks, amu
+        phase_constants = self.get_phase_constants(phase)
 
-                # Constants
-                reference_temperature = 25.0
-                absolute_temperature = 273.0
-                tolerance = 1.e-8
+        if phase_constants:
+            
+            # Constants
+            reference_temperature = 25.0
+            absolute_temperature = 273.0
+            tolerance = 1.e-8
 
-                # input
-                rho0 = phase_constants['rho0']
-                ao = phase_constants['ao']
-                akt0 = phase_constants['akt0']
-                dkdp = phase_constants['dkdp']
-                amu0 = phase_constants['amu0']
-                dmudp = phase_constants['dmudp']
-                gam = phase_constants['gam']
-                grun = phase_constants['grun']
-                delt = phase_constants['delt']
+            # input
+            rho0 = phase_constants['rho0']
+            ao = phase_constants['ao']
+            akt0 = phase_constants['akt0']
+            dkdp = phase_constants['dkdp']
+            amu0 = phase_constants['amu0']
+            dmudp = phase_constants['dmudp']
+            gam = phase_constants['gam']
+            grun = phase_constants['grun']
+            delt = phase_constants['delt']
 
-                # first, integrate with temperature at P=0
-                alpht = ao * (1. - 10. / np.sqrt(absolute_temperature + temperature))
-                phi = ao * (temperature - reference_temperature) - 20. * ao * (np.sqrt(temperature + absolute_temperature) - np.sqrt(reference_temperature + absolute_temperature))
-                density_t = rho0 * np.exp(-phi)
+            # first, integrate with temperature at P=0
+            alpht = ao * (1. - 10. / np.sqrt(absolute_temperature + temperature))
+            phi = ao * (temperature - reference_temperature) - 20. * ao * (np.sqrt(temperature + absolute_temperature) - np.sqrt(reference_temperature + absolute_temperature))
+            density_t = rho0 * np.exp(-phi)
 
-                akt_t = akt0 * np.exp(-delt * phi)  # KtT in Excel macro
-                amu_t = amu0 * np.exp(-gam * phi)   # GT in Excel macro
+            akt_t = akt0 * np.exp(-delt * phi)  # KtT in Excel macro
+            amu_t = amu0 * np.exp(-gam * phi)   # GT in Excel macro
 
-                # second, integrate with pressure at T fixed
-                f_guess = pressure / (3. * akt_t)
-                f_guess2 = 0.
-                press = pressure
-                akk = akt_t
-                akk_prime = dkdp
+            # second, integrate with pressure at T fixed
+            f_guess = pressure / (3. * akt_t)
+            f_guess2 = 0.
+            akk = akt_t
+            akk_prime = dkdp
 
-                res = root_scalar(self.pressure_function, args=(press, akk, akk_prime), bracket=[f_guess, f_guess2], xtol=tolerance)
-                if not res.converged:
-                    raise ValueError("Root finding did not converge")
+            if method_calc == 'array':
 
-                ff = res.root
-                dvol = (1. + 2. * ff) ** 1.5
-                density = density_t * dvol
-                ffac = (1. + 2. * ff) ** 2.5
+                ff = []
+                
+                for i in range(0,len(temperature)):
 
-                akt = akt_t * ffac * (1. - (5. - 3. * dkdp) * ff)
-                amu = amu_t * ffac * (1. - ff * (5. - 3. * dmudp * akt_t / amu_t))
+                    res = root_scalar(self.pressure_function, args=(pressure[i], akk[i], akk_prime), bracket=[f_guess[i], f_guess2], xtol=tolerance)
+                    if not res.converged:
+                        raise ValueError("Root finding did not converge at array index: " + str(i))
+                    ff_ = res.root
+                    ff.append(ff_)
 
-                # convert to adiabatic bulk modulus
-                alphtp = alpht * dvol ** (-delt)
-                aks = akt * (1. + alphtp * grun * (temperature + absolute_temperature))
-
-                if return_vp_vs_vbulk:
-                    vbulk, vp, vs = self.calculate_velocities(density, aks, amu)
-                    if return_aktout:
-                        return density, aks, amu, vp, vs, vbulk, akt
-                    return density, aks, amu, vp, vs, vbulk
-
-                return density, aks, amu
+                ff = np.array(ff)
+                
             else:
-                raise ValueError(f"No phase constants available for '{phase}'.")
-        except Exception as e:
-            print(f"An error occurred: {e}")
+
+                res = root_scalar(self.pressure_function, args=(pressure, akk, akk_prime), bracket=[f_guess, f_guess2], xtol=tolerance)
+                if not res.converged:
+                    raise ValueError("Root finding did not converge.")
+                ff = res.root
+            
+            dvol = (1. + 2. * ff) ** 1.5
+            density = density_t * dvol
+            ffac = (1. + 2. * ff) ** 2.5
+
+            akt = akt_t * ffac * (1. - (5. - 3. * dkdp) * ff)
+            amu = amu_t * ffac * (1. - ff * (5. - 3. * dmudp * akt_t / amu_t))
+
+            # convert to adiabatic bulk modulus
+            alphtp = alpht * dvol ** (-delt)
+            aks = akt * (1. + alphtp * grun * (temperature + absolute_temperature))
+            
+            if return_vp_vs_vbulk == True:
+                vbulk, vp, vs = self.calculate_velocities(density, aks, amu)
+                if return_aktout == True:
+                    return density, aks, amu, vp, vs, vbulk, akt
+                else:
+                    return density, aks, amu, vp, vs, vbulk
+            else:
+                if return_aktout == True:
+                    return density, aks, amu, akt
+                else:
+                    return density, aks, amu, akt
+        else:
+            raise ValueError(f"No phase constants available for '{phase}'.")
+
 
     def calculate_velocities(self, density, aks, amu):
         try:
