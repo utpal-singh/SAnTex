@@ -125,7 +125,7 @@ class Isotropy:
                     ff.append(ff_)
 
                 ff = np.array(ff)
-                
+
             else:
 
                 res = root_scalar(self.pressure_function, args=(pressure, akk, akk_prime), bracket=[f_guess, f_guess2], xtol=tolerance)
@@ -154,7 +154,7 @@ class Isotropy:
                 if return_aktout == True:
                     return density, aks, amu, akt
                 else:
-                    return density, aks, amu, akt
+                    return density, aks, amu
         else:
             raise ValueError(f"No phase constants available for '{phase}'.")
 
