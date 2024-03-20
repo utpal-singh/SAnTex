@@ -2,6 +2,7 @@ import os
 import json
 import numpy as np
 from tabulate import tabulate
+from ..isotropy import Isotropy
 
 # database_path = os.path.join(os.path.dirname(__file__), "materials_database.csv")
 
@@ -52,20 +53,27 @@ class Material:
             return None
 
     
-    def load_density(self, phase):
-        try:
-            for material in self.materials_data:
-                try:
-                    if material['Phase'] == phase:
-                        return material["Density(g/cm3)"] * 1000
-                except KeyError:
-                    print("Error: Density data not found or incorrect format.")
-                    return None
-            print(f"Error: Phase '{phase}' not found in materials data.")
-            return None
-        except AttributeError:
-            print("Error: Materials data not available.")
-            return None
+    def load_density(self, phase, pressure = None, temperature = None):
+        if pressure is None or temperature is None:
+
+            try:
+                for material in self.materials_data:
+                    try:
+                        if material['Phase'] == phase:
+                            return material["Density(g/cm3)"] * 1000
+                    except KeyError:
+                        print("Error: Density data not found or incorrect format.")
+                        return None
+                print(f"Error: Phase '{phase}' not found in materials data.")
+                return None
+            except AttributeError:
+                print("Error: Materials data not available.")
+                return None
+            
+        else:
+            isotropy = Isotropy()
+            density, aks, amu, vp, vs, vbulk, akt = isotropy.calculate_seismic_properties(phase, temperature=temperature, pressure=pressure, return_vp_vs_vbulk=True, return_aktout=True)
+            return density
 
     
 
@@ -247,14 +255,12 @@ class Material:
         return tabulate(data, headers=headers, tablefmt="pretty")
     
 
-
-
     def voigthighPT(self, phase, PRESSURE=0, TEMP=300):
-            dCdT = self.get_voigt_matrix_temperature(phase)
-            dCdP = self.get_voigt_matrix_pressure(phase)
-            
-            tensor_calc = self.get_voigt_matrix(phase) + (dCdT * (TEMP - 300) * 0.001) + (dCdP * PRESSURE)
-            return tensor_calc
+        dCdT = self.get_voigt_matrix_temperature(phase)
+        dCdP = self.get_voigt_matrix_pressure(phase)
+        
+        tensor_calc = self.get_voigt_matrix(phase) + (dCdT * (TEMP - 300) * 0.001) + (dCdP * PRESSURE)
+        return tensor_calc
 
             
 
