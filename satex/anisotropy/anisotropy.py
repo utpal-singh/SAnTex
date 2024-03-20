@@ -5,6 +5,10 @@ from ..tensor import Tensor
 import matplotlib.pyplot as plt
 import numpy as np
 from .vtkplotter import Plotter
+import plotly.graph_objects as go
+from plotly.subplots import make_subplots
+
+
 
 class Anisotropy:
     def __init__(self, stiffness_matrix, density):
@@ -74,6 +78,7 @@ class Anisotropy:
         except Exception as e:
             raise ValueError("Error in calculating phase velocity:", e)
 
+
     def plot(self):
         try:
             fig, axs = plt.subplots(2, 3, figsize=(15, 10))
@@ -115,7 +120,7 @@ class Anisotropy:
                 ax.set_aspect('equal', 'box')
                 
                 # Adding text at the bottom of each plot
-                text = 'Some text'  # You can customize this text
+                text = 'p'  # You can customize this text
                 ax.text(0.5, -0.15, text, ha='center', transform=ax.transAxes)
 
             axs[0, 0].set_title('VP/VS1')
@@ -130,6 +135,112 @@ class Anisotropy:
         except Exception as e:
             raise ValueError("Error in plotting:", e)
         
+
+    def plotvs1(self):
+        try:
+            fig, ax = plt.subplots(figsize=(8, 6))
+
+            step = math.pi / 180
+
+            x = []
+            y = []
+            c = []
+
+            for theta in np.arange(0, math.pi / 2 + step, step):
+                for phi in np.arange(0, 2 * math.pi + step, step):
+                    n = np.array([math.sin(theta) * math.cos(phi), math.sin(theta) * math.sin(phi), math.cos(theta)])
+                    tik = self.christoffel_tensor(n)
+                    if tik is not None:
+                        wave_moduli, _ = self.wave_property(tik)
+                        vs1 = math.sqrt(wave_moduli[1] / self.rho)
+                        x.append(n[0] / (1 + n[2]))
+                        y.append(n[1] / (1 + n[2]))
+                        c.append(vs1)
+
+            sc = ax.scatter(x, y, c=c, cmap='RdBu')
+            ax.set_xlabel('x')
+            ax.set_ylabel('y')
+            ax.set_aspect('equal', 'box')
+
+            # Adding text at the bottom of the plot
+            text = 'Some text'  # You can customize this text
+            ax.text(0.5, -0.15, text, ha='center', transform=ax.transAxes)
+
+            ax.set_title('VS1')
+
+            plt.colorbar(sc, ax=ax, label='VS1')
+            plt.tight_layout()
+            plt.show()
+        except Exception as e:
+            raise ValueError("Error in plotting:", e)
+
+    def plotly(self):
+        try:
+            fig = go.Figure()
+
+            step = math.pi / 180
+
+            # Create subplots
+            fig = make_subplots(rows=2, cols=3, subplot_titles=("VP/VS1", "VP", "VS1", "VS2", "AVpVs1", "AVpVs2"))
+
+            for i in range(6):
+                x = []
+                y = []
+                c = []
+
+                for theta in np.arange(0, math.pi / 2 + step, step):
+                    for phi in np.arange(0, 2 * math.pi + step, step):
+                        n = np.array([math.sin(theta) * math.cos(phi), math.sin(theta) * math.sin(phi), math.cos(theta)])
+                        tik = self.christoffel_tensor(n)
+                        if tik is not None:
+                            wave_moduli, _ = self.wave_property(tik)
+                            vp = math.sqrt(wave_moduli[0] / self.rho)
+                            vs1 = math.sqrt(wave_moduli[1] / self.rho)
+                            vs2 = math.sqrt(wave_moduli[2] / self.rho)
+                            vpvs1 = vp/vs1
+                            x.append(n[0] / (1 + n[2]))
+                            y.append(n[1] / (1 + n[2]))
+                            if i == 0:
+                                c.append(vpvs1)
+                            elif i == 1:
+                                c.append(vp)
+                            elif i == 2:
+                                c.append(vs1)
+                            elif i == 3:
+                                c.append(vs2)
+                            elif i == 4:
+                                c.append((vp - vs1) / (vp + vs1))
+                            elif i == 5:
+                                c.append((vp - vs2) / (vp + vs2))
+
+                # Add trace to subplot
+                row = i // 3 + 1
+                col = i % 3 + 1
+                fig.add_trace(go.Scatter(
+                    x=x,
+                    y=y,
+                    mode='markers',
+                    marker=dict(
+                        size=5,
+                        color=c,
+                        colorscale='RdBu',
+                        colorbar=dict(title='Colorbar Title'),
+                    ),
+                    name='',
+                ), row=row, col=col)
+
+            fig.update_layout(
+                title="Plot Title",
+                xaxis_title="x",
+                yaxis_title="y"
+            )
+
+            fig.show()
+        except Exception as e:
+            raise ValueError("Error in plotting:", e)
+
+
+            
     def plotter_vs_splitting(self, density, voigt_stiffness):
 
         Plotter.plot_vs_splitting(voigt_stiffness, density)
