@@ -27,7 +27,7 @@ class Isotropy:
 
     def get_phase_constants(self, phase):
         try:
-            phase_data = next(item for item in self.data.values() if item.get('phase') == phase)
+            phase_data = next(item for item in self.data.values() if item.get('phase') == phase or item.get('name') == phase)
             if phase_data:
                 return {
                     'id': phase_data['phase'],
