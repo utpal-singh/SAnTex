@@ -55,6 +55,7 @@ class EBSD:
         euler_angles = euler_angles.reset_index(drop=True)
         return euler_angles
         
+
     def plot(self, data=None, rotation_angle=0, inside_plane=True):
         """
         Plots the EBSD map with colors based on phase.
@@ -84,12 +85,51 @@ class EBSD:
         # Filter data based on phase
         df_new = data[data['Phase'].isin([0, 1, 2])]
         
+        # Define custom colormap for phases
+        phases_colors = {0: 'black', 1: 'green', 2: 'yellow'}
+        
         # Plot
-        plt.scatter(df_new['X'], df_new['Y'], c=df_new['Phase'], cmap='viridis')
-        plt.xlabel('X')
-        plt.ylabel('Y')
-        plt.title('EBSD Map with Color Based on Phase')
+        fig, ax = plt.subplots(figsize=(16, 9))  # Adjust the figsize as per your requirement
+        ax.scatter(df_new['X'], df_new['Y'], c=df_new['Phase'].map(phases_colors), s=1)  # Set s=1 for one point per pixel
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_title('EBSD Map with Color Based on Phase')
+        
+        ax.set_aspect('equal')  # Set aspect ratio to 'equal' to ensure equal scaling along both axes
+
         plt.show()
+
+
+
+
+    def get_index_of_phases(self, phases_list):
+        phases = self.phases()
+        phases_data = self.phases_data
+
+        try:
+            # Define a list of phase names entered by the user 
+            phases_list = ['Forsterite', 'Diopside']  
+
+            # Convert all phase names to lowercase for case insensitivity
+            phases_list = [phase.lower() for phase in phases_list]
+
+            # Get the indexes of the phases entered by the user
+            phase_indexes = [phase[0] for phase in phases_data if phase[1].lower() in phases_list]
+
+            return phase_indexes
+
+        except Exception as e:
+            print("An error occurred:", e)
+
+
+        # Define a list of phase names entered by the user (replace this with actual user input if available)
+        user_phases_input = ['Forsterite', 'Diopside']
+
+        # Get the indexes of the phases entered by the user
+        phase_indexes = [phase[0] for phase in phases if phase[1] in user_phases_input]
+
+        print(phase_indexes)
+
 
     def phases_names(self):
         """
@@ -217,6 +257,8 @@ class EBSD:
         
         # Table headers
         headers = ["Index", "Phase", "Percentage"]
+
+        self.phases_data = data
         
         # Tabulate the data
         table = tabulate(data, headers=headers, tablefmt="grid")
