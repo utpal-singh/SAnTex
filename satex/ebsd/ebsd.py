@@ -15,9 +15,9 @@ from .calcGrainBoundary import assign_to_grains_parallel
 import plotly.express as px
 
 from .melt import calcMelttensor
-from .rotateEBSD import apply_custom_rotation_to_dataframe
+from .rotateEBSD import apply_custom_rotation_to_dataframe, apply_custom_rotation_to_dataframe_noxy
 
-from .ebsdrotation import apply_custom_rotation_to_dataframe as rotebsd
+# from .ebsdrotation import apply_custom_rotation_to_dataframe as rotebsd
 from .ebsdrotation import plot as plotrotebsd
 
 class EBSD:
@@ -475,11 +475,15 @@ class EBSD:
         # Show the plot
         fig.show()
 
-    def rotateEBSD(self, ebsd_df, angles):
-        return apply_custom_rotation_to_dataframe(ebsd_df, angles)
+    def rotateEBSD(self, ebsd_df, angles, keepXY = True):
+
+        if keepXY == False:
+            return apply_custom_rotation_to_dataframe_noxy(ebsd_df, angles)
+        else:
+            return apply_custom_rotation_to_dataframe(ebsd_df, angles)
     
 
-    def plot_rotate_ebsd(self, sample_ref = ["x2east", "zOutOfPlane"], ebsd_df = None):
+    def plot_rotate_ebsd(self, sample_ref = ["x2east", "zOutOfPlane"], ebsd_df = None, keepXY = False):
         if ebsd_df is None:
             ebsd_df = self.get_ebsd_data()
 
@@ -507,8 +511,10 @@ class EBSD:
         if sample_ref == ["x2south", "zIntoPlane"]:
             angle = (0, 180, 270)
 
-        
-        rotated_ebsd_df = rotebsd(ebsd_df, angle)
+        if keepXY == False:
+            rotated_ebsd_df = apply_custom_rotation_to_dataframe_noxy(ebsd_df, angle)
+        else:
+            rotated_ebsd_df = apply_custom_rotation_to_dataframe(ebsd_df, angle)
 
         return rotated_ebsd_df
 
