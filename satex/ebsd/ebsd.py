@@ -56,21 +56,26 @@ class EBSD:
         return euler_angles
         
 
-    def plot(self, data=None, rotation_angle=0, inside_plane=True):
+    def plot(self, data=None, rotation_angle=0, inside_plane=True, mirror=False):
         """
-        Plots the EBSD map with colors based on phase.
+        Plots the EBSD map with colors based on phase. Allows for rotation and optional mirroring of the data.
 
         Parameters:
             data (pandas.DataFrame, optional): DataFrame containing EBSD data. If not provided, uses stored data.
-            rotation_angle (int, optional): Angle by which to rotate the EBSD data (in degrees). Default is 0.
+            rotation_angle (int, optional): Angle by which to rotate the EBSD data (in degrees). Accepts 0, 90, 180, 270.
             inside_plane (bool, optional): If True, rotates the EBSD data inside the plane. If False, rotates outside the plane. Default is True.
+            mirror (bool, optional): If True, mirrors the EBSD data horizontally before rotating. Default is False.
 
         Returns:
             None
         """
         if data is None:
             data, _ = self.ctf.get_data()
-        
+
+        # Mirror EBSD data if required
+        if mirror:
+            data['X'] = -data['X']  # Mirror horizontally
+
         # Rotate EBSD data
         if rotation_angle != 0:
             theta = np.radians(rotation_angle)
