@@ -77,6 +77,10 @@ class Anisotropy:
             return tuple(vp), tuple(vs1), tuple(vs2)
         except Exception as e:
             raise ValueError("Error in calculating phase velocity:", e)
+        
+    def velocities(self):
+        vp, vs1, vs2 = self.phase_velocity()
+        return vp, vs1, vs2
 
 
     def plot(self):

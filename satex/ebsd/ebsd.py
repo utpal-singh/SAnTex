@@ -88,10 +88,10 @@ class EBSD:
             data['X'], data['Y'] = xy_rotated[:, 0], xy_rotated[:, 1]
         
         # Filter data based on phase
-        df_new = data[data['Phase'].isin([0, 1, 2])]
+        df_new = data[data['Phase'].isin([0, 1, 2, 3])]
         
         # Define custom colormap for phases
-        phases_colors = {0: 'black', 1: 'green', 2: 'yellow'}
+        phases_colors = {0: 'black', 1: 'green', 2: 'yellow', 3:'blue'}
         
         # Plot
         fig, ax = plt.subplots(figsize=(16, 9))  # Adjust the figsize as per your requirement

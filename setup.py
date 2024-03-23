@@ -12,7 +12,8 @@ setup(
         'vtk',
         'tqdm',
         'tabulate',
-        'scikit-learn'
+        'scikit-learn',
+        'plotly'
     ],
     package_data={
         'satex': [
