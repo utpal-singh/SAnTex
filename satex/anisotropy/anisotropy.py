@@ -104,6 +104,12 @@ class Anisotropy:
 
 
 
+        print("Max Vp: ", maxvp)
+        print("Min Vp: ", minvp)
+        print("Max Vs1: ", maxvs1)
+        print("Min Vs1: ", minvs1)
+        print("Max Vs2: ", maxvs2)
+        print("Min Vs2: ", minvs2)
         print("Max vs anisotropy percent: ", max_vs_aniostropy_percent)
         print("Min vs anisotropy percent: ", min_vs_anisotropy_percent)
         print("P wave anisotropy percent: ", p_wave_anisotropy_percent)
@@ -111,7 +117,6 @@ class Anisotropy:
         print("S2 Wave anisotropy percent: ", s2_wave_anisotropy_percent)
         print("Velocity difference: ", maxdvs)
         print("Vp/Vs1 ratio: ", AVpVs1)
-
 
 
 
