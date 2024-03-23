@@ -8,7 +8,8 @@ from .vtkplotter import Plotter
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-
+from scipy.interpolate import griddata
+import math
 
 class Anisotropy:
     def __init__(self, stiffness_matrix, density):
@@ -81,13 +82,49 @@ class Anisotropy:
     def velocities(self):
         vp, vs1, vs2 = self.phase_velocity()
         return vp, vs1, vs2
+    
+    def anisotropy_values(self):
+        vp, vs1, vs2 = self.velocities()
+        maxvp = max(vp)
+        minvp = min(vp)
+        maxvs1 = max(vs1)
+        minvs1 = min(vs1)
+        maxvs2 = max(vs2)
+        minvs2 = min(vs2)
+        swaveAnisotropy_percent= 200*(np.array(vs1)-np.array(vs2))/(np.array(vs1)+np.array(vs2))
+        max_vs_aniostropy_percent = max(swaveAnisotropy_percent)
+        min_vs_anisotropy_percent = min(swaveAnisotropy_percent)
+        p_wave_anisotropy_percent = 200*(maxvp-minvp) / (maxvp+minvp)
+        s1_wave_anisotropy_percent = 200*(maxvs1-minvs1) / (maxvs1+minvs1)
+        s2_wave_anisotropy_percent = 200*(maxvs2-minvs2) / (maxvs2+minvs2)
+        dvs = np.array(vs1) - np.array(vs2)
+        maxdvs = max(dvs)
+        vp_vs1= np.array(vp)/np.array(vs1)
+        AVpVs1=200*(max(vp_vs1)-min(vp_vs1))/(max(vp_vs1)+min(vp_vs1));
 
 
-    def plot(self):
+
+        print("Max vs anisotropy percent: ", max_vs_aniostropy_percent)
+        print("Min vs anisotropy percent: ", min_vs_anisotropy_percent)
+        print("P wave anisotropy percent: ", p_wave_anisotropy_percent)
+        print("S1 Wave anisotropy percent: ", s1_wave_anisotropy_percent)
+        print("S2 Wave anisotropy percent: ", s2_wave_anisotropy_percent)
+        print("Velocity difference: ", maxdvs)
+        print("Vp/Vs1 ratio: ", AVpVs1)
+
+
+
+
+    def plot(self, colormap="RdBu_r"):
         try:
             fig, axs = plt.subplots(2, 3, figsize=(15, 10))
             step = math.pi / 180
 
+            # Define custom texts for each subplot
+            texts = ['Ratio of VP to VS1', 'Velocity of P-waves (VP)', 'Velocity of S1-waves (VS1)', 
+                    'Velocity of S2-waves (VS2)', 'Anisotropy measure for VP and VS1', 
+                    'Anisotropy measure for VP and VS2']
+            
             for i, ax in enumerate(axs.flat):
                 x = []
                 y = []
@@ -118,14 +155,23 @@ class Anisotropy:
                             elif i == 5:
                                 c.append((vp - vs2) / (vp + vs2))
 
-                sc = ax.scatter(x, y, c=c, cmap='RdBu')
+                # Interpolate onto a regular grid
+                xi = np.linspace(min(x), max(x), 100)
+                yi = np.linspace(min(y), max(y), 100)
+                xi, yi = np.meshgrid(xi, yi)
+                zi = griddata((x, y), c, (xi, yi), method='linear')
+
+                # Plotting 5 contour lines for each subplot
+                contours = ax.contour(xi, yi, zi, 5, colors='black')
+                ax.clabel(contours, inline=True, fontsize=8)
+
+                sc = ax.scatter(x, y, c=c, cmap=colormap, s=5)  # Reduce scatter dot size for clarity
                 ax.set_xlabel('x')
                 ax.set_ylabel('y')
                 ax.set_aspect('equal', 'box')
-                
-                # Adding text at the bottom of each plot
-                text = 'p'  # You can customize this text
-                ax.text(0.5, -0.15, text, ha='center', transform=ax.transAxes)
+
+                # Adding custom text at the bottom of each plot
+                ax.text(0.5, -0.15, texts[i], ha='center', transform=ax.transAxes)
 
             axs[0, 0].set_title('VP/VS1')
             axs[0, 1].set_title('VP')
@@ -137,46 +183,8 @@ class Anisotropy:
             plt.tight_layout()
             plt.show()
         except Exception as e:
-            raise ValueError("Error in plotting:", e)
-        
+            print(f"An error occurred: {e}")
 
-    def plotvs1(self):
-        try:
-            fig, ax = plt.subplots(figsize=(8, 6))
-
-            step = math.pi / 180
-
-            x = []
-            y = []
-            c = []
-
-            for theta in np.arange(0, math.pi / 2 + step, step):
-                for phi in np.arange(0, 2 * math.pi + step, step):
-                    n = np.array([math.sin(theta) * math.cos(phi), math.sin(theta) * math.sin(phi), math.cos(theta)])
-                    tik = self.christoffel_tensor(n)
-                    if tik is not None:
-                        wave_moduli, _ = self.wave_property(tik)
-                        vs1 = math.sqrt(wave_moduli[1] / self.rho)
-                        x.append(n[0] / (1 + n[2]))
-                        y.append(n[1] / (1 + n[2]))
-                        c.append(vs1)
-
-            sc = ax.scatter(x, y, c=c, cmap='RdBu')
-            ax.set_xlabel('x')
-            ax.set_ylabel('y')
-            ax.set_aspect('equal', 'box')
-
-            # Adding text at the bottom of the plot
-            text = 'Some text'  # You can customize this text
-            ax.text(0.5, -0.15, text, ha='center', transform=ax.transAxes)
-
-            ax.set_title('VS1')
-
-            plt.colorbar(sc, ax=ax, label='VS1')
-            plt.tight_layout()
-            plt.show()
-        except Exception as e:
-            raise ValueError("Error in plotting:", e)
 
     def plotly(self):
         try:
