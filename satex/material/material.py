@@ -72,7 +72,7 @@ class Material:
             
         else:
             isotropy = Isotropy()
-            density, aks, amu, vp, vs, vbulk, akt = isotropy.calculate_seismic_properties(phase, temperature=temperature, pressure=pressure, return_vp_vs_vbulk=True, return_aktout=True)
+            density, aks, amu = isotropy.calculate_seismic_properties(phase, temperature=temperature, pressure=pressure, return_vp_vs_vbulk=False, return_aktout=False)
             return density
 
     
