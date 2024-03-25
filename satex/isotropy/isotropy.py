@@ -48,7 +48,7 @@ class Isotropy:
             print(f"Error accessing phase constants: {e}")
             return None
 
-    def calculate_seismic_properties(self, phase, temperature, pressure, return_vp_vs_vbulk=False, return_aktout=False):
+    def calculate_seismic_properties(self, phase, temperature, pressure, ref_density = None, return_vp_vs_vbulk=False, return_aktout=False):
         """
         Calculate velocities at P,T for a mineral given parameters.
         
@@ -88,7 +88,11 @@ class Isotropy:
             tolerance = 1.e-8
 
             # input
-            rho0 = phase_constants['rho0']
+            if ref_density == None:
+                rho0 = phase_constants['rho0']
+            else:
+                rho0 = ref_density
+            
             ao = phase_constants['ao']
             akt0 = phase_constants['akt0']
             dkdp = phase_constants['dkdp']
