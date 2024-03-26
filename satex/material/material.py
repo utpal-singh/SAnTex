@@ -263,8 +263,7 @@ class Material:
         return tensor_calc
     
     def modalRock(self, rock, fraction, pressure, temperature, melt=0):
-        # Rock is an array of minerals and fraction is another array corresponding to the particular phase. eg. rock = ["Forsterite", "Diopside", "Enstatite"]
-        fraction = [0.2, 0.5, 0.3]
+        # Rock is an array of minerals and fraction is another array corresponding to the particular phase. eg. rock = ["Forsterite", "Diopside", "Enstatite"], fraction = [0.2, 0.5, 0.3]
         cij = []
         rho = []
         for item in rock:
