@@ -181,6 +181,100 @@ class Isotropy:
             return pdif
         except ZeroDivisionError as e:
             print(f"Error in pressure function: {e}")
+            
+    def HashinShtrikmanBounds(self, phase_constant_list, fraction_list, temperature, pressure):
+    
+        """
+        Calculates Hashin-Shtrikman Bounds for the given parameters:
+        
+        Inputs:
+        phase_constant_list: list of phase constant instances gotten from set_modal_composition function.
+        fraction_list: list of fractions of each phase.
+        temperature: temperature array or scalar in Kelvin
+        pressure: pressure array or scalar in GPa
+        
+        Outputs:
+        3 lists of medium value, upper bound and lower bound, indexed respectively: 
+        [Vbulk_medium,Vp_medium,Vs_medium], [Vbulk_upper,Vp_upper,Vs_upper], [Vbulk_lower, Vp_lower, Vs_lower]
+        
+        """
+        aks_list = []
+        amu_list = []
+        
+        if isinstance(temperature,(int,float)):
+            if isinstance(pressure,(int,float)):
+                method_calc = 'scalar'
+            else:
+                raise ValueError('While temperature is a scalar, pressure is an array.')
+        else:
+            if len(temperature) != len(pressure):
+                raise ValueError('Length of the temperature and pressure arrays do not match!')
+            else:
+                method_calc = 'array'
+                
+        if method_calc == 'array':
+            density_mix = np.zeros(len(temperature))
+        else:
+            density_mix = 0.0
+        
+        for phase_idx in range(0,len(phase_constant_list)):
+        
+            #calculating each phase moduli and density at T and P
+            density, aks, amu = self.calculate_seismic_properties(phase_constant_list[phase_idx]['id'], temperature=temperature, pressure=pressure,
+            return_vp_vs_vbulk=False, return_aktout=False)
+                        
+            #calculating density of the mixture
+            density_mix = density_mix + (density * fraction_list[phase_idx])
+            
+            #appending moduli into lists
+            aks_list.append(aks)
+            amu_list.append(amu)
+            
+        
+        aks_list = np.array(aks_list)
+        amu_list = np.array(amu_list)
+        
+        #Minimum maximum bounds calculation for moduli
+        aks_min_array = np.amin(aks_list, axis = 0)
+        aks_max_array = np.amax(aks_list, axis = 0)
+        
+        amu_min_array = np.amin(amu_list, axis = 0)
+        amu_max_array = np.amax(amu_list, axis = 0)
+        
+        zet_min = (amu_min_array / 6.0) * ((9.0*aks_min_array) + (8.0*amu_min_array)) / (aks_min_array + (2*amu_min_array))
+        zet_max = (amu_max_array / 6.0) * ((9.0*aks_max_array) + (8.0*amu_max_array)) / (aks_max_array + (2*amu_max_array))
+        
+        if method_calc == 'array':
+            skm = np.zeros(len(temperature))
+            skp = np.zeros(len(temperature))
+            smm = np.zeros(len(temperature))
+            smp = np.zeros(len(temperature))
+        else:
+            skm = 0.0
+            skp = 0.0
+            smm = 0.0
+            smp = 0.0
+        
+        for phase_idx in range(0,len(phase_constant_list)):
+            skm = skm + (fraction_list[phase_idx] / (aks_list[phase_idx] + (4*amu_min_array/3)))
+            skp = skp + (fraction_list[phase_idx] / (aks_list[phase_idx] + (4*amu_max_array/3)))
+            smm = smm + (fraction_list[phase_idx] / (amu_list[phase_idx] + zet_min))
+            smp = smp + (fraction_list[phase_idx] / (amu_list[phase_idx] + zet_max))
+            
+        khsm = (1.0 / skm) - (4.0*(amu_min_array/3.0))
+        khsp = (1.0 / skp) - (4.0*(amu_max_array/3.0))
+        mhsm = (1.0/smm) - zet_min
+        mhsp = (1.0/smp) - zet_max
+        
+        rkkh = 0.5*(khsm+khsp)
+        rkgh = 0.5*(mhsm+mhsp)
+        
+        Vbulk_medium, Vp_medium, Vs_medium = self.calculate_velocities(density = density_mix, aks = rkkh ,amu = rkgh)
+        Vbulk_upper, Vp_upper, Vs_upper = self.calculate_velocities(density = density_mix, aks = khsp ,amu = mhsp)
+        Vbulk_lower, Vp_lower, Vs_lower = self.calculate_velocities(density = density_mix, aks = khsm ,amu = mhsm)
+        
+        return [Vbulk_medium,Vp_medium,Vs_medium], [Vbulk_upper,Vp_upper,Vs_upper], [Vbulk_lower, Vp_lower, Vs_lower]
+        
                     
     def set_modal_composition(self, phase_list, fraction_list):
         
@@ -196,13 +290,16 @@ class Isotropy:
         
         """
         
+        if sum(fraction_list) != 1.0:
+            raise ValueError('The values entered in fraction_list do not sum up to 1.')
+        
         phase_constant_list = []
         
         for item in phase_list:
         
             phase_constant = self.get_phase_constants(phase = item)
             phase_constant_list.append(phase_constant)
-            
+                        
         return phase_constant_list, fraction_list
         
         
