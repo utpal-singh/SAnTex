@@ -125,7 +125,7 @@ class Anisotropy:
             fig, axs = plt.subplots(2, 3, figsize=(15, 10))
             step = math.pi / 180
 
-            # Define custom texts for each subplot
+            # texts for each subplot
             texts = ['Ratio of VP to VS1', 'Velocity of P-waves (VP)', 'Velocity of S1-waves (VS1)', 
                     'Velocity of S2-waves (VS2)', 'Anisotropy measure for VP and VS1', 
                     'Anisotropy measure for VP and VS2']
@@ -166,16 +166,16 @@ class Anisotropy:
                 xi, yi = np.meshgrid(xi, yi)
                 zi = griddata((x, y), c, (xi, yi), method='linear')
 
-                # Plotting 5 contour lines for each subplot
+                # Plotting contour lines for each subplot
                 contours = ax.contour(xi, yi, zi, 5, colors='black')
                 ax.clabel(contours, inline=True, fontsize=8)
 
-                sc = ax.scatter(x, y, c=c, cmap=colormap, s=5)  # Reduce scatter dot size for clarity
+                sc = ax.scatter(x, y, c=c, cmap=colormap, s=5)  # Reduce scatter dot size s for clarity
                 ax.set_xlabel('x')
                 ax.set_ylabel('y')
                 ax.set_aspect('equal', 'box')
 
-                # Adding custom text at the bottom of each plot
+                # Adding above text at the bottom of each plot
                 ax.text(0.5, -0.15, texts[i], ha='center', transform=ax.transAxes)
 
             axs[0, 0].set_title('VP/VS1')
@@ -197,7 +197,6 @@ class Anisotropy:
 
             step = math.pi / 180
 
-            # Create subplots
             fig = make_subplots(rows=2, cols=3, subplot_titles=("VP/VS1", "VP", "VS1", "VS2", "AVpVs1", "AVpVs2"))
 
             for i in range(6):
@@ -230,7 +229,6 @@ class Anisotropy:
                             elif i == 5:
                                 c.append((vp - vs2) / (vp + vs2))
 
-                # Add trace to subplot
                 row = i // 3 + 1
                 col = i % 3 + 1
                 fig.add_trace(go.Scatter(

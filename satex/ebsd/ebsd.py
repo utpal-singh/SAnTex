@@ -1,13 +1,13 @@
 # sage/ebsd/ebsd.py
 
-from .ctf_parser import Ctf  # Importing Ctf class from ctf_parser module
-import matplotlib.pyplot as plt  # Importing matplotlib for plotting functionalities
+from .ctf_parser import Ctf
+import matplotlib.pyplot as plt 
 from tabulate import tabulate
 
-import numpy as np  # Importing numpy for numerical operations
-import pandas as pd  # Importing pandas for data manipulation
-from sklearn.neighbors import KNeighborsClassifier  # Importing KNeighborsClassifier for classification
-from joblib import Parallel, delayed  # Importing Parallel and delayed for parallel execution
+import numpy as np 
+import pandas as pd 
+from sklearn.neighbors import KNeighborsClassifier 
+from joblib import Parallel, delayed 
 from ..tensor import Tensor
 from scipy.spatial.transform import Rotation
 
@@ -33,7 +33,7 @@ class EBSD:
             filename (str): The filename of the EBSD data file.
         """
         self._filename = filename
-        self.ctf = Ctf(self._filename)  # Creating an instance of the Ctf class
+        self.ctf = Ctf(self._filename) 
     
     def get_euler_angles(self, phase, data = None):
         """
@@ -112,13 +112,9 @@ class EBSD:
         phases_data = self.phases_data
 
         try:
-            # Define a list of phase names entered by the user 
             phases_list = ['Forsterite', 'Diopside']  
-
-            # Convert all phase names to lowercase for case insensitivity
             phases_list = [phase.lower() for phase in phases_list]
 
-            # Get the indexes of the phases entered by the user
             phase_indexes = [phase[0] for phase in phases_data if phase[1].lower() in phases_list]
 
             return phase_indexes
@@ -127,10 +123,8 @@ class EBSD:
             print("An error occurred:", e)
 
 
-        # Define a list of phase names entered by the user (replace this with actual user input if available)
         user_phases_input = ['Forsterite', 'Diopside']
 
-        # Get the indexes of the phases entered by the user
         phase_indexes = [phase[0] for phase in phases if phase[1] in user_phases_input]
 
         print(phase_indexes)
@@ -257,15 +251,12 @@ class EBSD:
         total_count = phase_counts.sum()
         phase_percentages = {phase: (count / total_count) * 100 for phase, count in zip(phases_list, phase_counts)}
         
-        # Convert the dictionary to a list of tuples for tabulate
         data = [(index, phase, percentage) for index, (phase, percentage) in enumerate(phase_percentages.items())]
         
-        # Table headers
         headers = ["Index", "Phase", "Percentage"]
 
         self.phases_data = data
         
-        # Tabulate the data
         table = tabulate(data, headers=headers, tablefmt="grid")
         return table
 
@@ -310,9 +301,6 @@ class EBSD:
                     beta = euler_angle.iloc[i]["Euler2"]
                     gamma = euler_angle.iloc[i]["Euler3"]
                     output = np.array(tensor.rotate_tensor(tensor_list[x], alpha, beta, gamma))
-                #     print(output)
-                #     print(f"Counter: {counter}")
-                #     counter +=1
                     rotated_tensor_list.append(output)
                 x+= 1
 
@@ -329,29 +317,6 @@ class EBSD:
         tensor_list = []
         for voigt in cij:
             tensor_list.append(tensor.voigt_to_tensor(voigt))
-
-        # rotated_tensor_list = []
-        # len_euler = []
-        # x = 0
-        # for euler_angle in euler_angles:
-        #     len_euler.append(len(euler_angle))
-        #     for i in range(len(euler_angle)):
-        #         alpha = euler_angle.iloc[i]["Euler1"]
-        #         beta = euler_angle.iloc[i]["Euler2"]
-        #         gamma = euler_angle.iloc[i]["Euler3"]
-        #         output = np.array(tensor.rotate_tensor(tensor_list[x], alpha, beta, gamma))
-        #     #     print(output)
-        #     #     print(f"Counter: {counter}")
-        #     #     counter +=1
-        #         rotated_tensor_list.append(output)
-        #     x+= 1
-
-        # density_averaged = (np.sum(np.multiply(density,len_euler)))/(np.sum(len_euler))
-
-        # tensor_sum = np.sum(rotated_tensor_list, axis=0)
-        # tensor_sum= tensor_sum/sum(len_euler)
-
-        # return tensor_sum, len_euler, density_averaged
             
         tensor = Tensor()
         rotated_tensor = []
@@ -462,10 +427,9 @@ class EBSD:
         return df_filtered
     
     def plotGrains(self, df):
-        # Create a scatter plot using Plotly
         fig = px.scatter(df, x='X', y='Y', color='Phase', color_continuous_scale='viridis')
 
-        # Customize the marker size pixel (1 pixel here)
+        # Customize marker size (2 pixel here)
         fig.update_traces(marker=dict(size=2))
 
         # Customize the layout
@@ -477,7 +441,6 @@ class EBSD:
             showlegend=True
         )
 
-        # Show the plot
         fig.show()
 
     def rotateEBSD(self, ebsd_df, angles, keepXY = True):
@@ -532,7 +495,6 @@ class EBSD:
 
 
 if __name__ == "__main__":
-    # Example usage
     ctfobj = EBSD("ebsd.ctf")
     print(ctfobj.get_euler_angles(3))
 
