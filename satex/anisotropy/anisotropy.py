@@ -1,12 +1,17 @@
 import numpy as np
 import math
-from ..tensor import Tensor
+from satex import Tensor
 
 import matplotlib.pyplot as plt
 import numpy as np
 from .vtkplotter import Plotter
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+
+from .plot_vel_grid import plot_velocity_grid
+
+from satex import Material
+from satex import EBSD
 
 from scipy.interpolate import griddata
 import math
@@ -82,8 +87,13 @@ class Anisotropy:
     def velocities(self):
         vp, vs1, vs2 = self.phase_velocity()
         return vp, vs1, vs2
-    
-    def anisotropy_values(self):
+
+    def anisotropy_values(self, stiffness_matrix = None, density = None, return_values=None):
+        """
+        Return values can ve maxvp, minv, maxvs1, minvs1, maxvs2, minvs2
+        
+        """
+
         vp, vs1, vs2 = self.velocities()
         maxvp = max(vp)
         minvp = min(vp)
@@ -91,32 +101,71 @@ class Anisotropy:
         minvs1 = min(vs1)
         maxvs2 = max(vs2)
         minvs2 = min(vs2)
-        swaveAnisotropy_percent= 200*(np.array(vs1)-np.array(vs2))/(np.array(vs1)+np.array(vs2))
-        max_vs_aniostropy_percent = max(swaveAnisotropy_percent)
+        swaveAnisotropy_percent = 200 * (np.array(vs1) - np.array(vs2)) / (np.array(vs1) + np.array(vs2))
+        max_vs_anisotropy_percent = max(swaveAnisotropy_percent)
         min_vs_anisotropy_percent = min(swaveAnisotropy_percent)
-        p_wave_anisotropy_percent = 200*(maxvp-minvp) / (maxvp+minvp)
-        s1_wave_anisotropy_percent = 200*(maxvs1-minvs1) / (maxvs1+minvs1)
-        s2_wave_anisotropy_percent = 200*(maxvs2-minvs2) / (maxvs2+minvs2)
+        p_wave_anisotropy_percent = 200 * (maxvp - minvp) / (maxvp + minvp)
+        s1_wave_anisotropy_percent = 200 * (maxvs1 - minvs1) / (maxvs1 + minvs1)
+        s2_wave_anisotropy_percent = 200 * (maxvs2 - minvs2) / (maxvs2 + minvs2)
         dvs = np.array(vs1) - np.array(vs2)
         maxdvs = max(dvs)
-        vp_vs1= np.array(vp)/np.array(vs1)
-        AVpVs1=200*(max(vp_vs1)-min(vp_vs1))/(max(vp_vs1)+min(vp_vs1));
+        vp_vs1 = np.array(vp) / np.array(vs1)
+        AVpVs1 = 200 * (max(vp_vs1) - min(vp_vs1)) / (max(vp_vs1) + min(vp_vs1))
 
-
-
-        print("Max Vp: ", maxvp)
-        print("Min Vp: ", minvp)
-        print("Max Vs1: ", maxvs1)
-        print("Min Vs1: ", minvs1)
-        print("Max Vs2: ", maxvs2)
-        print("Min Vs2: ", minvs2)
-        print("Max vs anisotropy percent: ", max_vs_aniostropy_percent)
-        print("Min vs anisotropy percent: ", min_vs_anisotropy_percent)
-        print("P wave anisotropy percent: ", p_wave_anisotropy_percent)
-        print("S1 Wave anisotropy percent: ", s1_wave_anisotropy_percent)
-        print("S2 Wave anisotropy percent: ", s2_wave_anisotropy_percent)
-        print("Velocity difference: ", maxdvs)
-        print("Vp/Vs1 ratio: ", AVpVs1)
+        if return_values == 'maxvp':
+            return maxvp
+        elif return_values == 'maxvs1':
+            return maxvs1
+        elif return_values == 'maxvs1':
+            return maxvs1
+        elif return_values == 'maxvs1':
+            return maxvs1
+        elif return_values == 'maxvs1':
+            return maxvs1
+        elif return_values == 'maxvs1':
+            return maxvs1
+        elif return_values == 'maxvs1':
+            return maxvs1
+        elif return_values == 'maxvs1':
+            return maxvs1
+        
+        else:
+            print("Max Vp: ", maxvp)
+            print("Min Vp: ", minvp)
+            print("Max Vs1: ", maxvs1)
+            print("Min Vs1: ", minvs1)
+            print("Max Vs2: ", maxvs2)
+            print("Min Vs2: ", minvs2)
+            print("Max vs anisotropy percent: ", max_vs_anisotropy_percent)
+            print("Min vs anisotropy percent: ", min_vs_anisotropy_percent)
+            print("P wave anisotropy percent: ", p_wave_anisotropy_percent)
+            print("S1 Wave anisotropy percent: ", s1_wave_anisotropy_percent)
+            print("S2 Wave anisotropy percent: ", s2_wave_anisotropy_percent)
+            print("Velocity difference: ", maxdvs)
+            print("Vp/Vs1 ratio: ", AVpVs1)
+            return {
+                'maxvp': maxvp,
+                'minvp': minvp,
+                'maxvs1': maxvs1,
+                'minvs1': minvs1,
+                'maxvs2': maxvs2,
+                'minvs2': minvs2,
+                'max_vs_anisotropy_percent': max_vs_anisotropy_percent,
+                'min_vs_anisotropy_percent': min_vs_anisotropy_percent,
+                'p_wave_anisotropy_percent': p_wave_anisotropy_percent,
+                's1_wave_anisotropy_percent': s1_wave_anisotropy_percent,
+                's2_wave_anisotropy_percent': s2_wave_anisotropy_percent,
+                'maxdvs': maxdvs,
+                'AVpVs1': AVpVs1
+            }
+        
+    def plot_velocities(self, pressure_range, temperature_range, return_type, is_ebsd = False, phase = None, grid = [10, 10], filename = None, *args):
+        """
+        Return values can ve maxvp, minv, maxvs1, minvs1, maxvs2, minvs2 
+        args can be [0, 1, 2, 3]
+        give filename is is_ebsd is True
+        """
+        plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd = False, phase = None, grid = [10, 10], filename = None, *args)
 
 
 
