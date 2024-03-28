@@ -182,7 +182,7 @@ class Isotropy:
         except ZeroDivisionError as e:
             print(f"Error in pressure function: {e}")
             
-    def HashinShtrikmanBounds(self, phase_constant_list, fraction_list, temperature, pressure):
+    def HashinShtrikmanBounds(self, phase_constant_list, fraction_list, temperature, pressure, fractions_matches_T = False):
     
         """
         Calculates Hashin-Shtrikman Bounds for the given parameters:
@@ -201,6 +201,7 @@ class Isotropy:
         aks_list = []
         amu_list = []
         
+        
         if isinstance(temperature,(int,float)):
             if isinstance(pressure,(int,float)):
                 method_calc = 'scalar'
@@ -212,6 +213,11 @@ class Isotropy:
             else:
                 method_calc = 'array'
                 
+                if len(fraction_list) == len(temperature):
+                    fractions_matches_T = True
+                else:
+                    fractions_matches_T = False
+                
         if method_calc == 'array':
             density_mix = np.zeros(len(temperature))
         else:
@@ -222,9 +228,12 @@ class Isotropy:
             #calculating each phase moduli and density at T and P
             density, aks, amu = self.calculate_seismic_properties(phase_constant_list[phase_idx]['id'], temperature=temperature, pressure=pressure,
             return_vp_vs_vbulk=False, return_aktout=False)
-                        
+            
             #calculating density of the mixture
-            density_mix = density_mix + (density * fraction_list[phase_idx])
+            if fractions_matches_T == False:
+                density_mix = density_mix + (density * fraction_list[phase_idx])
+            else:
+                density_mix = density_mix + (density * fraction_list[:,phase_idx])
             
             #appending moduli into lists
             aks_list.append(aks)
@@ -256,10 +265,15 @@ class Isotropy:
             smp = 0.0
         
         for phase_idx in range(0,len(phase_constant_list)):
-            skm = skm + (fraction_list[phase_idx] / (aks_list[phase_idx] + (4*amu_min_array/3)))
-            skp = skp + (fraction_list[phase_idx] / (aks_list[phase_idx] + (4*amu_max_array/3)))
-            smm = smm + (fraction_list[phase_idx] / (amu_list[phase_idx] + zet_min))
-            smp = smp + (fraction_list[phase_idx] / (amu_list[phase_idx] + zet_max))
+            if fractions_matches_T == False:
+                frac_list_holder = fraction_list[phase_idx]
+            else:
+                frac_list_holder = fraction_list[:,phase_idx]
+                
+            skm = skm + (frac_list_holder / (aks_list[phase_idx] + (4*amu_min_array/3)))
+            skp = skp + (frac_list_holder / (aks_list[phase_idx] + (4*amu_max_array/3)))
+            smm = smm + (frac_list_holder / (amu_list[phase_idx] + zet_min))
+            smp = smp + (frac_list_holder / (amu_list[phase_idx] + zet_max))
             
         khsm = (1.0 / skm) - (4.0*(amu_min_array/3.0))
         khsp = (1.0 / skp) - (4.0*(amu_max_array/3.0))
@@ -275,7 +289,6 @@ class Isotropy:
         
         return [Vbulk_medium,Vp_medium,Vs_medium], [Vbulk_upper,Vp_upper,Vs_upper], [Vbulk_lower, Vp_lower, Vs_lower]
         
-                    
     def set_modal_composition(self, phase_list, fraction_list):
         
         """
@@ -290,7 +303,12 @@ class Isotropy:
         
         """
         
-        if sum(fraction_list) != 1.0:
+        if type(fraction_list) != np.ndarray:
+            fraction_list = np.array(fraction_list)
+            
+        all_sums = np.allclose(fraction_list.sum(axis = 1), 1.0, atol = 1e-6)
+        
+        if all_sums == False:
             raise ValueError('The values entered in fraction_list do not sum up to 1.')
         
         phase_constant_list = []
