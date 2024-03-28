@@ -2,7 +2,7 @@ import numpy as np
 from satex import Material
 import matplotlib.pyplot as plt
 
-def plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd = False, phase = None, grid = [10, 10], filename = None, *args):
+def plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd = False, phase = None, grid = [5, 5], filename = None, *args):
     from satex import Anisotropy
     """
     Return values can ve maxvp, minv, maxvs1, minvs1, maxvs2, minvs2 

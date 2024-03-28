@@ -161,13 +161,13 @@ class Anisotropy:
                 'AVpVs1': AVpVs1
             }
         
-    def plot_velocities(self, pressure_range, temperature_range, return_type, is_ebsd = False, phase = None, grid = [10, 10], filename = None, *args):
+    def plot_velocities(self, pressure_range, temperature_range, return_type, is_ebsd = False, phase = None, grid = [5, 5], filename = None, *args):
         """
         Return values can ve maxvp, minv, maxvs1, minvs1, maxvs2, minvs2 
         args can be [0, 1, 2, 3]
         give filename is is_ebsd is True
         """
-        plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd = False, phase = None, grid = [10, 10], filename = None, *args)
+        plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd = False, phase = phase, grid = [5, 5], filename = None, *args)
 
 
 
