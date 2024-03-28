@@ -1,10 +1,9 @@
 import numpy as np
 from satex import Material
-from satex import Anisotropy
-
 import matplotlib.pyplot as plt
 
 def plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd = False, phase = None, grid = [10, 10], filename = None, *args):
+    from satex import Anisotropy
     """
     Return values can ve maxvp, minv, maxvs1, minvs1, maxvs2, minvs2 
     args can be [0, 1, 2, 3]
@@ -20,8 +19,6 @@ def plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd =
         temperature_grid = np.linspace(temperature_range[0], temperature_range[1], grid[1])
         
         vp_matrix = np.zeros((grid[0], grid[1]))
-        print(pressure_grid)
-        print(temperature_grid)
         
         for i, p in enumerate(pressure_grid):
             for j, t in enumerate(temperature_grid):
@@ -29,9 +26,8 @@ def plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd =
                 cij_highpt = material.voigthighPT(phase, p, t)*10**9
                 density_highpt = material.load_density(phase, p, t)
                 anisotropy = Anisotropy(cij_highpt, density_highpt)
-                vp_matrix[i, j] = anisotropy.anisotropy_values(return_type)
+                vp_matrix[i, j] = anisotropy.anisotropy_values(return_values=return_type)
 
-        print(vp_matrix)
         return vp_matrix
 
     if is_ebsd is True:

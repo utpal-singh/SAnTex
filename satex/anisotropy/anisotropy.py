@@ -10,20 +10,22 @@ from plotly.subplots import make_subplots
 
 from .plot_vel_grid import plot_velocity_grid
 
-from satex import Material
-from satex import EBSD
+from .. import Material
+from .. import EBSD
 
 from scipy.interpolate import griddata
 import math
 
 class Anisotropy:
     def __init__(self, stiffness_matrix, density):
-        try:
+        if stiffness_matrix is not None and density is not None:
             tensor_object = Tensor()
             self.cijkl = tensor_object.voigt_to_tensor(stiffness_matrix)
             self.rho = density
-        except Exception as e:
-            raise ValueError("Error in initializing Anisotropy object: " + str(e))
+        else:
+            tensor_object = Tensor()
+            self.cijkl = None
+            self.rho = None
 
     def christoffel_tensor(self, n):
         try:
