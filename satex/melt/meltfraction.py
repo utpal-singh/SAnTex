@@ -1,3 +1,4 @@
+import numpy as np
 def calculate_melt_fractions(pressures_input, temperatures_input, cutoff=1):
     pressures = np.atleast_1d(pressures_input)
     temperatures = np.atleast_1d(temperatures_input)

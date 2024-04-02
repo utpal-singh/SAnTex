@@ -3,6 +3,7 @@
 from .ctf_parser import Ctf
 import matplotlib.pyplot as plt 
 from tabulate import tabulate
+import os
 
 import numpy as np 
 import pandas as pd 
@@ -33,6 +34,9 @@ class EBSD:
             filename (str): The filename of the EBSD data file.
         """
         self._filename = filename
+        if not os.path.isfile(self._filename):
+                    raise FileNotFoundError(f"The file '{self._filename}' was not found.")
+        
         self.ctf = Ctf(self._filename) 
     
     def get_euler_angles(self, phase, data = None):
