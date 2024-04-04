@@ -26,8 +26,48 @@ def calculate_odf(euler_angles):
     ax.set_xlabel('Phi1')
     ax.set_ylabel('Phi')
     ax.set_zlabel('Phi2')
-    ax.set_title('ODF Representation (Simplified)')
+    ax.set_title('ODF Representation')
     plt.show()
+
+
+import plotly.graph_objects as go
+import numpy as np
+
+def plot_orientations_3d(euler_angles):
+
+    phi1, Phi, phi2 = euler_angles[:, 0], euler_angles[:, 1], euler_angles[:, 2]
+    
+    fig = go.Figure(data=[go.Scatter3d(
+        x=phi1,
+        y=Phi,
+        z=phi2,
+        mode='markers',
+        marker=dict(
+            size=5,
+            color='rgba(255, 0, 0, 0.8)',  
+        )
+    )])
+    
+    fig.update_layout(
+        title='3D Plot of Bunge-Euler Orientations',
+        scene=dict(
+            xaxis_title='Phi1 (Degrees)',
+            yaxis_title='Phi (Degrees)',
+            zaxis_title='Phi2 (Degrees)'
+        ),
+        margin=dict(r=0, b=0, l=0, t=30) 
+    )
+    
+    fig.show()
+
+if __name__ == "__main__":
+    euler_angles = np.array([
+    [10, 20, 30],
+    [40, 50, 60],
+    [70, 80, 90],
+])
+    plot_orientations_3d(euler_angles)
+
 
 if __name__ == "__main__":
     euler_angles = np.array([
