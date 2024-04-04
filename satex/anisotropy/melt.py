@@ -145,7 +145,7 @@ if __name__ == "__main__":
     print(rho_average)
 
     oxide_dict = {'sio2': 40, 'tio2': 1.84, 'feo': 9.57, 'mgo': 6.67, 'cao': 11.5, 'na2o': 2.68, 'k2o': 0.25, 'h2o': 10}
-    dens, component_density = calc_melt_density(oxide_dict, 500, 1273)
+    dens, component_density = calc_melt_density(oxide_dict, 500, 1500)
     print(dens)
     print(component_density)
 
