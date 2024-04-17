@@ -492,10 +492,10 @@ class EBSD:
         return rotated_ebsd_df
     
     def odf(self, ebsd_df):
-        odf(ebsd_df)
+        odf(df = ebsd_df)
 
     def pdf(self, ebsd_df):
-        pdf(ebsd_df)
+        pdf(df = ebsd_df)
 
     def ipf(self, ebsd_df):
-        ipf(ebsd_df)
+        ipf(df = ebsd_df)

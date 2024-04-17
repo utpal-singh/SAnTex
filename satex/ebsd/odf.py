@@ -10,14 +10,14 @@ import numpy as np
 
 import random
 
-def odf(ebsd_df, phase=1, crystal_symmetry='D2', random_val=True, miller=[1, 0, 0], hemisphere = 'both', 
+def odf(df, phase=1, crystal_symmetry='D2', random_val=True, miller=[1, 0, 0], hemisphere = 'both', 
         axes_labels=["Xs", "Ys"], alpha = 0.01, figure = None, vector_labels = None, reproject=False, show_hemisphere_label = None,
         grid = None, grid_resolution = None, return_figure = None):
     """
         Calculate the Orientation Distribution Function (ODF) for a given EBSD dataset and optionally visualize it.
 
         Parameters:
-        - ebsd_df: pandas DataFrame
+        - df: pandas DataFrame
             The DataFrame containing EBSD (Electron Backscatter Diffraction) data.
         - phase: int, optional
             The phase number for which ODF needs to be calculated (default is 1).
@@ -215,13 +215,13 @@ def odf(ebsd_df, phase=1, crystal_symmetry='D2', random_val=True, miller=[1, 0, 
     r_.scatter(hemisphere=hemisphere, axes_labels=axes_labels, alpha = alpha)
     return r_
 
-def ipf(self, ebsd_df, phase=1, vector_sample=[0, 0, 1], random_val=True,
+def ipf(df, phase=1, vector_sample=[0, 0, 1], random_val=True,
             vector_title='Z', projection='ipf', crystal_symmetry='D2'):
     """
     Generate and visualize an Inverse Pole Figure (IPF) from EBSD data.
 
     Parameters:
-    - ebsd_df: pandas DataFrame
+    - df: pandas DataFrame
         The DataFrame containing EBSD (Electron Backscatter Diffraction) data.
     - phase: int, optional
         The phase number for which IPF needs to be generated (default is 1).
@@ -244,6 +244,8 @@ def ipf(self, ebsd_df, phase=1, vector_sample=[0, 0, 1], random_val=True,
     from orix.quaternion import Orientation, symmetry
     from orix.vector import Miller, Vector3d
     import matplotlib.pyplot as plt
+    from orix.crystal_map import Phase
+
     euler_df = df[df['Phase'] == phase][['Euler1', 'Euler2', 'Euler3']]
 
     euler_values = [tuple(x) for x in euler_df.to_numpy()]
@@ -406,14 +408,14 @@ def ipf(self, ebsd_df, phase=1, vector_sample=[0, 0, 1], random_val=True,
     _ = ax2.set_title(f"Phase{phase}, {vector_title}")
 
 
-def pdf(ebsd_df, phase=1, crystal_symmetry='D2', random_val=True, miller=[0, 1, 0], hemisphere = 'both', sigma = 4,
+def pdf(df, phase=1, crystal_symmetry='D2', random_val=True, miller=[0, 1, 0], hemisphere = 'both', sigma = 4,
         axes_labels=["Xs", "Ys"], alpha = 0.01, figure = None, vector_labels = None, reproject=False, show_hemisphere_label = None,
         grid = None, grid_resolution = None, return_figure = None):
     """
         Calculate the Orientation Distribution Function (ODF) for a given EBSD dataset and optionally visualize it.
 
         Parameters:
-        - ebsd_df: pandas DataFrame
+        - df: pandas DataFrame
             The DataFrame containing EBSD (Electron Backscatter Diffraction) data.
         - phase: int, optional
             The phase number for which ODF needs to be calculated (default is 1).
