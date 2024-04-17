@@ -13,7 +13,8 @@ setup(
         'tqdm',
         'tabulate',
         'scikit-learn',
-        'plotly'
+        'plotly',
+        'orix'
     ],
     package_data={
         'satex': [
