@@ -20,6 +20,7 @@ from .rotateEBSD import apply_custom_rotation_to_dataframe, apply_custom_rotatio
 
 # from .ebsdrotation import apply_custom_rotation_to_dataframe as rotebsd
 from .ebsdrotation import plot as plotrotebsd
+from .odf import ipf, odf, pdf
 
 class EBSD:
     """
@@ -489,6 +490,15 @@ class EBSD:
             rotated_ebsd_df = apply_custom_rotation_to_dataframe(ebsd_df, angle)
 
         return rotated_ebsd_df
+    
+    def odf(self, ebsd_df):
+        odf(ebsd_df)
+
+    def pdf(self, ebsd_df):
+        pdf(ebsd_df)
+
+    def ipf(self, ebsd_df):
+        ipf(ebsd_df)
 
         
 
