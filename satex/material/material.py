@@ -276,7 +276,3 @@ class Material:
             cij_average += fraction[i] * cij[i]
         return cij_average, rho_average
             
-
-if __name__ == "__main__":
-    mat = Material("olivine")
-    print(calculate_tensor_deriv("olivine", 2, 1000))

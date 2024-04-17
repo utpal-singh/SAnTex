@@ -499,22 +499,3 @@ class EBSD:
 
     def ipf(self, ebsd_df):
         ipf(ebsd_df)
-
-        
-
-        
-
-
-
-
-
-if __name__ == "__main__":
-    ctfobj = EBSD("ebsd.ctf")
-    print(ctfobj.get_euler_angles(3))
-
-    phi = 45  # First Euler angle
-    phi1 = 30 # Second Euler angle
-    phi2 = 60 # Third Euler angle
-
-    quaternion = euler_to_quaternion(phi, phi1, phi2)
-    print("Quaternion:", quaternion)

@@ -172,25 +172,3 @@ def apply_custom_rotation_to_dataframe_noxy(df, angles):
     df[['Euler1', 'Euler2', 'Euler3', 'X', 'Y']] = results
 
     return df
-
-
-if __name__ == "__main__":
-    # Example usage
-    initial_phi1 = 119.468
-    initial_Phi = 117.433
-    initial_phi2 = 74.0688
-
-    # Case 1: rotation('Euler', 180*degree, 180*degree, 0*degree, 'BUNGE,ZXZ')
-    angles1 = (180, 180, 0)
-    res_phi1, res_Phi, res_phi2 = bunge_euler_rotation(initial_phi1, initial_Phi, initial_phi2, angles1)
-    print(f"Resultant Bunge Euler angles (degrees): phi1 = {res_phi1:.3f}, Phi = {res_Phi:.3f}, phi2 = {res_phi2:.3f}")
-
-    # Case 2: rotation('Euler', 180*degree, 0*degree, 0*degree, 'BUNGE,ZXZ')
-    angles2 = (180, 0, 0)
-    res_phi1, res_Phi, res_phi2 = bunge_euler_rotation(initial_phi1, initial_Phi, initial_phi2, angles2)
-    print(f"Resultant Bunge Euler angles (degrees): phi1 = {res_phi1:.3f}, Phi = {res_Phi:.3f}, phi2 = {res_phi2:.3f}")
-
-    # Case 3: rotation('Euler', 180*degree, 180*degree, 180*degree, 'BUNGE,ZXZ')
-    angles3 = (180, 180, 180)
-    res_phi1, res_Phi, res_phi2 = bunge_euler_rotation(initial_phi1, initial_Phi, initial_phi2, angles3)
-    print(f"Resultant Bunge Euler angles (degrees): phi1 = {res_phi1:.3f}, Phi = {res_Phi:.3f}, phi2 = {res_phi2:.3f}")

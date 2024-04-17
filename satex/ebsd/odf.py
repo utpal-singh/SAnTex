@@ -668,24 +668,3 @@ def plot_orientations_3d(euler_angles):
     
     fig.show()
 
-if __name__ == "__main__":
-    euler_angles = np.array([
-    [10, 20, 30],
-    [40, 50, 60],
-    [70, 80, 90],
-])
-    plot_orientations_3d(euler_angles)
-
-
-if __name__ == "__main__":
-
-    euler_angles = np.array([
-        [10, 20, 30],
-        [40, 50, 60],
-        [20, 25, 46],
-        [15, 45, 34],
-        [23, 45, 67],
-        [45, 56, 34]
-    ])
-    
-    calculate_odf(euler_angles)
