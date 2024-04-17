@@ -8,7 +8,6 @@ from orix.vector import Miller, Vector3d
 
 import numpy as np
 
-from ..ebsd import EBSD
 import random
 
 def odf(ebsd_df, phase=1, crystal_symmetry='D2', random_val=True, miller=[1, 0, 0], hemisphere = 'both', 
