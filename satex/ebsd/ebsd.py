@@ -549,4 +549,5 @@ class EBSD:
         pdf(df = ebsd_df)
 
     def ipf(self, ebsd_df):
+        self.pdf(ebsd_df=ebsd_df)
         ipf(df = ebsd_df)

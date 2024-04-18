@@ -322,29 +322,3 @@ class Anisotropy:
     def plotter_vs2(self, density, voigt_stiffness):
 
         Plotter.plot_vp(voigt_stiffness, density)
-
-
-
-if __name__ == "__main__":
-    try:
-        stiffness_matrix = np.array([[198.96, 73.595, 68.185, 0., 9.735, 0.],
-                                    [73.595, 155.94, 62.23, 0., 6.295, 0.],
-                                    [68.185, 62.23, 225.99, 0., 33.85, 0.],
-                                    [0., 0., 0., 65.66, 0., 6.415],
-                                    [9.735, 6.295, 33.85, 0., 60.23, 0.],
-                                    [0., 0., 0., 6.415, 0., 65.18]]) * 10**9
-
-        density = 3500
-
-        anisotropy_instance = Anisotropy(stiffness_matrix, density)
-
-        vp, vs1, vs2 = anisotropy_instance.phase_velocity()
-
-        print("The values of vp are:")
-        print(np.min(vp))
-        print("The values of vs1 are:")
-        print(np.min(vs1))
-        print("The values of vs2 are:")
-        print(np.min(vs2))
-    except ValueError as e:
-        print("Error:", e)

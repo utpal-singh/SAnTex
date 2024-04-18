@@ -53,5 +53,4 @@ values = np.random.randint(100, 500, size=10)  # Random sample values for demons
 
 interp_box = (138.5, -35.0, 139.0, -34.5)  # Defined as (left_lon, bottom_lat, right_lon, top_lat)
 
-if __name__ == "__main__":
-    plot_data_with_interpolation_in_defined_box(lon_points, lat_points, values, interp_box, method='nearest', full_map=False)
+
