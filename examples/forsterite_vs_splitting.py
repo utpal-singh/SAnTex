@@ -1,4 +1,4 @@
-from satex import Anisotropy
+from santex import Anisotropy
 import numpy as np
 
 stiffness_matrix = np.array([[198.96, 73.595, 68.185, 0., 9.735, 0.],

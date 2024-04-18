@@ -1,6 +1,6 @@
 import numpy as np
 import math
-from satex import Tensor
+from santex import Tensor
 
 import matplotlib.pyplot as plt
 import numpy as np

@@ -1,9 +1,9 @@
 import numpy as np
-from satex import Material
+from santex import Material
 import matplotlib.pyplot as plt
 
 def plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd = False, phase = None, grid = [5, 5], filename = None, *args):
-    from satex import Anisotropy
+    from santex import Anisotropy
     """
     Generates a grid of velocity values based on specified pressure and temperature ranges.
 

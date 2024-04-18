@@ -1,5 +1,5 @@
 import numpy as np
-from satex import Material
+from santex import Material
 import pandas as pd
 
 def calc_melt_density(weight_per, pressure, temperature):
