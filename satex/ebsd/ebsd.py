@@ -502,6 +502,9 @@ class EBSD:
 
         return rotated_ebsd_df
     
+    def filterMAD(self, df, value=0.7):
+        return df[df['MAD']<value]
+    
     def odf(self, df, phase=1, crystal_symmetry='D2', random_val=True, miller=[1, 0, 0], hemisphere = 'both', 
             axes_labels=["Xs", "Ys"], alpha = 0.01, figure = None, vector_labels = None, reproject=False, show_hemisphere_label = None,
             grid = None, grid_resolution = None, return_figure = None):
