@@ -34,6 +34,7 @@ setup(
         'scikit-learn',
         'plotly',
         'orix',
+        'sphinx_rtd_theme',
     ],
     keywords=['python', 'seismic', 'seismic anisotropy', 'EBSD', 'Texture', "Crystallography"],
     package_data={
