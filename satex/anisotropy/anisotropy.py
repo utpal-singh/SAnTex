@@ -179,10 +179,10 @@ class Anisotropy:
 
 
 
-    def plot(self, colormap="RdBu_r"):
+    def plot(self, colormap="RdBu_r", step = 180):
         try:
             fig, axs = plt.subplots(2, 3, figsize=(15, 10))
-            step = math.pi / 180
+            step = math.pi / step
 
             # texts for each subplot
             texts = ['Ratio of VP to VS1', 'Velocity of P-waves (VP)', 'Velocity of S1-waves (VS1)', 
