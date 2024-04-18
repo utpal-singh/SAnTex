@@ -17,6 +17,12 @@ You can install SAnTeX using pip:
 
 ```bash
 git clone https://github.com/utpal-singh/SAnTex.git
-cd sage
+cd santex
 pip install .
+
+
+or
+
+```bash
+pip install santex
 
