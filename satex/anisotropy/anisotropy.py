@@ -179,7 +179,10 @@ class Anisotropy:
 
 
 
-    def plot(self, colormap="RdBu_r", step = 180):
+    def plot(self, colormap="RdBu_r", step = 180, savefig = False, figname = None, dpi = 300):
+        """
+        figname: string
+        """
         try:
             fig, axs = plt.subplots(2, 3, figsize=(15, 10))
             step = math.pi / step
@@ -246,8 +249,9 @@ class Anisotropy:
 
             plt.tight_layout()
             plt.show()
-        except Exception as e:
-            print(f"An error occurred: {e}")
+
+            if savefig:
+                plt.savefig(f"{figname}", dpi = dpi)
 
 
     def plotly(self):
