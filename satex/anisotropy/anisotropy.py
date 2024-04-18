@@ -90,11 +90,19 @@ class Anisotropy:
         vp, vs1, vs2 = self.phase_velocity()
         return vp, vs1, vs2
 
-    def anisotropy_values(self, stiffness_matrix = None, density = None, return_values=None):
+    def anisotropy_values(self, stiffness_matrix = None, density = None, method = None, return_values=None):
         """
         Return values can ve maxvp, minv, maxvs1, minvs1, maxvs2, minvs2
         
         """
+
+        if method == "array":
+            anis_mat = []
+            for i in stiffness_matrix:
+                anis = Anisotropy(stiffness_matrix[i], density[i])
+                anis_mat.append(self.anisotropy_values(anis))
+                self.anisotropy_values(anis)
+            return anis_mat
 
         vp, vs1, vs2 = self.velocities()
         maxvp = max(vp)
