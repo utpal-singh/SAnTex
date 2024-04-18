@@ -4,6 +4,19 @@ import pandas as pd
 
 def calc_melt_density(weight_per, pressure, temperature):
     """
+    Calculates the density and component density of a melt based on its composition.
+
+    Parameters:
+        weight_per (list or dict): List or dictionary representing the weight percentage of various oxides in the melt. 
+                                   If a dictionary is provided, it should have oxide names as keys and corresponding weight percentages as values.
+        pressure (float): Pressure of the melt in bars.
+        temperature (float): Temperature of the melt in Kelvin.
+
+    Returns:
+        density (float): Density of the melt.
+        component_density (array): Component-wise density of the melt.
+
+    Example Usage: 
     oxide = ['sio2', 'tio2', 'al2o3', 'fe2o3', 'feo', 'mgo', 'cao', 'na2o', 'k2o', 'h2o']
     weight_per = [40, 1.84, 13.7, 2.7, 9.57, 6.67, 11.5, 2.68, 0.25, 10] or weight_per can be a dictionary like {'sio2': 40, 'tio2': 1.84, 'feo': 9.57, 'mgo': 6.67, 'cao': 11.5, 'na2o': 2.68, 'k2o': 0.25, 'h2o': 10}
     """
@@ -60,10 +73,16 @@ def calc_melt_density(weight_per, pressure, temperature):
 
 def calc_melt_density_from_excel(input_file, output_file):
     """
-    Sample excel file
-    Sample Name	Pressure (bars)	Temperature (K)	    SiO2	TiO2	Al2O3	Fe2O3	FeO	    MgO	    CaO	    Na2O	K2O	    H2O
-    sample_wir_01	500	            1273	        45.5	2.1	    15.8	3.4	    8.2	    4.9	    10.2	3.3	    0.6	    5.5
-    sample_wir_02	500	            1273	        49.7	1.9	    14.3	2.8	7   .1	    5.6	    9.8	    4.1	    0.7	    4.0
+    Calculates melt densities for samples listed in an input Excel file and saves the results to an output Excel file.
+
+    Parameters:
+        input_file (str): Path to the input Excel file containing sample data.
+        output_file (str): Path to save the output Excel file with calculated melt densities.
+
+    Sample excel file:
+        Sample Name	Pressure (bars)	Temperature (K)	    SiO2	TiO2	Al2O3	Fe2O3	FeO	    MgO	    CaO	    Na2O	K2O	    H2O
+        sample_wir_01	500	            1273	        45.5	2.1	    15.8	3.4	    8.2	    4.9	    10.2	3.3	    0.6	    5.5
+        sample_wir_02	500	            1273	        49.7	1.9	    14.3	2.8	7   .1	    5.6	    9.8	    4.1	    0.7	    4.0
 
     """
     df = pd.read_excel(input_file)
@@ -90,7 +109,26 @@ def calc_melt_density_from_excel(input_file, output_file):
 
 
 def modalRock(rock, fraction, pressure, temperature, melt=0, weight_per = []):
-    # Rock is an array of minerals and fraction is another array corresponding to the particular phase. eg. rock = ["Forsterite", "Diopside", "Enstatite"], fraction = [0.2, 0.5, 0.3]
+
+    """
+    Calculates the average elastic constants and density of a rock mixture.
+
+    Parameters:
+        rock (list): An array of mineral names constituting the rock mixture.
+        fraction (list): An array corresponding to the fractional composition of each mineral in the rock.
+        pressure (float): Pressure of the rock mixture in GPa.
+        temperature (float): Temperature of the rock mixture in Kelvin.
+        melt (float, optional): Fraction of melt in the rock mixture. Set to a non-zero value if there is a melt component. Default is 0.
+        weight_per (list, optional): Weight percentage of oxides in the melt component, required if `melt` is non-zero. Default is [].
+
+    Returns:
+        cij_average (array): Average elastic constants of the rock mixture.
+        rho_average (float): Average density of the rock mixture.
+
+    Example Usage:
+        Rock is an array of minerals and fraction is another array corresponding to the particular phase. 
+        eg. rock = ["Forsterite", "Diopside", "Enstatite"], fraction = [0.2, 0.5, 0.3]
+    """
     if melt:
         density, comp_density = calc_melt_density(weight_per, pressure*10000, temperature)
         voigt_melt = np.array([[16.1,   15.967,  15.967,   0.,      0,   0.   ],

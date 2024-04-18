@@ -33,6 +33,9 @@ class EBSD:
 
         Parameters:
             filename (str): The filename of the EBSD data file.
+
+        Raises:
+            FileNotFoundError: If the specified file does not exist.
         """
         self._filename = filename
         if not os.path.isfile(self._filename):
@@ -113,11 +116,19 @@ class EBSD:
 
 
     def get_index_of_phases(self, phases_list):
+        """
+        Get the index of phases based on their names.
+
+        Parameters:
+            phases_list (list): A list of phase names.
+
+        Returns:
+            list: A list containing the indexes of the specified phases.
+        """
         phases = self.phases()
         phases_data = self.phases_data
 
         try:
-            phases_list = ['Forsterite', 'Diopside']  
             phases_list = [phase.lower() for phase in phases_list]
 
             phase_indexes = [phase[0] for phase in phases_data if phase[1].lower() in phases_list]

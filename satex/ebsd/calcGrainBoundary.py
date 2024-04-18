@@ -5,6 +5,14 @@ from joblib import Parallel, delayed
 def euler_to_quaternion(phi, theta, psi):
     """
     Convert Euler angles (in radians) to a quaternion.
+
+    Parameters:
+        phi (float): Euler angle phi in radians.
+        theta (float): Euler angle theta in radians.
+        psi (float): Euler angle psi in radians.
+
+    Returns:
+        np.ndarray: A quaternion representing the input Euler angles.    
     """
     c1 = np.cos(phi / 2)
     s1 = np.sin(phi / 2)
@@ -23,6 +31,13 @@ def euler_to_quaternion(phi, theta, psi):
 def quaternion_to_angle(q1, q2):
     """
     Calculate the misorientation angle between two quaternions.
+
+    Parameters:
+        q1 (np.ndarray): First quaternion.
+        q2 (np.ndarray): Second quaternion.
+
+    Returns:
+        float: The misorientation angle between the two quaternions in degrees.
     """
     dot_product = np.dot(q1, q2)
     angle_radians = 2 * np.arccos(np.abs(dot_product))
@@ -31,12 +46,29 @@ def quaternion_to_angle(q1, q2):
 def misorientation_angle(euler1, euler2):
     """
     Calculate the misorientation angle between two sets of Euler angles.
+
+    Parameters:
+        euler1 (list or np.ndarray): First set of Euler angles in radians.
+        euler2 (list or np.ndarray): Second set of Euler angles in radians.
+
+    Returns:
+        float: The misorientation angle between the two sets of Euler angles in degrees.    
     """
     q1 = euler_to_quaternion(*np.radians(euler1))
     q2 = euler_to_quaternion(*np.radians(euler2))
     return quaternion_to_angle(q1, q2)
 
 def assign_to_grains_parallel(df, threshold):
+    """
+        Assign grains to rows in a DataFrame based on misorientation angle threshold.
+
+    Parameters:
+        df (pd.DataFrame): Input DataFrame containing Euler angles for each row.
+        threshold (float): Misorientation angle threshold in degrees.
+
+    Returns:
+        dict: A dictionary mapping row indices to assigned grain indices.
+    """
     grains = []
     grain_indices = {}
 

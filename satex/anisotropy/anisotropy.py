@@ -17,17 +17,72 @@ from scipy.interpolate import griddata
 import math
 
 class Anisotropy:
+    """
+    Anisotropy class for representing anisotropic material properties.
+
+    Attributes:
+        cijkl (numpy.ndarray or None): stiffness tensor in voigt notation.
+            It is converted from the input stiffness matrix using voigt_to_tensor method.
+            If stiffness_matrix is None, cijkl remains None. Units can be SI or CGS but should remain consistent
+            between stiffness matrix and density
+        rho (float or None): Density of the material.
+            If density is None, rho remains None.
+
+    Methods:
+        __init__(stiffness_matrix, density):
+            Initializes the Anisotropy object with the given stiffness_matrix and density.
+            If either stiffness_matrix or density is None, cijkl and rho remain None.
+
+    Example Usage:
+        stiffness_matrix = np.array([[198.96, 73.595, 68.185, 0., 9.735, 0.],
+                                [73.595, 155.94, 62.23, 0., 6.295, 0.],
+                                [68.185, 62.23, 225.99, 0., 33.85, 0.],
+                                [0., 0., 0., 65.66, 0., 6.415],
+                                [9.735, 6.295, 33.85, 0., 60.23, 0.],
+                                [0., 0., 0., 6.415, 0., 65.18]]) * 10**9
+        density = 3.5 
+        anisotropy = Anisotropy(stiffness_matrix, density)
+    """
+    
     def __init__(self, stiffness_matrix, density):
+        """
+        Initializes an Anisotropy object with the given stiffness_matrix and density.
+
+        Parameters:
+            stiffness_matrix (list of lists or numpy.ndarray): The 6x6 stiffness matrix representing
+                the material's anisotropic properties in Voigt notation.
+            density (float): The density of the material.
+
+        Raises:
+            TypeError: If stiffness_matrix is not a 6x6 list or numpy.ndarray.
+
+        """
+        self.cijkl = None
+        self.rho = None
+
         if stiffness_matrix is not None and density is not None:
             tensor_object = Tensor()
             self.cijkl = tensor_object.voigt_to_tensor(stiffness_matrix)
             self.rho = density
-        else:
-            tensor_object = Tensor()
-            self.cijkl = None
-            self.rho = None
+
 
     def christoffel_tensor(self, n):
+        """
+        Calculates the Christoffel tensor given a direction vector n.
+
+        Parameters:
+            n (numpy.ndarray): The direction vector for which the Christoffel tensor is calculated.
+
+        Returns:
+            numpy.ndarray: The Christoffel tensor Tik for the given direction vector n.
+
+        Raises:
+            ValueError: If an error occurs during the calculation.
+
+        Example direction:
+            n = np.array([1, 0, 0])
+        
+        """
         try:
             tik = np.zeros((3, 3))
 
@@ -40,6 +95,18 @@ class Anisotropy:
             raise ValueError("Error in calculating the Christoffel tensor:", e)
 
     def wave_property(self, tik):
+        """
+        Calculates the wave properties (wave moduli and polarization directions) given the Christoffel tensor Tik.
+
+        Parameters:
+            tik (numpy.ndarray): The Christoffel tensor Tik for which wave properties are calculated.
+
+        Returns:
+            tuple: A tuple containing the wave moduli and polarization directions.
+
+        Raises:
+            ValueError: If an error occurs during the calculation.
+        """
         try:
             eigenvalues, eigenvectors = np.linalg.eig(tik)
             indices = np.argsort(eigenvalues)[::-1]
@@ -52,6 +119,16 @@ class Anisotropy:
             raise ValueError("Error in calculating wave properties:", e)
 
     def phase_velocity(self):
+        """
+        Calculates the phase velocities (P-wave velocity, S1-wave velocity, and S2-wave velocity) for different
+        directions using the Christoffel tensor and wave properties.
+
+        Returns:
+            tuple: A tuple containing the phase velocities (vp for P-wave, vs1 for S1-wave, and vs2 for S2-wave).
+
+        Raises:
+            ValueError: If an error occurs during the calculation.    
+        """
         try:
             vp = []
             vs1 = []
@@ -92,7 +169,24 @@ class Anisotropy:
 
     def anisotropy_values(self, stiffness_matrix = None, density = None, method = None, return_values=None):
         """
-        Return values can ve maxvp, minv, maxvs1, minvs1, maxvs2, minvs2
+        Calculates various anisotropy values based on the velocities calculated from the given stiffness matrix and density.
+
+        Parameters:
+            stiffness_matrix (list or None): The stiffness matrix representing the material's anisotropic properties.
+            density (float or None): The density of the material.
+            method (str or None): The method to use for calculating anisotropy values. Options: 'array'.
+            return_values (str or None): The specific anisotropy value to return. Options: 'maxvp', 'minvp', 'maxvs1',
+                'minvs1', 'maxvs2', 'minvs2', or None (default) to print all values.
+
+        Returns:
+            float or None: A dictionary containing the calculated anisotropy values if return_values is None,
+                or a single anisotropy value if return_values is specified.
+
+        Raises:
+            ValueError: If an error occurs during the calculation.
+
+        Notes:
+            - If method='array', an array of Anisotropy objects can be provided for batch calculation.
         
         """
 
@@ -171,9 +265,27 @@ class Anisotropy:
         
     def plot_velocities(self, pressure_range, temperature_range, return_type, is_ebsd = False, phase = None, grid = [5, 5], filename = None, *args):
         """
-        Return values can ve maxvp, minv, maxvs1, minvs1, maxvs2, minvs2 
-        args can be [0, 1, 2, 3]
-        give filename is is_ebsd is True
+        Plots velocities based on specified ranges and return types.
+
+            Parameters:
+                pressure_range (tuple): The range of pressures for which velocities will be plotted.
+                temperature_range (tuple): The range of temperatures for which velocities will be plotted.
+                return_type (str): The type of velocity to plot. Options: 'maxvp', 'minvp', 'maxvs1', 'minvs1', 'maxvs2', 'minvs2'.
+                is_ebsd (bool): Whether the data comes from electron backscatter diffraction (EBSD). Default is False.
+                phase (str or None): The phase of the material. Only required if is_ebsd is True.
+                grid (list): The grid dimensions for the plot. Default is [5, 5].
+                filename (str or None): The filename to save the plot. Required if is_ebsd is True.
+                *args: can be [01, 2, 3]
+
+            Raises:
+                ValueError: If required parameters are not provided or if an error occurs during plotting.
+
+            Notes:
+                - If is_ebsd is True, phase and filename must be provided.
+                - The plot type and appearance can be customized using *args.
+
+            Example Usage:
+                anisotropy.plot_velocities((0, 100), (500, 1000), 'maxvp', is_ebsd=True, phase='phase1', filename='velocity_plot.png', 'ro-')
         """
         plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd = False, phase = phase, grid = [5, 5], filename = None, *args)
 
@@ -181,7 +293,24 @@ class Anisotropy:
 
     def plot(self, colormap="RdBu_r", step = 180, savefig = False, figname = None, dpi = 300):
         """
-        figname: string
+        Plots various anisotropic maps based on the Christoffel tensor.
+
+        Parameters:
+            colormap (str): The colormap to use for plotting. Default is "RdBu_r".
+            step (int): The step size for theta and phi values. Default is 180.
+            savefig (bool): Whether to save the plot as an image. Default is False.
+            figname (str or None): The filename to save the plot. Required if savefig is True.
+            dpi (int): The resolution of the saved image. Default is 300.
+
+        Raises:
+            ValueError: If an error occurs during the plotting process.
+
+        Notes:
+            - This method generates a 2x3 grid of subplots, each representing different anisotropic maps based on the Christoffel tensor.
+            - The colormap, step size, and other parameters can be customized.
+
+        Example Usage:
+            anisotropy.plot(colormap="viridis", step=120, savefig=True, figname="anisotropy_plot.png", dpi=600)
         """
         try:
             fig, axs = plt.subplots(2, 3, figsize=(15, 10))

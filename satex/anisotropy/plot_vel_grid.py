@@ -5,7 +5,27 @@ import matplotlib.pyplot as plt
 def plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd = False, phase = None, grid = [5, 5], filename = None, *args):
     from satex import Anisotropy
     """
-    Return values can ve maxvp, minv, maxvs1, minvs1, maxvs2, minvs2 
+    Generates a grid of velocity values based on specified pressure and temperature ranges.
+
+    Parameters:
+        pressure_range (tuple): A tuple containing the minimum and maximum pressure values (in GPa).
+        temperature_range (tuple): A tuple containing the minimum and maximum temperature values (in Kelvin).
+        return_type (str): The type of velocity values to return. Allowed values are 'maxvp', 'minv', 'maxvs1', 'minvs1', 'maxvs2', 'minvs2'.
+        is_ebsd (bool, optional): Indicates whether EBSD data is used. Default is False.
+        phase (str, optional): The phase for which velocity values are calculated. Required if is_ebsd is False.
+        grid (list, optional): A list specifying the grid size as [rows, columns]. Default is [5, 5].
+        filename (str, optional): The filename of the EBSD data file. Required if is_ebsd is True.
+        *args: Additional phase indices if EBSD data is used.
+
+    Returns:
+        np.ndarray: A grid of velocity values corresponding to the specified pressure and temperature ranges.
+
+    Notes:
+        - If is_ebsd is False, phase must be provided to calculate velocity values for the specified phase.
+        - If is_ebsd is True, filename must be provided along with additional phase indices (*args) to calculate velocity values from EBSD data.
+        - The return_type parameter determines the type of velocity values returned, such as maximum velocity (maxvp), minimum velocity (minv), etc.
+    
+    Usage:
     args can be [0, 1, 2, 3]
     give filename is is_ebsd is True
     """
