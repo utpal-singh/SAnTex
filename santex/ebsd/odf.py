@@ -212,7 +212,8 @@ def odf(df, phase=1, crystal_symmetry='D2', random_val=True, miller=[1, 0, 0], h
     orientations = orientations.reshape(*orientations.shape, 1)
     r_ = ~orientations * uvw_
 
-    r_.scatter(hemisphere=hemisphere, axes_labels=axes_labels, alpha = alpha)
+    r_.scatter(hemisphere=hemisphere, axes_labels=axes_labels, alpha = alpha, figure = figure, vector_labels = vector_labels, reproject=reproject, show_hemisphere_label = show_hemisphere_label,
+        grid = grid, grid_resolution = grid_resolution, return_figure = return_figure)
     return r_
 
 def ipf(df, phase=1, vector_sample=[0, 0, 1], random_val=True,
@@ -392,9 +393,9 @@ def ipf(df, phase=1, vector_sample=[0, 0, 1], random_val=True,
         symmetry_ =symmetry.Oh
 
     orientations = orientations.reshape(*orientations.shape, 1)
-    print(orientations)
+    # print(orientations)
     vec_sample = Vector3d(vector_sample)
-    print(vec_sample)
+    # print(vec_sample)
     vec_crystal = orientations * vec_sample
     subplot_kw = dict(projection=projection, symmetry=symmetry_)
     fig = plt.figure(figsize=(9, 8))
@@ -409,8 +410,9 @@ def ipf(df, phase=1, vector_sample=[0, 0, 1], random_val=True,
 
 
 def pdf(df, phase=1, crystal_symmetry='D2', random_val=True, miller=[0, 1, 0], hemisphere = 'both', sigma = 4,
-        axes_labels=["Xs", "Ys"], alpha = 0.01, figure = None, vector_labels = None, reproject=False, show_hemisphere_label = None,
-        grid = None, grid_resolution = None, return_figure = None):
+        axes_labels=["Xs", "Ys"], figure = None, show_hemisphere_label = None,
+        grid = None, grid_resolution = None, return_figure = None, log = False, colorbar=True, weights = None):
+    
     """
         Calculate the Orientation Distribution Function (ODF) for a given EBSD dataset and optionally visualize it.
 
@@ -425,14 +427,8 @@ def pdf(df, phase=1, crystal_symmetry='D2', random_val=True, miller=[0, 1, 0], h
             If True, randomly generate orientation values for incomplete data (default is True).
         - miller: list of int, optional
             The Miller indices representing the crystallographic plane to calculate ODF for (default is [1, 0, 0]).
-        - projection: str, optional
-            The type of projection to use for visualization (default is 'stereographic').
-        - figure: matplotlib Figure or None, optional
-            If provided, the ODF plot will be added to this Figure; otherwise, a new Figure will be created.
         - axes_labels: list of str or None, optional
             Labels for the X and Y axes of the ODF plot (default is None).
-        - vector_labels: list of str or None, optional
-            Labels for the vectors in the ODF plot (default is None, which results in auto-generated labels).
         - hemisphere: str, upper or lower or both, optional
             Specify the hemisphere for ODF calculation and visualization (default is None).
         - reproject: bool, optional
@@ -609,7 +605,9 @@ def pdf(df, phase=1, crystal_symmetry='D2', random_val=True, miller=[0, 1, 0], h
     uvw_ = uvw_.reshape(1, uvw_.size)
     orientations = orientations.reshape(*orientations.shape, 1)
     r_ = ~orientations * uvw_
-    r_.pole_density_function(sigma=sigma, hemisphere=hemisphere)
+    r_.pole_density_function(sigma=sigma, hemisphere=hemisphere, axes_labels=axes_labels, figure = figure, show_hemisphere_label = show_hemisphere_label,
+        grid = grid, grid_resolution = grid_resolution, return_figure = return_figure, log = log, colorbar=colorbar, weights = weights)
+
 
 def calculate_odf(euler_angles):
     """

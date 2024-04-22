@@ -583,9 +583,88 @@ class EBSD:
             axes_labels=axes_labels, alpha = alpha, figure = figure, vector_labels = vector_labels, reproject=reproject, show_hemisphere_label = show_hemisphere_label,
             grid = grid, grid_resolution = grid_resolution, return_figure = return_figure)
 
-    def pdf(self, ebsd_df):
-        pdf(df = ebsd_df)
+    def pdf(self, df, phase=1, crystal_symmetry='D2', random_val=True, miller=[0, 1, 0], hemisphere = 'both', sigma = 4,
+        axes_labels=["Xs", "Ys"], figure = None, show_hemisphere_label = None,
+        grid = None, grid_resolution = None, return_figure = None, log = False, colorbar=True, weights = None):
 
-    def ipf(self, ebsd_df):
-        self.pdf(ebsd_df=ebsd_df)
-        ipf(df = ebsd_df)
+        """
+            Calculate the Orientation Distribution Function (ODF) for a given EBSD dataset and optionally visualize it.
+
+            Parameters:
+            - df: pandas DataFrame
+                The DataFrame containing EBSD (Electron Backscatter Diffraction) data.
+            - phase: int, optional
+                The phase number for which ODF needs to be calculated (default is 1).
+            - crystal_symmetry: str, optional
+                The crystal symmetry of the material, e.g., 'D2' for cubic symmetry (default is 'D2').
+            - random_val: bool, optional
+                If True, randomly generate orientation values for incomplete data (default is True).
+            - miller: list of int, optional
+                The Miller indices representing the crystallographic plane to calculate ODF for (default is [1, 0, 0]).
+            - projection: str, optional
+                The type of projection to use for visualization (default is 'stereographic').
+            - figure: matplotlib Figure or None, optional
+                If provided, the ODF plot will be added to this Figure; otherwise, a new Figure will be created.
+            - axes_labels: list of str or None, optional
+                Labels for the X and Y axes of the ODF plot (default is None).
+            - vector_labels: list of str or None, optional
+                Labels for the vectors in the ODF plot (default is None, which results in auto-generated labels).
+            - hemisphere: str, upper or lower or both, optional
+                Specify the hemisphere for ODF calculation and visualization (default is None).
+            - reproject: bool, optional
+                If True, reproject data into a specified coordinate system (default is False).
+            - show_hemisphere_label: bool or None, optional
+                Specify whether to show the hemisphere label on the plot (default is None).
+            - grid: bool or None, optional
+                Specify whether to display a grid on the ODF plot (default is None).
+            - grid_resolution: tuple of float or None, optional
+                Resolution of the grid (default is None).
+            - figure_kwargs: dict or None, optional
+                Additional keyword arguments for configuring the matplotlib Figure (default is None).
+            - reproject_scatter_kwargs: dict or None, optional
+                Additional keyword arguments for configuring scatter plot during reprojection (default is None).
+            - text_kwargs: dict or None, optional
+                Additional keyword arguments for configuring text elements in the plot (default is None).
+            - return_figure: bool, optional
+                If True, return the matplotlib Figure object along with the ODF data (default is False).
+
+            Returns:
+            - odf_result: pandas DataFrame
+                DataFrame containing the calculated Orientation Distribution Function (ODF) values.
+            - figure: matplotlib Figure or None
+                If return_figure is True, the Figure object containing the ODF plot; otherwise, None.
+            """
+
+        pdf(df = df, phase=phase, crystal_symmetry=crystal_symmetry, random_val=random_val, miller=miller, sigma=sigma, hemisphere=hemisphere, axes_labels=axes_labels, figure = figure, show_hemisphere_label = show_hemisphere_label,
+        grid = grid, grid_resolution = grid_resolution, return_figure = return_figure, log = log, colorbar=colorbar, weights = weights)
+
+    def ipf(self, df, phase=1, vector_sample=[0, 0, 1], random_val=True,
+            vector_title='Z', projection='ipf', crystal_symmetry='D2'):
+        
+        """
+            Generate and visualize an Inverse Pole Figure (IPF) from EBSD data.
+
+            Parameters:
+            - df: pandas DataFrame
+                The DataFrame containing EBSD (Electron Backscatter Diffraction) data.
+            - phase: int, optional
+                The phase number for which IPF needs to be generated (default is 1).
+            - vector_sample: list of int, optional
+                The sample vector used for IPF generation (default is [0, 0, 1]).
+            - random_val: bool, optional
+                If True, randomly select orientation values for IPF generation (default is True).
+            - vector_title: str, optional
+                The title for the vector used in IPF visualization (default is 'Z').
+            - projection: str, optional
+                The type of projection for IPF visualization (default is 'ipf').
+            - crystal_symmetry: str, optional
+                The crystal symmetry of the material (default is 'D2').
+
+            Returns:
+            - fig: matplotlib Figure
+                The generated matplotlib Figure object containing the IPF visualization.
+        """
+
+        self.pdf(df = df, phase=phase, random_val=random_val, crystal_symmetry=crystal_symmetry)
+        ipf(df = df, phase=phase, vector_sample=vector_sample, random_val=random_val,
+            vector_title=vector_title, projection=projection, crystal_symmetry=crystal_symmetry)
