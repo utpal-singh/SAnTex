@@ -4,8 +4,6 @@ import numpy as np
 from tabulate import tabulate
 from ..isotropy import Isotropy
 
-# database_path = os.path.join(os.path.dirname(__file__), "materials_database.csv")
-
 class Material:
     def __init__(self, database_path=os.path.join(os.path.dirname(__file__), 'data/materials_database.json'), database_path2=os.path.join(os.path.dirname(__file__), 'data/derivatives_P.json'), database_path3=os.path.join(os.path.dirname(__file__),'data/derivatives_T.json')):
         self.materials_data = self.load_materials_data(database_path)

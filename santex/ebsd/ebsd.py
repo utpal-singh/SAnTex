@@ -64,7 +64,8 @@ class EBSD:
         return euler_angles
         
 
-    def plot(self, data=None, rotation_angle=0, inside_plane=True, mirror=False):
+    def plot(self, data=None, rotation_angle=0, inside_plane=True, mirror=False, save_image=False, image_filename=None, 
+             dpi=300, cmap='viridis', phase_colors=None, legend_location = "upper right"):
         """
         Plots the EBSD map with colors based on phase. Allows for rotation and optional mirroring of the data.
 
@@ -73,6 +74,12 @@ class EBSD:
             rotation_angle (int, optional): Angle by which to rotate the EBSD data (in degrees). Accepts 0, 90, 180, 270.
             inside_plane (bool, optional): If True, rotates the EBSD data inside the plane. If False, rotates outside the plane. Default is True.
             mirror (bool, optional): If True, mirrors the EBSD data horizontally before rotating. Default is False.
+            save_image (bool, optional): If True, saves the plot as an image. Default is False.
+            image_filename (str, optional): Filename to use when saving the image. Required if save_image is True.
+            dpi (int, optional): Dots per inch for the saved image. Default is 300.
+            cmap (str, optional): Colormap to use for plotting. Default is 'viridis'.
+            phase_colors (dict, optional): Custom colors for each phase. Should be in the format {phase_number: color}.
+            legend_location (str, optional): Location of the legend. Options are 'upper right', 'upper left', 'lower right', 'lower left'. Default is 'upper right'.
 
         Returns:
             None
@@ -96,21 +103,38 @@ class EBSD:
             data['X'], data['Y'] = xy_rotated[:, 0], xy_rotated[:, 1]
         
         # Filter data based on phase
-        df_new = data[data['Phase'].isin([0, 1, 2, 3])]
+        # df_new = data[data['Phase'].isin([0, 1, 2, 3])]
+        df_new = data
         
         # Define custom colormap for phases
-        phases_colors = {0: 'black', 1: 'green', 2: 'yellow', 3:'blue'}
-        
+        if phase_colors is None:
+            phase_colors = {0: 'black', 1: 'green', 2: 'blue', 3: 'red'}  # Default colors if not specified
+
+        phase_labels = [f'Phase {phase}' for phase in sorted(phase_colors.keys())]
+        phase_color_list = [phase_colors[phase] for phase in df_new['Phase']]
+        # print(phase_color_list)
+
         # Plot
         fig, ax = plt.subplots(figsize=(16, 9))  # Adjust the figsize as per your requirement
-        ax.scatter(df_new['X'], df_new['Y'], c=df_new['Phase'].map(phases_colors), s=1)  # Set s=1 for one point per pixel
+        scatter = ax.scatter(df_new['X'], df_new['Y'], c=df_new['Phase'], cmap=cmap, s=1)
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_title('EBSD Map with Color Based on Phase')
         
         ax.set_aspect('equal')  # Set aspect ratio to 'equal' to ensure equal scaling along both axes
 
+        # Create legend for phase colors
+        handles, _ = scatter.legend_elements()
+        legend = ax.legend(handles, phase_labels, title="Phases", loc=legend_location)
+        ax.add_artist(legend)
+
+        if save_image and image_filename:
+            plt.savefig(image_filename, dpi=dpi)  # Save the plot as an image with user-specified filename and DPI
+
         plt.show()
+
+
+
 
 
 

@@ -47,10 +47,12 @@ def plot_data_with_interpolation_in_defined_box(lon_points, lat_points, values, 
     plt.title("Interpolated Data Map")
     plt.show()
 
-lon_points = np.array([138.58, 138.60, 138.62, 138.64, 138.66, 138.68, 138.70, 138.72, 138.74, 138.76])
-lat_points = np.array([-34.92, -34.93, -34.94, -34.95, -34.96, -34.97, -34.98, -34.99, -35.00, -35.01])
-values = np.random.randint(100, 500, size=10)  # Random sample values for demonstration
 
-interp_box = (138.5, -35.0, 139.0, -34.5)  # Defined as (left_lon, bottom_lat, right_lon, top_lat)
+if __name__ == "__main__":
+    lon_points = np.array([138.58, 138.60, 138.62, 138.64, 138.66, 138.68, 138.70, 138.72, 138.74, 138.76])
+    lat_points = np.array([-34.92, -34.93, -34.94, -34.95, -34.96, -34.97, -34.98, -34.99, -35.00, -35.01])
+    values = np.random.randint(100, 500, size=10)  # Random sample values for demonstration
+
+    interp_box = (138.5, -35.0, 139.0, -34.5)  # Defined as (left_lon, bottom_lat, right_lon, top_lat)
 
 
