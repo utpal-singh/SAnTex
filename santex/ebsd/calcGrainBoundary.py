@@ -98,24 +98,3 @@ def assign_to_grains_parallel(df, threshold):
 
     return grain_indices
 
-# # Sample phase names
-# phase_names = ['nothn', 'Forsterite', 'Enstatite Opx AV77', 'Diopside CaMgSi2O6',  
-#                'Anorthite', 'Hornblende', 'Chromite', 'Pyrope']
-
-# # Assume df contains the dataframe with columns Phase, Euler1, Euler2, Euler3
-# # Replace df with your actual dataframe
-
-# # Assign rows to grains in parallel
-# threshold = 20 # Misorientation threshold
-# grain_indices = assign_to_grains_parallel(df[['Euler1', 'Euler2', 'Euler3']], threshold)
-
-# # Add grain indices to the dataframe
-# df['Grain'] = pd.Series(grain_indices)
-
-# # Display grains with their respective phase names
-# for grain_idx, group in df.groupby('Grain'):
-#     phase_counts = group['Phase'].value_counts()
-#     dominant_phase = phase_counts.idxmax()
-#     print(f"Grain {grain_idx}: Dominant Phase - {phase_names[dominant_phase]}, Size - {len(group)}")
-
-# # Now you have grains organized based on similar Euler angles with a maximum misorientation of 10 degrees, using parallel processing with progress indication.

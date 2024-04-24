@@ -2,9 +2,18 @@ import numpy as np
 import math
 
 import matplotlib.pyplot as plt
-from mpl_toolkits import mplot3d
 
 def christoffel_tensor(cijkl, n):
+    """
+    Calculate the Christoffel tensor for a given material and propagation direction vector.
+
+    Parameters:
+    - cijkl (array): The fourth-rank stiffness tensor for the material.
+    - n (list): The propagation direction vector, eg; [0, 1, 0].
+
+    Returns:
+    - array-like: The Christoffel tensor.
+    """
     tik = np.zeros((3, 3))
 
     for i in range(3):
@@ -17,6 +26,15 @@ def christoffel_tensor(cijkl, n):
 
 
 def wave_property(tik):
+    """
+    Calculate wave properties (eigenvalues and eigenvectors) from the Christoffel tensor.
+
+    Parameters:
+    - tik (array): The Christoffel tensor.
+
+    Returns:
+    - tuple: Tuple containing wave moduli (eigenvalues) and polarization directions (eigenvectors).
+    """
     eigenvalues, eigenvectors = np.linalg.eig(tik)
     indices = np.argsort(eigenvalues)[::-1]
     wave_moduli = []
@@ -29,6 +47,16 @@ def wave_property(tik):
 
 
 def phase_velocity(cijkl, rho):
+    """
+    Calculate phase velocities for various propagation directions.
+
+    Parameters:
+    - cijkl (array): The fourth-rank stiffness tensor for the material.
+    - rho (float): Density of the material.
+
+    Returns:
+    - tuple: Tuples containing phase velocities for P-wave (vp), S-wave with higher velocity (vs1), and S-wave with lower velocity (vs2).
+    """
     vp = []
     vs1 = []
     vs2 = []
@@ -48,6 +76,16 @@ def phase_velocity(cijkl, rho):
 
 
 def plot_vp_2d(cijkl, rho):
+    """
+    Plot phase velocities in a 2D stereographic projection.
+
+    Parameters:
+    - cijkl (array): The fourth-rank stiffness tensor for the material.
+    - rho (float): Density of the material.
+
+    Returns:
+    - None
+    """
     fig = plt.figure()
     ax = fig.add_subplot(111)
     step = math.pi / 180

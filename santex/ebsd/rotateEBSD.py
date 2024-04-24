@@ -3,7 +3,6 @@ from scipy.spatial.transform import Rotation
 import numpy as np
 from scipy.spatial.transform import Rotation
 from joblib import Parallel, delayed
-import pandas as pd
 from tqdm import tqdm
 
 def bunge_euler_rotation(phi1, Phi, phi2, angles):

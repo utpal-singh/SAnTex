@@ -12,8 +12,24 @@ from vtk import (
 from .utils import christoffel_tensor, wave_property, tensor_to_voigt, voigt_to_tensor
 
 class Plotter:
+    """
+    A class for plotting seismic wave velocities in 3D using VTK.
+
+    Attributes:
+    - None
+    """
     @classmethod
     def plot_vs_splitting(cls, c, rho):
+        """
+        Plot the difference between S-wave velocities (vs1 - vs2) in 3D using VTK.
+
+        Parameters:
+        - c (array): The fourth-rank stiffness tensor in Voigt notation.
+        - rho (float): Density of the material.
+
+        Returns:
+        - None
+        """
         cijkl = voigt_to_tensor(c)
 
         theta = np.linspace(0, np.pi, 100)
@@ -79,6 +95,16 @@ class Plotter:
 
     @classmethod
     def plot_vp(cls, c, rho):
+        """
+        Plot the P-wave velocities (vp) in 3D using VTK.
+
+        Parameters:
+        - c (array): The fourth-rank stiffness tensor in Voigt notation.
+        - rho (float): Density of the material.
+
+        Returns:
+        - None
+        """
         cijkl = voigt_to_tensor(c)
 
         theta = np.linspace(0, np.pi, 100)
@@ -144,6 +170,16 @@ class Plotter:
 
     @classmethod
     def plot_vs1(cls, c, rho):
+        """
+        Plot the S-wave velocities with higher velocity (vs1) in 3D using VTK.
+
+        Parameters:
+        - c (array): The fourth-rank stiffness tensor in Voigt notation.
+        - rho (float): Density of the material.
+
+        Returns:
+        - None
+        """
         cijkl = voigt_to_tensor(c)
 
         theta = np.linspace(0, np.pi, 100)
@@ -208,6 +244,30 @@ class Plotter:
         interactor.Start()
     @classmethod
     def plot_vp(cls, c, rho):
+
+        """
+        Plot the P-wave velocities (vp) in 3D using VTK.
+
+        This method calculates and visualizes the P-wave velocities (vp) for a given fourth-rank stiffness tensor (c)
+        and material density (rho) using the Visualization Toolkit (VTK).
+
+        Parameters:
+        - c (array): The fourth-rank stiffness tensor in Voigt notation.
+        - rho (float): Density of the material.
+
+        Returns:
+        - None
+
+        Usage Example:
+        >>> c = np.array([[323.70, 66.40, 71.60, 0.000, 0.000, 0.000],
+        ...               [66.40, 197.60, 75.60, 0.000, 0.000, 0.000],
+        ...               [71.60, 75.60, 235.10, 0.000, 0.000, 0.000],
+        ...               [0.000, 0.000, 0.000, 64.62, 0.000, 0.000],
+        ...               [0.000, 0.000, 0.000, 0.000, 78.05, 0.000],
+        ...               [0.000, 0.000, 0.000, 0.000, 0.000, 79.04]]) * 1e9
+        >>> Plotter.plot_vp(c, 3310)
+        """
+
         cijkl = voigt_to_tensor(c)
 
         theta = np.linspace(0, np.pi, 100)
