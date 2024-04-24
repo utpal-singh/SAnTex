@@ -415,7 +415,7 @@ class EBSD:
         r = Rotation.from_euler('ZXZ', [phi, phi1, phi2], degrees=True)
         return r.as_quat()
     
-    def calcGrains(self, df, threshold = 10, phase_names, downsampling_factor=20):
+    def calcGrains(self, df, phase_names, threshold = 10, downsampling_factor=20):
         """
         Calculated the grains in the ebsd data
 
