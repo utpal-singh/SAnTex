@@ -1,9 +1,10 @@
 import numpy as np
-from santex import Material
 import matplotlib.pyplot as plt
 
 def plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd = False, phase = None, grid = [5, 5], filename = None, *args):
     from santex import Anisotropy
+    from santex import EBSD
+    from santex import Material
     """
     Generates a grid of velocity values based on specified pressure and temperature ranges.
 
@@ -34,10 +35,8 @@ def plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd =
         cij = []
         density = []
 
-
         pressure_grid = np.linspace(pressure_range[0], pressure_range[1], grid[0])
         temperature_grid = np.linspace(temperature_range[0], temperature_range[1], grid[1])
-        
         vp_matrix = np.zeros((grid[0], grid[1]))
         
         for i, p in enumerate(pressure_grid):
@@ -47,6 +46,16 @@ def plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd =
                 density_highpt = material.load_density(phase, p, t)
                 anisotropy = Anisotropy(cij_highpt, density_highpt)
                 vp_matrix[i, j] = anisotropy.anisotropy_values(return_values=return_type)
+        pressure_mesh, temperature_mesh = np.meshgrid(pressure_grid, temperature_grid)
+        plt.figure(figsize=(8, 6))
+        plt.pcolormesh(pressure_mesh, temperature_mesh, vp_matrix, shading='auto', cmap='viridis')
+        plt.colorbar(label=f'{return_type}')
+        plt.xlabel('Pressure')
+        plt.ylabel('Temperature')
+        plt.title(f'{return_type} vs. Pressure and Temperature')
+        # plt.grid(True)
+        plt.tight_layout()
+        plt.show()
 
         return vp_matrix
 
@@ -59,5 +68,7 @@ def plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd =
 
         average_tensor, average_density = ebsd.getAnisotropyForEBSD(cij, euler_angles, density)
         anis = Anisotropy(average_tensor*10**9, average_density)
+    
+
 
 
