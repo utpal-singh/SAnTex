@@ -325,6 +325,19 @@ class EBSD:
         return data
     
     def getAnisotropyForEBSD(self, cij, euler_angles, density, melt=0):
+        """
+        Calculates average density and tensor for EBSD data
+
+        Parameters:
+        cij: array, stiffness tensor of phase
+        euler_angles: list, euler angles of phases in list
+        density: float, density of phases
+        melt: float, fraction of melt available
+
+        Returns:
+        - average_tensor: array, average tensor calculated
+        - density: float, average density
+        """
         if melt:
             tensor = Tensor()
             tensor_list = []
@@ -351,7 +364,7 @@ class EBSD:
 
             tensor_sum = (1 - melt*0.01)*tensor_sum + melt*0.01*calcMelttensor
 
-            return tensor_sum, len_euler, density_averaged
+            return tensor_sum, density_averaged
 
         tensor = Tensor()
         tensor_list = []
@@ -402,13 +415,18 @@ class EBSD:
         r = Rotation.from_euler('ZXZ', [phi, phi1, phi2], degrees=True)
         return r.as_quat()
     
-    def calcGrains(self, df, threshold, phase_names, downsampling_factor=20):
+    def calcGrains(self, df, threshold = 10, phase_names, downsampling_factor=20):
         """
-        this is the df from df = ebsdfile.get_ebsd_data(), 
-        threshold will be the threshold angle in degrees, phase_name will be a 
-        list of phases present and that can be obtained from self.phases_names
-        by default threshold is set to 10 degrees, but can be modified as threshold = 20 and
-        so on and so forth
+        Calculated the grains in the ebsd data
+
+        Parameters:
+        - df: EBSD dataframe, this is the df we get from from df = ebsdfile.get_ebsd_data(), 
+        - threshold: float, threshold will be the threshold angle in degrees, threshold mean orientation angle, by default threshold is set to 10 degrees, but can be modified as threshold = 20 and so on and so forth
+        - phase_names: list, phase_name will be a list of phases present and that can be obtained from self.phases_names
+        - downsampling factor: int, specify downsampling factor for faster computation, default is 20
+
+        Returns:
+        - df: EBSD dataframe with grains calculated
         """
         if df is None:
             df = self.get_ebsd_data()
@@ -440,7 +458,14 @@ class EBSD:
     
     def filterByGrainSize(self, df, phases_names, min_grain_size = 100):
         """
-        df is the input from calcGrainsdf, with grain column appended
+        Filters ebsd by grain size
+
+        Parameters:
+        - df: EBSD dataframe, which is the input from calcGrainsdf, with grain column appended
+        - min_grain_size: int, desired minimum grain size, default is 100
+
+        Returns:
+        - df_filtered: Filtered EBSD dataframe
         """
 
         if df is None:
@@ -466,13 +491,21 @@ class EBSD:
 
         return df_filtered
     
-    def plotGrains(self, df):
-        fig = px.scatter(df, x='X', y='Y', color='Phase', color_continuous_scale='viridis')
+    def plotGrains(self, df, color_continuous_scale='viridis', save_name=None, dpi=None):
+        """
+        Create a 2D scatter plot with phase coloring.
 
-        # Customize marker size (2 pixel here)
+        Parameters:
+        - df (DataFrame): The EBSD DataFrame containing the data to plot.
+        - color_continuous_scale (str): The color scale to use for continuous colors, default is viridis.
+        - save_name (str): The name to use when saving the figure as a PNG file. If None, the figure will be displayed but not saved.
+        - dpi (int): The DPI (dots per inch) to use when saving the figure. If None, the default DPI will be used.
+
+        Returns:
+        - None
+        """
+        fig = px.scatter(df, x='X', y='Y', color='Phase', color_continuous_scale=color_continuous_scale)
         fig.update_traces(marker=dict(size=2))
-
-        # Customize the layout
         fig.update_layout(
             title="2D Scatter Plot with Phase",
             xaxis_title="X",
@@ -480,10 +513,31 @@ class EBSD:
             coloraxis_colorbar_title="Phase",
             showlegend=True
         )
-
-        fig.show()
+        if save_name:
+            if not save_name.endswith('.png'):
+                save_name += '.png'  # Ensure the file has a .png extension
+            if dpi:
+                fig.write_image(save_name, format='png', scale=dpi)
+            else:
+                fig.write_image(save_name, format='png')
+            print(f"Figure saved as {os.path.abspath(save_name)}")
+        else:
+            fig.show()
 
     def rotateEBSD(self, ebsd_df, angles, keepXY = True):
+
+        """
+        Rotate EBSD with a certain angles
+
+        Parameters:
+        - ebsd_df: ebsd pandas dataframe
+        - angles: angles to be rotated (phi1, phi2, phi3), eg: [20, 30, 40]
+        - keepXY: bool, Specify if you want to keep X and Y constant. Default is True
+
+        Returns:
+        - Rotated EBSD dataframe 
+        
+        """
 
         if keepXY == False:
             return apply_custom_rotation_to_dataframe_noxy(ebsd_df, angles)
@@ -492,6 +546,17 @@ class EBSD:
     
 
     def plot_rotate_ebsd(self, sample_ref = ["x2east", "zOutOfPlane"], ebsd_df = None, keepXY = False):
+        """
+        Plots the rotated ebsd and returns the rotated ebsd dataframe
+
+        Parameters:
+        - sample_ref: sample reference, eg: ["x2east", "zOutOfPlane"], ["x2west", "zOutOfPlane"], ["x2north", "zOutOfPlane"], ["x2south", "zOutOfPlane"], ["x2east", "zIntoPlane"], default is ["x2east", "zOutOfPlane"]
+        - ebsd_df: the ebsd pandas dataframe
+        - keepXY: bool, Specify if you want to keep X and Y constant. Default is False
+
+        Returns:
+        - rotated_ebsd_df : rotated ebsd dataframe
+        """
         if ebsd_df is None:
             ebsd_df = self.get_ebsd_data()
 
@@ -527,6 +592,16 @@ class EBSD:
         return rotated_ebsd_df
     
     def filterMAD(self, df, value=0.7):
+        """
+        Filters the ebsd dataframe with MAD greater than a certain threshold
+
+        Parameters:
+        - df: pandas EBSD dataframe
+        - value: value of the threshold for MAD (default is 0.7)
+
+        Returns:
+        - df: EBSD filtered dataframe
+        """
         return df[df['MAD']<value]
     
     def odf(self, df, phase=1, crystal_symmetry='D2', random_val=True, miller=[1, 0, 0], hemisphere = 'both', 
@@ -536,7 +611,7 @@ class EBSD:
             Calculate the Orientation Distribution Function (ODF) for a given EBSD dataset and optionally visualize it.
 
             Parameters:
-            - df: pandas DataFrame
+            - df: pandas EBSD DataFrame
                 The DataFrame containing EBSD (Electron Backscatter Diffraction) data.
             - phase: int, optional
                 The phase number for which ODF needs to be calculated (default is 1).

@@ -6,6 +6,17 @@ from ..isotropy import Isotropy
 
 class Material:
     def __init__(self, database_path=os.path.join(os.path.dirname(__file__), 'data/materials_database.json'), database_path2=os.path.join(os.path.dirname(__file__), 'data/derivatives_P.json'), database_path3=os.path.join(os.path.dirname(__file__),'data/derivatives_T.json')):
+        """
+        Initialize a Material object with data loaded from JSON files.
+
+        Parameters:
+        - database_path (str): The file path to the main materials database JSON file. Default is 'data/materials_database.json'.
+        - database_path2 (str): The file path to the pressure derivatives JSON file. Default is 'data/derivatives_P.json'.
+        - database_path3 (str): The file path to the temperature derivatives JSON file. Default is 'data/derivatives_T.json'.
+
+        Returns:
+        - None
+        """
         self.materials_data = self.load_materials_data(database_path)
         self.pressure_deriv = self.load_pressure_deriv(database_path2)
         self.temperature_deriv = self.load_temperature_deriv(database_path3)
@@ -13,6 +24,16 @@ class Material:
 
 
     def load_materials_data(self, database_path):
+
+        """
+        Load materials data from a JSON file.
+
+        Parameters:
+        - database_path (str): The file path to the materials database JSON file.
+
+        Returns:
+        - dict: A dictionary containing the loaded materials data.
+        """
         try:
             with open(database_path, 'r') as file:
                 materials_data = json.load(file)
@@ -26,6 +47,15 @@ class Material:
 
 
     def load_pressure_deriv(self, database_path2):
+        """
+        Load pressure derivatives from a JSON file.
+
+        Parameters:
+        - database_path (str): The file path to the pressure derivatives JSON file.
+
+        Returns:
+        - dict: A dictionary containing the loaded pressure derivatives data.
+        """
         try:
             with open(database_path2, 'r') as file:
                 pressure_data = json.load(file)
@@ -39,6 +69,16 @@ class Material:
 
 
     def load_temperature_deriv(self, database_path3):
+
+        """
+        Load temperature derivatives from a JSON file.
+
+        Parameters:
+        - database_path (str): The file path to the temperature derivatives JSON file.
+
+        Returns:
+        - dict: A dictionary containing the loaded temperature derivatives data.
+        """
         try:
             with open(database_path3, 'r') as file:
                 temperature_data = json.load(file)
