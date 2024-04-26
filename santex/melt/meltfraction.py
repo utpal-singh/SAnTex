@@ -38,18 +38,3 @@ def calculate_melt_fractions(pressures_input, temperatures_input, cutoff=1):
     F = np.where((F > cutoff) , cutoff, F)
     
     return F if isinstance(pressures_input, np.ndarray) or isinstance(pressures_input, list) else F.item()
-
-if __name__ == "__main__":
-    pressure = [4, 5]  # GPa
-    temperature = [2000, 3000]  # Kelvin
-    cutoff_fraction = 0.05  # Cutoff value for melt fraction
-
-    melt_fraction = calculate_melt_fractions(pressure, temperature, 0.05)
-    print(melt_fraction)
-
-    pressure = 4  # GPa
-    temperature = 2000  # Kelvin
-    cutoff_fraction = 0.05  # Cutoff value for melt fraction
-
-    melt_fraction = calculate_melt_fractions(pressure, temperature, 0.05)
-    print(melt_fraction)
