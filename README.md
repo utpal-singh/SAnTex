@@ -19,10 +19,11 @@ You can install SAnTex using pip from your terminal:
 git clone https://github.com/utpal-singh/SAnTex.git
 cd santex
 pip install .
+```
 
 
 or
 
 ```bash
 pip install santex
-
+```
