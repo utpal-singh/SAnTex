@@ -1,6 +1,7 @@
 import os
 import json
 import numpy as np
+import pandas as pd
 from tabulate import tabulate
 from ..isotropy import Isotropy
 
@@ -407,4 +408,35 @@ class Material:
         for i in range(len(fraction)):
             cij_average += fraction[i] * cij[i]
         return cij_average, rho_average
+    
+
+    def modalRockFromExcel(self, excel_path, pressure, temperature, melt=0):
+        """
+        Calculate the average Voigt matrix and density of rocks from an Excel worksheet.
+        
+        Parameters:
+        - excel_path (str): Path to the Excel worksheet.
+        - pressure (float): The pressure in MPa.
+        - temperature (float): The temperature in Kelvin.
+        - melt (float): Amount of melting (default 0).
+        
+        Returns:
+        - tuple: Average Voigt matrix as a numpy array and average density as a float.
+        """
+
+        # Load data from Excel
+        df = pd.read_excel(excel_path)
+        rock_data = df.values  # Assuming the Excel has columns for rock types and fractions
+
+        cij_average = np.zeros((6, 6))
+        rho_total = 0
+
+        for rock, fraction in rock_data:
+            cij = self.voigthighPT(rock, pressure, temperature)
+            rho = self.load_density(rock, pressure, temperature)
+            rho_total += fraction * rho
+            cij_average += fraction * cij
+
+        return cij_average, rho_total
+
             
