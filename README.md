@@ -1,6 +1,6 @@
 # SAnTex: Seismic Anisotropy from Texture
 
-SAnTeX is a Python library which calculates the full elastic tensor of rocks from modal mineral composition, crystallographic orientation, and a crystal stiffness tensor catalogue that accounts for the dependency of elasticity with pressure and temperature.
+SAnTex is a Python library which calculates the full elastic tensor of rocks from modal mineral composition, crystallographic orientation, and a crystal stiffness tensor catalogue that accounts for the dependency of elasticity with pressure and temperature.
 
 ## Features
 
@@ -13,7 +13,7 @@ SAnTeX is a Python library which calculates the full elastic tensor of rocks fro
 
 ## Installation
 
-You can install SAnTeX using pip:
+You can install SAnTex using pip from your terminal:
 
 ```bash
 git clone https://github.com/utpal-singh/SAnTex.git
