@@ -92,6 +92,18 @@ class Material:
 
     
     def load_density(self, phase, pressure = None, temperature = None):
+
+        """
+        Load the density of a material based on the given phase.
+        
+        Parameters:
+        - phase (str): The phase of the material.
+        - pressure (float or None): The pressure in MPa (optional).
+        - temperature (float or None): The temperature in Kelvin (optional).
+        
+        Returns:
+        - float or None: The density in g/cm³ or None if data not available.
+        """
         if pressure is None or temperature is None:
 
             try:
@@ -116,24 +128,62 @@ class Material:
     
 
     def get_properties_by_phase(self, phase):
+
+        """
+        Get the properties of a material based on the given phase.
+        
+        Parameters:
+        - phase (str): The phase of the material.
+        
+        Returns:
+        - dict or None: The properties of the material or None if not found.
+        """
         for material in self.materials_data:
             if material['Phase'] == phase:
                 return material
         return None  # Return None if the phase is not found
     
     def get_pressure_properties_by_phase(self, phase):
+        """
+        Get the pressure properties of a material based on the given phase.
+        
+        Parameters:
+        - phase (str): The phase of the material.
+        
+        Returns:
+        - dict or None: The pressure properties or None if not found.
+        """
         for material in self.pressure_deriv:
             if material['Phase'] == phase:
                 return material
         return None  # Return None if the phase is not found
     
     def get_temperature_properties_by_phase(self, phase):
+        """
+        Get the temperature properties of a material based on the given phase.
+        
+        Parameters:
+        - phase (str): The phase of the material.
+        
+        Returns:
+        - dict or None: The temperature properties or None if not found.
+        """
+
         for material in self.temperature_deriv:
             if material['Phase'] == phase:
                 return material
         return None  # Return None if the phase is not found
 
     def get_voigt_matrix(self, phase):
+        """
+        Calculate and return the Voigt matrix of a material based on the given phase.
+        
+        Parameters:
+        - phase (str): The phase of the material.
+        
+        Returns:
+        - numpy array or None: The Voigt matrix or None if data not available.
+        """
         material_properties = self.get_properties_by_phase(phase)
 
         if not material_properties:
@@ -263,11 +313,23 @@ class Material:
 
     
     def availablePhases(self):
+        """
+        Generate a formatted table listing available phases along with their crystal systems and primary phases.
+        
+        Returns:
+        - str: A formatted table listing available phases.
+        """
         headers = ["Phase", "Crystal System", "Primary Phase"]
         data = [(material['Phase'], material['Crystal System'], material['Primary Phase']) for material in self.materials_data]
         return tabulate(data, headers=headers, tablefmt="pretty")
 
     def availablePrimaryPhases(self):
+        """
+        Generate a formatted table listing available primary phases along with their crystal systems and phases.
+        
+        Returns:
+        - str: A formatted table listing available primary phases.
+        """
         headers = ["Primary Phase", "Crystal Systems", "Phases"]
         info = {}
         for material in self.materials_data:
@@ -282,6 +344,12 @@ class Material:
         return tabulate(data, headers=headers, tablefmt="pretty")
 
     def availableCrystalSystems(self):
+        """
+        Generate a formatted table listing available crystal systems along with their associated phases.
+        
+        Returns:
+        - str: A formatted table listing available crystal systems.
+        """
         headers = ["Crystal System", "Phases"]
         crystal_systems = set(material['Crystal System'] for material in self.materials_data)
         info = {system: [] for system in crystal_systems}
@@ -294,6 +362,17 @@ class Material:
     
 
     def voigthighPT(self, phase, PRESSURE=0, TEMP=300):
+        """
+        Perform calculations to obtain the Voigt matrix at high pressure and temperature conditions.
+        
+        Parameters:
+        - phase (str): The phase of the material.
+        - PRESSURE (float): The pressure in MPa (default 0).
+        - TEMP (float): The temperature in Kelvin (default 300).
+        
+        Returns:
+        - numpy array or None: The calculated Voigt matrix or None if data not available.
+        """
         dCdT = self.get_voigt_matrix_temperature(phase)
         dCdP = self.get_voigt_matrix_pressure(phase)
         
@@ -301,7 +380,22 @@ class Material:
         return tensor_calc
     
     def modalRock(self, rock, fraction, pressure, temperature, melt=0):
+        """
+        Calculate the average Voigt matrix and density of a rock composed of multiple minerals.
+        
+        Parameters:
+        - rock (list): An array of minerals.
+        - fraction (list): Fractions corresponding to each mineral in the rock.
+        - pressure (float): The pressure in MPa.
+        - temperature (float): The temperature in Kelvin.
+        - melt (float): Amount of melting (default 0).
+        
+        Returns:
+        - tuple: Average Voigt matrix as a numpy array and average density as a float.
+
         # Rock is an array of minerals and fraction is another array corresponding to the particular phase. eg. rock = ["Forsterite", "Diopside", "Enstatite"], fraction = [0.2, 0.5, 0.3]
+
+        """
         cij = []
         rho = []
         for item in rock:
