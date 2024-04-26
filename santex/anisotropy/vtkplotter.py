@@ -5,9 +5,9 @@ from vtk import (
     vtkActor, vtkRenderer, vtkRenderWindow,
     vtkRenderWindowInteractor
 )
-
-from .utils import christoffel_tensor, wave_property, tensor_to_voigt, voigt_to_tensor
-
+from ..tensor.tensor import Tensor
+from .utils import christoffel_tensor, wave_property
+tensor = Tensor()
 class Plotter:
     """
     A class for plotting seismic wave velocities in 3D using VTK.
@@ -27,7 +27,7 @@ class Plotter:
         Returns:
         - None
         """
-        cijkl = voigt_to_tensor(c)
+        cijkl = tensor.voigt_to_tensor(c)
 
         theta = np.linspace(0, np.pi, 100)
         phi = np.linspace(0, 2 * np.pi, 100)
@@ -102,7 +102,7 @@ class Plotter:
         Returns:
         - None
         """
-        cijkl = voigt_to_tensor(c)
+        cijkl = tensor.voigt_to_tensor(c)
 
         theta = np.linspace(0, np.pi, 100)
         phi = np.linspace(0, 2 * np.pi, 100)
@@ -177,7 +177,7 @@ class Plotter:
         Returns:
         - None
         """
-        cijkl = voigt_to_tensor(c)
+        cijkl = tensor.voigt_to_tensor(c)
 
         theta = np.linspace(0, np.pi, 100)
         phi = np.linspace(0, 2 * np.pi, 100)
@@ -265,7 +265,7 @@ class Plotter:
         >>> Plotter.plot_vp(c, 3310)
         """
 
-        cijkl = voigt_to_tensor(c)
+        cijkl = tensor.voigt_to_tensor(c)
 
         theta = np.linspace(0, np.pi, 100)
         phi = np.linspace(0, 2 * np.pi, 100)

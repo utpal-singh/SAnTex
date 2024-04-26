@@ -9,6 +9,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from .plot_vel_grid import plot_velocity_grid
+from .utils import christoffel_tensor, wave_property
 
 from .. import Material
 from .. import EBSD
@@ -84,13 +85,7 @@ class Anisotropy:
         
         """
         try:
-            tik = np.zeros((3, 3))
-
-            for i in range(3):
-                for k in range(3):
-                    tik[i, k] = np.tensordot(self.cijkl[i, :, k, :], np.outer(n, n))
-
-            return tik
+            return christoffel_tensor(self.cijkl, n)
         except Exception as e:
             raise ValueError("Error in calculating the Christoffel tensor:", e)
 
@@ -108,13 +103,7 @@ class Anisotropy:
             ValueError: If an error occurs during the calculation.
         """
         try:
-            eigenvalues, eigenvectors = np.linalg.eig(tik)
-            indices = np.argsort(eigenvalues)[::-1]
-
-            wave_moduli = [eigenvalues[i] for i in indices]
-            polarization_directions = [eigenvectors[:, i] / np.linalg.norm(eigenvectors[:, i]) for i in indices]
-
-            return tuple(wave_moduli), tuple(polarization_directions)
+            return wave_property(tik)
         except Exception as e:
             raise ValueError("Error in calculating wave properties:", e)
 
