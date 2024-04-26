@@ -424,9 +424,8 @@ class Material:
         - tuple: Average Voigt matrix as a numpy array and average density as a float.
         """
 
-        # Load data from Excel
         df = pd.read_excel(excel_path)
-        rock_data = df.values  # Assuming the Excel has columns for rock types and fractions
+        rock_data = df.values 
 
         cij_average = np.zeros((6, 6))
         rho_total = 0
