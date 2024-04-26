@@ -19,6 +19,7 @@ affiliations:
    index: 1
 date: 'Not Specified'
 bibliography: paper.bib
+---
 
 # Summary
 
@@ -39,7 +40,9 @@ To address these gaps, we developed SAnTex (Seismic Anisotropy from Texture), a 
 
 Hooke's Law describes the behaviour of certain materials when subjected to a stretching or compressing force. Hooke's law can be expressed in terms of the elastic stiffness tensor and the strain tensor, as:
 
-$$\[C_{ijkl} = R_{im}R_{jn}R_{ko}R_{lp}C_{mnop}\]$$
+$$
+C_{ijkl} = [R_{im}R_{jn}R_{ko}R_{lp}C_{mnop}]
+$$
 
 where $\sigma_{ij}$ and $\epsilon_{kl}$ are the components of the stress and strain tensors, respectively, while $C_{ijkl}$ are the components of the elastic stiffness tensor. In this form, Hooke's law is more general and can account for the anisotropy and directionality of the material’s elastic properties.
 
@@ -51,7 +54,9 @@ $$
 
 In the current version of SAnTex, melt is considered as an isotropic phase with homogenous distribution within an anisotropic host rock (e.g., Lee et al., 2017).
 
+$$
 Cijkl(p, T) = (1-f)(Cijkl(0, 0) + dC/dP p + dC/dT T) + f(Cmelt(p, T))
+$$
 
 The percentage of melt can be controlled by the user. The approach currently incorporated in SAnTex overlooks the complex behaviour of melt, including its viscosity, flow dynamics, and interaction with neighbouring minerals, which can influence the overall anisotropic properties of the system. Future developments of SAnTex will aim to include more functionalities towards the calculation of melt-induced anisotropy. 
 
