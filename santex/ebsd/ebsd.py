@@ -7,19 +7,16 @@ import os
 
 import numpy as np 
 import pandas as pd 
-from sklearn.neighbors import KNeighborsClassifier 
-from joblib import Parallel, delayed 
 from ..tensor import Tensor
 from scipy.spatial.transform import Rotation
 
 from .calcGrainBoundary import assign_to_grains_parallel
 import plotly.express as px
 
-from .melt import calcMelttensor
+from .melt_tensor import calcMelttensor
 from .rotateEBSD import apply_custom_rotation_to_dataframe, apply_custom_rotation_to_dataframe_noxy
 
 # from .ebsdrotation import apply_custom_rotation_to_dataframe as rotebsd
-from .ebsdrotation import plot as plotrotebsd
 from .odf import ipf, odf, pdf
 
 class EBSD:
@@ -189,15 +186,15 @@ class EBSD:
     def get_euler_angles_by_phase(self, phase):
         """
         Retrieves Euler angles by phase names.
-        Not yet implemented.
 
         Parameters:
             phase (str): Phase name.
 
         Returns:
-            None
+            pandas.dataframe: euler angles of phase by name
         """
-        pass
+        phase_index = self.get_index_of_phases(phase)
+        return self.get_euler_angles(phase_index)
 
     def get_phases_numbers(self):
         """

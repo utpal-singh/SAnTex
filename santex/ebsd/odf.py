@@ -5,8 +5,7 @@ from scipy.stats import gaussian_kde
 from orix.crystal_map import Phase
 from orix.quaternion import Orientation, symmetry
 from orix.vector import Miller, Vector3d
-
-import numpy as np
+import plotly.graph_objects as go
 
 import random
 
@@ -636,9 +635,6 @@ def calculate_odf(euler_angles):
     ax.set_title('ODF Representation')
     plt.show()
 
-
-import plotly.graph_objects as go
-import numpy as np
 
 def plot_orientations_3d(euler_angles):
 

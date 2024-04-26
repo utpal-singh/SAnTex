@@ -1,5 +1,22 @@
 import numpy as np
 def calculate_melt_fractions(pressures_input, temperatures_input, cutoff=1):
+    """
+    Calculates melt fractions based on pressure and temperature conditions.
+
+    Parameters:
+    pressures_input (float, list, or ndarray): Pressure or list/array of pressures in GPa.
+    temperatures_input (float, list, or ndarray): Temperature or list/array of temperatures in Kelvin.
+    cutoff (float, optional): Cutoff value for melt fraction calculation. Default is 1.
+
+    Returns:
+    float or ndarray: Melt fraction(s) calculated based on the input conditions.
+
+    Notes:
+    - The function computes melt fractions based on pressure and temperature using thermodynamic equations.
+    - If pressures_input and temperatures_input are arrays of the same shape, returns an array of melt fractions.
+    - If pressures_input and temperatures_input are scalars, returns a single melt fraction.
+    - Values outside the cutoff range are capped at the cutoff value.
+    """
     pressures = np.atleast_1d(pressures_input)
     temperatures = np.atleast_1d(temperatures_input)
     

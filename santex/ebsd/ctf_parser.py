@@ -45,20 +45,10 @@ class Ctf:
         with open(self._filename, 'r') as file:
             lines = file.readlines()
 
-    # print(lines[:15])
         header_start = lines.index('JobMode\tGrid\n')
-        # print(header_start)
         data_start = lines.index('Phase\tX\tY\tBands\tError\tEuler1\tEuler2\tEuler3\tMAD\tBC\tBS\n')
-        # print(data_start)
-
         header_data = pd.read_csv(self._filename, delimiter='\t', skiprows=header_start+1, nrows=7, names=["info", "value"])
-        # print(header_data)
-
         data = pd.read_csv(self._filename, delimiter='\t', skiprows=data_start)
-        # print(data)
-        # print(data)
-        # header_info = pd.read_csv(filename, sep="\t", nrows=data_start)
-        # print(data)
         return data, header_data
 
     def get_phases_numbers(self):

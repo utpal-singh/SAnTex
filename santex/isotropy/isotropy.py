@@ -7,6 +7,13 @@ import os
 
 class Isotropy:
     def __init__(self):
+        """
+        Initializes the Isotropy class by loading material data from a JSON file.
+
+        Raises:
+        FileNotFoundError: If the JSON file 'materials.json' is not found.
+        json.JSONDecodeError: If there is an error decoding the JSON file.
+        """
         try:
             json_file = 'materials.json'
             json_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data', json_file)
@@ -16,6 +23,12 @@ class Isotropy:
             raise FileNotFoundError(f"Error loading JSON file '{json_file}': {e}")
 
     def get_available_phases(self):
+        """
+        Prints and returns a list of available phases from the loaded material data.
+
+        Returns:
+        List: A list of available phases.
+        """
         try:
             for key in range(0,len(self.data)):
                 print('######################Available Phases######################')
@@ -26,6 +39,15 @@ class Isotropy:
             return []
 
     def get_phase_constants(self, phase):
+        """
+        Retrieves phase constants for a given phase name or ID from the loaded material data.
+
+        Parameters:
+        phase (str): The name or ID of the phase.
+
+        Returns:
+        dict: Phase constants including ID, name, density, expansivity, bulk modulus, shear modulus, and more.
+        """
         try:
             phase_data = next(item for item in self.data.values() if item.get('phase') == phase or item.get('name') == phase)
             if phase_data:
@@ -164,6 +186,17 @@ class Isotropy:
 
 
     def calculate_velocities(self, density, aks, amu):
+        """
+        Calculates velocities (vp, vs, vbulk) based on density, adiabatic bulk modulus (aks), and shear modulus (amu).
+
+        Parameters:
+        density (float or array): Density in kg/m^3.
+        aks (float or array): Adiabatic bulk modulus in Pa.
+        amu (float or array): Shear modulus in Pa.
+
+        Returns:
+        Tuple: Velocities vp, vs, vbulk in km/s.
+        """
         try:
             vbulk = 0.001 * np.sqrt(aks / density)
             vp = 0.001 * np.sqrt((aks + 1.3333 * amu) / density)
@@ -173,6 +206,18 @@ class Isotropy:
             print(f"Error calculating velocities: {e}")
 
     def pressure_function(self, f, press, akk, akk_prime):
+        """
+        Helper function for pressure calculation in calculate_seismic_properties method.
+
+        Parameters:
+        f (float): Pressure factor.
+        press (float): Pressure in Pa.
+        akk (float): Adiabatic bulk modulus in Pa.
+        akk_prime (float): Derivative of bulk modulus with respect to pressure.
+
+        Returns:
+        float: Pressure difference.
+        """
         try:
             zeta = 0.75 * (4. - akk_prime)
             f1 = (1. + 2. * f) ** 2.5

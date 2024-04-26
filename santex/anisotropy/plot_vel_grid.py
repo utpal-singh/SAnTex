@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-def plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd = False, phase = None, grid = [5, 5], filename = None, *args):
+def plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd = False, phase = None, grid = [5, 5], filename = None,fig_name=None, save_plot=False, dpi=300, *args):
     from santex import Anisotropy
     from santex import EBSD
     from santex import Material
@@ -55,7 +55,12 @@ def plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd =
         plt.title(f'{return_type} vs. Pressure and Temperature')
         # plt.grid(True)
         plt.tight_layout()
-        plt.show()
+        if save_plot:
+            if fig_name is None:
+                raise ValueError("Filename must be provided when saving the plot.")
+            plt.savefig(fig_name, dpi=dpi)
+        else:
+            plt.show()
 
         return vp_matrix
 
