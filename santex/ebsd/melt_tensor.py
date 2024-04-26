@@ -3,7 +3,16 @@ from ..tensor.tensor import Tensor
 
 
 def calcMelttensor():
-    """Reference 
+    """
+    Returns the melt stiffness tensor.
+    
+    Parameters: 
+    - None
+    
+    Returns:
+    - np.ndarray - melt stifness tensor
+    
+    Reference 
     Lee, A. L., Walker, A. M., Lloyd, G. E., & Torvela, T. (2017). 
     Modeling the impact of melt on seismic properties during mountain building. 
     Geochemistry, Geophysics, Geosystems, 18(3), 1090–1110. https://doi.org/10.1002/2016GC006705

@@ -62,8 +62,6 @@ class Tensor:
                 tensor[j-1][i-1][l-1][k-1] = voigt[I-1][J-1]
         return np.array(tensor)
     
-# import numpy as np
-
     def euler_to_rotation(self, phi1, phi, phi2):
 
         """

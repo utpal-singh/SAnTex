@@ -100,7 +100,6 @@ class EBSD:
             data['X'], data['Y'] = xy_rotated[:, 0], xy_rotated[:, 1]
         
         # Filter data based on phase
-        # df_new = data[data['Phase'].isin([0, 1, 2, 3])]
         df_new = data
         
         # Define custom colormap for phases
@@ -109,7 +108,6 @@ class EBSD:
 
         phase_labels = [f'Phase {phase}' for phase in sorted(phase_colors.keys())]
         phase_color_list = [phase_colors[phase] for phase in df_new['Phase']]
-        # print(phase_color_list)
 
         # Plot
         fig, ax = plt.subplots(figsize=(16, 9))  # Adjust the figsize as per your requirement
@@ -291,8 +289,6 @@ class EBSD:
         table = tabulate(data, headers=headers, tablefmt="grid")
         return table
 
-
-    
     def filterByPhase(self, phase_list, data=None):
         """
         Filters EBSD data by phase.

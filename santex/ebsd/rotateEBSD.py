@@ -1,7 +1,5 @@
 import numpy as np
 from scipy.spatial.transform import Rotation
-import numpy as np
-from scipy.spatial.transform import Rotation
 from joblib import Parallel, delayed
 from tqdm import tqdm
 

@@ -233,14 +233,14 @@ class Isotropy:
         Calculates Hashin-Shtrikman Bounds for the given parameters:
         
         Parameters:
-        phase_constant_list: list of phase constant instances gotten from set_modal_composition function.
-        fraction_list: list of fractions of each phase.
-        temperature: temperature array or scalar in Kelvin
-        pressure: pressure array or scalar in GPa
+        - phase_constant_list: list of phase constant instances gotten from set_modal_composition function.
+        - fraction_list: list of fractions of each phase.
+        - temperature: temperature array or scalar in Kelvin
+        - pressure: pressure array or scalar in GPa
         
         Returns:
-        3 lists of medium value, upper bound and lower bound, indexed respectively: 
-        [Vbulk_medium,Vp_medium,Vs_medium], [Vbulk_upper,Vp_upper,Vs_upper], [Vbulk_lower, Vp_lower, Vs_lower]
+        - 3 lists of medium value, upper bound and lower bound, indexed respectively: 
+            [Vbulk_medium,Vp_medium,Vs_medium], [Vbulk_upper,Vp_upper,Vs_upper], [Vbulk_lower, Vp_lower, Vs_lower]
         
         """
         aks_list = []
@@ -348,9 +348,9 @@ class Isotropy:
             
         Returns:
         
-        phase_constant_list: 
+        - phase_constant_list: 
             list containing the phase constats that can be inputted into HashinShtrikmanBounds method.
-        fraction_list: 
+        - fraction_list: 
             np.ndarray list of fractions of entered minerals.
         """
         

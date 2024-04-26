@@ -1,6 +1,5 @@
 import numpy as np
 import math
-
 import matplotlib.pyplot as plt
 from .utils import christoffel_tensor, wave_property
 
@@ -31,11 +30,6 @@ def phase_velocity(cijkl, rho):
             vs1.append(math.sqrt(wave_moduli[1] / rho))
             vs2.append(math.sqrt(wave_moduli[2] / rho))
     return tuple(vp), tuple(vs1), tuple(vs2)
-
-
-import matplotlib.pyplot as plt
-import numpy as np
-import math
 
 def plot_vp_2d(cijkl, rho, save_plot=False, filename=None, dpi=300, cmap='RdBu'):
     """

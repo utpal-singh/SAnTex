@@ -222,7 +222,6 @@ class Material:
         ])
 
         # Make the matrix symmetric by copying the upper triangular part to the lower triangular part
-        # voigt_matrix = (voigt_matrix + voigt_matrix.T)/2 - np.diag(voigt_matrix.diagonal())
         voigt_matrix = (voigt_matrix + voigt_matrix.T)/2
 
         return voigt_matrix
