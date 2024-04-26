@@ -167,27 +167,6 @@ def modalRock(rock, fraction, pressure, temperature, melt=0, weight_per = []):
 
 
 
-if __name__ == "__main__":
-    weight_per = [40, 1.84, 13.7, 2.7, 9.57, 6.67, 11.5, 2.68, 0.25, 10]
-    dens, component_density = calc_melt_density(weight_per, 500, 1273)
-    print(dens)
-    print(component_density)
-    rock = ["Forsterite", "Diopside", "Enstatite"]
-    fraction = [0.2, 0.5, 0.3]
-    cij_average, rho_average = modalRock(rock, fraction, 2, 1000)
-    print(cij_average)
-    print(rho_average)
-
-    cij_average, rho_average = modalRock(rock, fraction, 2, 1000, 0.05, weight_per)
-    print(cij_average)
-    print(rho_average)
-
-    oxide_dict = {'sio2': 40, 'tio2': 1.84, 'feo': 9.57, 'mgo': 6.67, 'cao': 11.5, 'na2o': 2.68, 'k2o': 0.25, 'h2o': 10}
-    dens, component_density = calc_melt_density(oxide_dict, 500, 1500)
-    print(dens)
-    print(component_density)
-
-
 
 
 
