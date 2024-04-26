@@ -133,12 +133,6 @@ class EBSD:
 
         plt.show()
 
-
-
-
-
-
-
     def get_index_of_phases(self, phases_list):
         """
         Get the index of phases based on their names.

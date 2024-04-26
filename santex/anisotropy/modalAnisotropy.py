@@ -1,6 +1,8 @@
 from ..material import Material
 from ..anisotropy import Anisotropy
 
+import numpy as np
+
 def modalAnisotropy(material, fraction, pressure, temperature):
     voigtMatrixTotal = []
     density = []

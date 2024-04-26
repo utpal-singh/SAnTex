@@ -5,9 +5,6 @@ from vtk import (
     vtkActor, vtkRenderer, vtkRenderWindow,
     vtkRenderWindowInteractor
 )
-# from .anisotropy import Anisotropy
-# from cijkl_3dplots import christoffel_tensor, wave_property
-# import tensor_conversion
 
 from .utils import christoffel_tensor, wave_property, tensor_to_voigt, voigt_to_tensor
 

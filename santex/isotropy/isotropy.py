@@ -187,20 +187,19 @@ class Isotropy:
         """
         Calculates Hashin-Shtrikman Bounds for the given parameters:
         
-        Inputs:
+        Parameters:
         phase_constant_list: list of phase constant instances gotten from set_modal_composition function.
         fraction_list: list of fractions of each phase.
         temperature: temperature array or scalar in Kelvin
         pressure: pressure array or scalar in GPa
         
-        Outputs:
+        Returns:
         3 lists of medium value, upper bound and lower bound, indexed respectively: 
         [Vbulk_medium,Vp_medium,Vs_medium], [Vbulk_upper,Vp_upper,Vs_upper], [Vbulk_lower, Vp_lower, Vs_lower]
         
         """
         aks_list = []
         amu_list = []
-        
         
         if isinstance(temperature,(int,float)):
             if isinstance(pressure,(int,float)):
@@ -292,15 +291,22 @@ class Isotropy:
     def set_modal_composition(self, phase_list, fraction_list):
         
         """
+        Prepares the input for HashinShtrikmanBounds method for the entered phase_list
+        and fraction_list.
         
-        Inputs:
+        Parameters:        
+        - phase_list - list of phase ids to be included in the rock. 
+            Example: ['fo', 'en'] -- Forsterite and Enstatite
         
-        phase_list - list of phase ids to be included in the rock. 
-        Example: ['fo', 'en'] -- Forsterite and Enstatite
+        - fraction_list - list of fraction lists to be included in the rock
+            Example: [0.8, 0.2] -- 0.8 fo and 0.2 en
+            
+        Returns:
         
-        fraction_list - list of fraction lists to be included in the rock
-        Example: [0.8, 0.2] -- 0.8 fo and 0.2 en
-        
+        phase_constant_list: 
+            list containing the phase constats that can be inputted into HashinShtrikmanBounds method.
+        fraction_list: 
+            np.ndarray list of fractions of entered minerals.
         """
         
         if type(fraction_list) != np.ndarray:
