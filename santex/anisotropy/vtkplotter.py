@@ -7,6 +7,7 @@ from vtk import (
 )
 from ..tensor.tensor import Tensor
 from .utils import christoffel_tensor, wave_property
+
 tensor = Tensor()
 class Plotter:
     """
@@ -327,17 +328,3 @@ class Plotter:
 
         interactor.Initialize()
         interactor.Start()
-
-
-
-if __name__ == "__main__":
-    density = 3310
-    c = np.array([[323.70, 66.40, 71.60, 0.000, 0.000, 0.000],
-                [66.40, 197.60, 75.60, 0.000, 0.000, 0.000],
-                [71.60, 75.60, 235.10, 0.000, 0.000, 0.000],
-                [0.000, 0.000, 0.000, 64.62, 0.000, 0.000],
-                [0.000, 0.000, 0.000, 0.000, 78.05, 0.000],
-                [0.000, 0.000, 0.000, 0.000, 0.000, 79.04]]) * 1e9
-    # cijkl = tensor_conversion.voigt_to_tensor(c)
-
-    Plotter.plot_wave_velocities(c, density)
