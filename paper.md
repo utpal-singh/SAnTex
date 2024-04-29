@@ -61,7 +61,7 @@ C_{ijkl}(p, T) = (1-f)(C_{ijkl}(0, 0) + \left. \frac{\partial C_{ijkl}}{\partial
 
 The percentage of melt can be controlled by the user. The approach currently incorporated in SAnTex overlooks the complex behaviour of melt, including its viscosity, flow dynamics, and interaction with neighbouring minerals, which can influence the overall anisotropic properties of the system. Future developments of SAnTex will aim to include more functionalities towards the calculation of melt-induced anisotropy. 
 
-The propagation of elastic deformation through an elastic medium is governed by the elastodynamics equation (Walker et al 2012):
+The propagation of elastic deformation through an elastic medium is governed by the elastodynamics equation [@walker_msatnew_2012:2012]:
 \begin{equation}
 \rho \frac{\partial^2 u_i}{\partial t^2} = C_{ijkl} \frac{\partial^2 u_l}{\partial x_j \partial x_k}, \label{eq:elastodynamics}
 \end{equation}
@@ -85,7 +85,7 @@ By substituting \ref{eq:elastodynamics} into \ref{eq:scalarwavefield}, we obtain
 \noindent
 where $C_{ijkl}$ is the elastic stiffness tensor, $n_j$ is the wave propagation direction, $V$ is the wave speed, $\delta_{ik}$ is the Kronecker delta, and $p_k$ is the polarization vector of the wave.
 
-The eigenvalues $\lambda_1$, $\lambda_2$, $\lambda_3$ derived from the Christoffel tensor \(T_{ik} = C_{ijk\ell}n_jn_i\) are not invariant under transformations and, when arranged in ascending order, they signify the squared phase velocities of seismic waves along principal directions in an anisotropic medium. The sorted eigenvalues commonly represent the velocities of P-waves (\(v_p\)), the fastest shear wave (\(v_{s1}\)), and a slower shear wave (\(v_{s2}\)) according to the following:
+The eigenvalues $\lambda_1$, $\lambda_2$, $\lambda_3$ derived from the Christoffel tensor $\(T_{ik} = C_{ijk\ell}n_jn_i\)$ are not invariant under transformations and, when arranged in ascending order, they signify the squared phase velocities of seismic waves along principal directions in an anisotropic medium. The sorted eigenvalues commonly represent the velocities of P-waves ($\(v_p\)$), the fastest shear wave ($\(v_{s1}\)$), and a slower shear wave ($\(v_{s2}\)$) according to the following:
 
 \begin{equation}
     \lambda_1 = \rho.v_p^2, \lambda_2 = \rho.v_{s1}^2, \lambda_1 = \rho.v_{s2}^2
