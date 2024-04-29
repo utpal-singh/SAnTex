@@ -61,6 +61,39 @@ C_{ijkl}(p, T) = (1-f)(C_{ijkl}(0, 0) + \left. \frac{\partial C_{ijkl}}{\partial
 
 The percentage of melt can be controlled by the user. The approach currently incorporated in SAnTex overlooks the complex behaviour of melt, including its viscosity, flow dynamics, and interaction with neighbouring minerals, which can influence the overall anisotropic properties of the system. Future developments of SAnTex will aim to include more functionalities towards the calculation of melt-induced anisotropy. 
 
+The propagation of elastic deformation through an elastic medium is governed by the elastodynamics equation (Walker et al 2012):
+\begin{equation}
+\rho \frac{\partial^2 u_i}{\partial t^2} = C_{ijkl} \frac{\partial^2 u_l}{\partial x_j \partial x_k}, \label{eq:elastodynamics}
+\end{equation}
+\noindent
+where $\rho$ is the density, $u_i$ is the displacement, $x_j$ is position and $t$ is time. 
+
+The scalar wave equation is a partial differential equation that describes how a scalar field, such as pressure or displacement, varies in space and time under the influence of a wave speed. The general form of the scalar wave equation is:
+
+\begin{equation}
+    \nabla^2 u - \frac{1}{c^2} \frac{\partial^2 u}{\partial t^2} = 0
+    \label{eq:scalarwavefield}
+\end{equation}
+
+\noindent
+where $u$ is a scalar field, $c$ is the wave speed, $\nabla^2$ is laplacian operator, and $\frac{\partial^2 u}{\partial t^2}$ is second derivative with respect to time.
+
+By substituting \ref{eq:elastodynamics} into \ref{eq:scalarwavefield}, we obtain the well-known Christoffel equation (Christoffel 1877): 
+\begin{equation*}
+\left(C_{ijkl}n_jn_l - \rho V^2 \delta_{ik}\right)p_k = 0,
+\end{equation*}
+\noindent
+where $C_{ijkl}$ is the elastic stiffness tensor, $n_j$ is the wave propagation direction, $V$ is the wave speed, $\delta_{ik}$ is the Kronecker delta, and $p_k$ is the polarization vector of the wave.
+
+The eigenvalues $\lambda_1$, $\lambda_2$, $\lambda_3$ derived from the Christoffel tensor \(T_{ik} = C_{ijk\ell}n_jn_i\) are not invariant under transformations and, when arranged in ascending order, they signify the squared phase velocities of seismic waves along principal directions in an anisotropic medium. The sorted eigenvalues commonly represent the velocities of P-waves (\(v_p\)), the fastest shear wave (\(v_{s1}\)), and a slower shear wave (\(v_{s2}\)) according to the following:
+
+\begin{equation}
+    \lambda_1 = \rho.v_p^2, \lambda_2 = \rho.v_{s1}^2, \lambda_1 = \rho.v_{s2}^2
+\end{equation}
+
+\noindent
+and the eigenvector corresponds to the wave polarisation direction.
+
 SAnTex calculates seismic anisotropy from EBSD texture data using the following steps:
 1. Calculation of the effective tensor constants by incorporating pressure and temperature derivatives. SAnTex includes an inbuilt catalogue of minerals, for which it automatically calculates the stiffness tensors and density for a range of pressure and temperature conditions.
 2. Determination of the reference stiffness tensors by applying Taylor series expansion.
