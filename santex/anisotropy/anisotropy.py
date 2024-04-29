@@ -207,20 +207,30 @@ class Anisotropy:
 
         if return_values == 'maxvp':
             return maxvp
+        elif return_values == 'minvp':
+            return minvp
         elif return_values == 'maxvs1':
             return maxvs1
-        elif return_values == 'maxvs1':
-            return maxvs1
-        elif return_values == 'maxvs1':
-            return maxvs1
-        elif return_values == 'maxvs1':
-            return maxvs1
-        elif return_values == 'maxvs1':
-            return maxvs1
-        elif return_values == 'maxvs1':
-            return maxvs1
-        elif return_values == 'maxvs1':
-            return maxvs1
+        elif return_values == 'minvs1':
+            return minvs1
+        elif return_values == 'maxvs2':
+            return maxvs2
+        elif return_values == 'minvs2':
+            return minvs2
+        elif return_values == 'max_vs_anisotropy_percent':
+            return max_vs_anisotropy_percent
+        elif return_values == 'min_vs_anisotropy_percent':
+            return min_vs_anisotropy_percent
+        elif return_values == 'p_wave_anisotropy_percent':
+            return p_wave_anisotropy_percent
+        elif return_values == 's1_wave_anisotropy_percent':
+            return s1_wave_anisotropy_percent
+        elif return_values == 's2_wave_anisotropy_percent':
+            return s2_wave_anisotropy_percent
+        elif return_values == 'maxdvs':
+            return maxdvs
+        elif return_values == 'AVpVs1':
+            return AVpVs1
         
         else:
             print("Max Vp: ", maxvp)
