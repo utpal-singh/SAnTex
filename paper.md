@@ -48,15 +48,7 @@ where $\sigma_{ij}$ and $\epsilon_{kl}$ are the components of the stress and str
 
 The pressure and temperature dependence of elastic constants is mainly linear but can include non-linear effects that can be approximated up to second-order terms. This relationship can be simplified using a Taylor series expansion, as outlined below:
 
-$$
-C_{ijkl}(p, T) = C_{ijkl}(0, 0) + \left. \frac{\partial C_{ijkl}}{\partial p} \right|_{(0,0)} p + \left. \frac{\partial C_{ijkl}}{\partial T} \right|_{(0,0)} T + \mathcal{O}(p^2, T^2)
-$$
-
 In the current version of SAnTex, melt is considered as an isotropic phase with homogenous distribution within an anisotropic host rock (e.g., [@lee_modeling_2017:2017]).
-
-$$
-C_{ijkl}(p, T) = C_{ijkl}(0, 0) + \left. \frac{\partial C_{ijkl}}{\partial p} \right|_{(0,0)} p + \left. \frac{\partial C_{ijkl}}{\partial T} \right|_{(0,0)} T + \mathcal{O}(p^2, T^2)
-$$
 
 The percentage of melt can be controlled by the user. The approach currently incorporated in SAnTex overlooks the complex behaviour of melt, including its viscosity, flow dynamics, and interaction with neighbouring minerals, which can influence the overall anisotropic properties of the system. Future developments of SAnTex will aim to include more functionalities towards the calculation of melt-induced anisotropy. 
 
