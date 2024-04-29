@@ -64,7 +64,7 @@ SAnTex calculates seismic anisotropy from EBSD texture data using the following 
 1. Calculation of the effective tensor constants by incorporating pressure and temperature derivatives. SAnTex includes an inbuilt catalogue of minerals, for which it automatically calculates the stiffness tensors and density for a range of pressure and temperature conditions.
 2. Determination of the reference stiffness tensors by applying Taylor series expansion.
 3. Estimation of a mean stiffness tensor by Voigt-Reuss-Hill bounds.
-4. Incorporation of the effect of melt on seismic properties through a nonlinear peridotite melting curve between solidus and liquidus `[@mckenzie_volume_1988]`. Alternatively, the user can input a melt fraction of their choice.
+4. Incorporation of the effect of melt on seismic properties through a nonlinear peridotite melting curve between solidus and liquidus [@mckenzie_volume_1988]. Alternatively, the user can input a melt fraction of their choice.
 
 # Package Summary
 SAnTex allows for (Fig. 2):
@@ -73,7 +73,7 @@ SAnTex allows for (Fig. 2):
 2.	Tensor operations: Tensor conversions between Voigt matrix and full stiffness tensors, as well as rotations based on euler angles.
 3.	Material analysis: SAnTex provides a catalogue of minerals to calculate seismic properties of a given composition. Users can load the catalogue and either utilise the phases of interest for EBSD-determined phase abundances or they can assume a modal mineral composition.
 4.	Calculation of Seismic Anisotropy: Performs calculations of seismic anisotropy at a range of pressure and temperature conditions (Pressure: 0 GPa to 13 GPa, Temperature: 300 K to 2000 K), with visualisation capabilities in interactive 2D and 3D plots.
-5.	Calculation of Isotropic velocities: Calculates isotropic seismic wave velocities (Vp, Vs and Vbulk), isothermal bulk modulus, and density at elevated temperatures and pressures (e.g., `@Hacker:2004`).
+5.	Calculation of Isotropic velocities: Calculates isotropic seismic wave velocities (Vp, Vs and Vbulk), isothermal bulk modulus, and density at elevated temperatures and pressures (e.g., [@Hacker:2004]).
 
 # Acknowledgements
 
