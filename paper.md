@@ -40,10 +40,6 @@ To address these gaps, we developed SAnTex (Seismic Anisotropy from Texture), a 
 
 Hooke's Law describes the behaviour of certain materials when subjected to a stretching or compressing force. Hooke's law can be expressed in terms of the elastic stiffness tensor and the strain tensor, as:
 
-$$
-\[\sigma_{ij} = C_{ijkl} \epsilon_{kl}\]
-$$
-
 where $\sigma_{ij}$ and $\epsilon_{kl}$ are the components of the stress and strain tensors, respectively, while $C_{ijkl}$ are the components of the elastic stiffness tensor. In this form, Hooke's law is more general and can account for the anisotropy and directionality of the material’s elastic properties.
 
 The pressure and temperature dependence of elastic constants is mainly linear but can include non-linear effects that can be approximated up to second-order terms. This relationship can be simplified using a Taylor series expansion, as outlined below:
