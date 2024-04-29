@@ -27,7 +27,7 @@ Seismic anisotropy, the directional dependency of seismic wave velocities, is im
 
 # Statement of need
 
-Seismic wave velocities and anisotropy provide essential insights into the composition, structure, and rheology of the Earth’s crust and mantle. Seismic anisotropy is primarily caused by the propagation of seismic waves through anisotropic rocks in which plastic deformation has led to the development of mineral crystallographic preferred orientation (CPO) `[karato_geodynamic_2008; @mainprice_development_1989; nicolas_formation_1987]`. The rock composition (e.g., mineral mode, presence of melt or water) and microstructure (e.g., grain size, microcracks) can further influence both seismic velocities and anisotropy (Mainprice & Nicolas, 1989; Almqvist & Mainprice, 2017).
+Seismic wave velocities and anisotropy provide essential insights into the composition, structure, and rheology of the Earth’s crust and mantle. Seismic anisotropy is primarily caused by the propagation of seismic waves through anisotropic rocks in which plastic deformation has led to the development of mineral crystallographic preferred orientation (CPO) `[karato_geodynamic_2008; @Mainprice:89; nicolas_formation_1987]`. The rock composition (e.g., mineral mode, presence of melt or water) and microstructure (e.g., grain size, microcracks) can further influence both seismic velocities and anisotropy (Mainprice & Nicolas, 1989; Almqvist & Mainprice, 2017).
 
 Seismic anisotropy calculations that rely on the integration of textural data obtained by Electron Backscatter Diffraction (EBSD) with experimentally determined elastic stiffness tensors have become standard practice `[@vauchez_microstructure_2005; @jung_effect_2006, @boneh_modeling_2015; @tommasi_heterogeneity_2015; @bernard_relationships_2019; @demouchy_microstructures_2019, @chatzaras_transpressional_2021]`. Existing software packages that predict seismic properties from rock texture either use stiffness tensors corresponding to room temperature and pressure conditions or consider only the effect of pressure. Yet, first principles simulations based on density functional theory `[@qian_elasticity_2017; @su_self-consistent_2021; @walker_msatnew_2012]` and laboratory measurements under varying pressure and temperature conditions `[@kumazawa_elastic_1969-1; @kumazawa_elastic_1969]` reveal significant deviations from the standard reference crystal stiffness tensors at room pressure and temperature (Fig. 1).
 
@@ -69,11 +69,11 @@ SAnTex calculates seismic anisotropy from EBSD texture data using the following 
 # Package Summary
 SAnTex allows for (Fig. 2):
 
-1.	Processing of EBSD data: Facilitates the processing and cleaning of EBSD data, calculating orientation distribution functions, pole density functions, and inverse pole figures.  
+1.	Processing of EBSD data: Facilitates the processing and cleaning of EBSD data, calculating orientation distribution functions, pole density functions, and inverse pole figures.
 2.	Tensor operations: Tensor conversions between Voigt matrix and full stiffness tensors, as well as rotations based on euler angles.
 3.	Material analysis: SAnTex provides a catalogue of minerals to calculate seismic properties of a given composition. Users can load the catalogue and either utilise the phases of interest for EBSD-determined phase abundances or they can assume a modal mineral composition.
 4.	Calculation of Seismic Anisotropy: Performs calculations of seismic anisotropy at a range of pressure and temperature conditions (Pressure: 0 GPa to 13 GPa, Temperature: 300 K to 2000 K), with visualisation capabilities in interactive 2D and 3D plots.
-5.	Calculation of Isotropic velocities: Calculates isotropic seismic wave velocities (Vp, Vs and Vbulk), isothermal bulk modulus, and density at elevated temperatures and pressures (e.g., Hacker & Abers, 2004). 
+5.	Calculation of Isotropic velocities: Calculates isotropic seismic wave velocities (Vp, Vs and Vbulk), isothermal bulk modulus, and density at elevated temperatures and pressures (e.g., `@Hacker:2004`).
 
 # Acknowledgements
 
