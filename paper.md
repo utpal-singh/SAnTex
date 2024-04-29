@@ -76,7 +76,7 @@ The scalar wave equation is a partial differential equation that describes how a
 
 where $u$ is a scalar field, $c$ is the wave speed, $\nabla^2$ is laplacian operator, and $\frac{\partial^2 u}{\partial t^2}$ is second derivative with respect to time.
 
-By substituting \ref{eq:elastodynamics} into \ref{eq:scalarwavefield}, we obtain the well-known Christoffel equation (Christoffel 1877): 
+By substituting, we obtain the well-known Christoffel equation (Christoffel 1877): 
 \begin{equation*}
 \left(C_{ijkl}n_jn_l - \rho V^2 \delta_{ik}\right)p_k = 0,
 \end{equation*}
