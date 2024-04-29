@@ -75,6 +75,8 @@ SAnTex allows for (Fig. 2):
 4.	Calculation of Seismic Anisotropy: Performs calculations of seismic anisotropy at a range of pressure and temperature conditions (Pressure: 0 GPa to 13 GPa, Temperature: 300 K to 2000 K), with visualisation capabilities in interactive 2D and 3D plots.
 5.	Calculation of Isotropic velocities: Calculates isotropic seismic wave velocities (Vp, Vs and Vbulk), isothermal bulk modulus, and density at elevated temperatures and pressures (e.g., [@Hacker:2004]).
 
+![Workflow of SAnTex with important methods and classes outlined.](santex.png){ width=100% }
+
 # Acknowledgements
 
 This research was supported by the Australian Research Council grants ARC-DP220100709 and ARC-LP190100146. Acknowledgements are also made to the financial support from the School of Geosciences at The University of Sydney.
