@@ -62,17 +62,16 @@ C_{ijkl}(p, T) = (1-f)(C_{ijkl}(0, 0) + \left. \frac{\partial C_{ijkl}}{\partial
 The percentage of melt can be controlled by the user. The approach currently incorporated in SAnTex overlooks the complex behaviour of melt, including its viscosity, flow dynamics, and interaction with neighbouring minerals, which can influence the overall anisotropic properties of the system. Future developments of SAnTex will aim to include more functionalities towards the calculation of melt-induced anisotropy. 
 
 The propagation of elastic deformation through an elastic medium is governed by the elastodynamics equation [@walker_msatnew_2012:2012]:
-\begin{equation}
-\rho \frac{\partial^2 u_i}{\partial t^2} = C_{ijkl} \frac{\partial^2 u_l}{\partial x_j \partial x_k}, \label{eq:elastodynamics}
+\begin{equation}\label{eq:elastodynamics}
+\rho \frac{\partial^2 u_i}{\partial t^2} = C_{ijkl} \frac{\partial^2 u_l}{\partial x_j \partial x_k}
 \end{equation}
 \noindent
 where $\rho$ is the density, $u_i$ is the displacement, $x_j$ is position and $t$ is time. 
 
 The scalar wave equation is a partial differential equation that describes how a scalar field, such as pressure or displacement, varies in space and time under the influence of a wave speed. The general form of the scalar wave equation is:
 
-\begin{equation}
+\begin{equation}\label{eq:scalarwavefield}
     \nabla^2 u - \frac{1}{c^2} \frac{\partial^2 u}{\partial t^2} = 0
-    \label{eq:scalarwavefield}
 \end{equation}
 
 \noindent
