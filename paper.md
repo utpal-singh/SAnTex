@@ -41,8 +41,9 @@ To address these gaps, we developed SAnTex (Seismic Anisotropy from Texture), a 
 Hooke's Law describes the behaviour of certain materials when subjected to a stretching or compressing force. Hooke's law can be expressed in terms of the elastic stiffness tensor and the strain tensor, as:
 
 \begin{equation}\label{eq:hookeslaw}
-\[\sigma_{ij} = C_{ijkl} \epsilon_{kl}\]
+\sigma_{ij} = C_{ijkl} \epsilon_{kl}
 \end{equation}
+
 
 where $\sigma_{ij}$ and $\epsilon_{kl}$ are the components of the stress and strain tensors, respectively, while $C_{ijkl}$ are the components of the elastic stiffness tensor. In this form, Hooke's law is more general and can account for the anisotropy and directionality of the material’s elastic properties.
 
