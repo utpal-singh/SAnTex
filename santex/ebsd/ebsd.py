@@ -286,8 +286,7 @@ class EBSD:
 
         self.phases_data = data
         
-        table = tabulate(data, headers=headers, tablefmt="grid")
-        return table
+        return data
 
     def filterByPhase(self, phase_list, data=None):
         """
@@ -305,7 +304,7 @@ class EBSD:
         indexes = []
         for phase in phase_list:
             phase_items = list(self.phases())
-            index = phase_items.index(phase)
+            index = next(index for index, mineral, value in phase_items if mineral == phase)
             indexes.append(index)
         for index in indexes:
             data = data[data['Phase'] != index]
@@ -590,6 +589,16 @@ class EBSD:
         - df: EBSD filtered dataframe
         """
         return df[df['MAD']<value]
+    
+    def filterByPhaseNumberList(self, df, phase_list):
+        """
+        Filters the EBSD dataframe given a list of phases
+        """
+        if df is None:
+            df = self.ctf.get_data()[0]
+
+        df_filtered = df[~df['Phase'].isin(phase_list)]
+        return df_filtered
     
     def odf(self, df, phase=1, crystal_symmetry='D2', random_val=True, miller=[1, 0, 0], hemisphere = 'both', 
             axes_labels=["Xs", "Ys"], alpha = 0.01, figure = None, vector_labels = None, reproject=False, show_hemisphere_label = None,

@@ -11,7 +11,7 @@ __pycache__/
 *.so
 
 #Files
-*.ctf
+# *.ctf
 *.crc
 *.cpc
 
