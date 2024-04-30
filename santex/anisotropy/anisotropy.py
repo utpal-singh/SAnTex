@@ -244,7 +244,7 @@ class Anisotropy:
             print("P wave anisotropy percent: ", p_wave_anisotropy_percent)
             print("S1 Wave anisotropy percent: ", s1_wave_anisotropy_percent)
             print("S2 Wave anisotropy percent: ", s2_wave_anisotropy_percent)
-            print("Velocity difference: ", maxdvs)
+            print("Velocity difference, maxdvs: ", maxdvs)
             print("Vp/Vs1 ratio: ", AVpVs1)
             return {
                 'maxvp': maxvp,
