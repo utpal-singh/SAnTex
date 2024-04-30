@@ -65,10 +65,11 @@ C_{ijkl}(p, T) = (1-f)(C_{ijkl}(0, 0) + \left. \frac{\partial C_{ijkl}}{\partial
 The fraction of melt, f can be controlled by the user. $C_{\text{melt}}$ is the stiffness tensor of the melt. The approach currently incorporated in SAnTex overlooks the complex behaviour of melt, including its viscosity, flow dynamics, and interaction with neighbouring minerals, which can influence the overall anisotropic properties of the system. Future developments of SAnTex will aim to include more functionalities towards the calculation of melt-induced anisotropy. 
 
 SAnTex calculates seismic anisotropy from EBSD texture data using the following steps:
-1. Calculation of the effective tensor constants by incorporating pressure and temperature derivatives. SAnTex includes an inbuilt catalogue of minerals, for which it automatically calculates the stiffness tensors and density for a range of pressure and temperature conditions.
-2. Determination of the reference stiffness tensors by applying Taylor series expansion.
-3. Estimation of a mean stiffness tensor by Voigt-Reuss-Hill bounds.
-4. Incorporation of the effect of melt on seismic properties through a nonlinear peridotite melting curve between solidus and liquidus [@mckenzie_volume_1988:1988]. Alternatively, the user can input a melt fraction of their choice.
+
+1.  Calculation of the effective tensor constants by incorporating pressure and temperature derivatives. SAnTex includes an inbuilt catalogue of minerals, for which it automatically calculates the stiffness tensors and density for a range of pressure and temperature conditions.
+2.  Determination of the reference stiffness tensors by applying Taylor series expansion.
+3.  Estimation of a mean stiffness tensor by Voigt-Reuss-Hill bounds.
+4.  Incorporation of the effect of melt on seismic properties through a nonlinear peridotite melting curve between solidus and liquidus [@mckenzie_volume_1988:1988]. Alternatively, the user can input a melt fraction of their choice.
 
 # Package Summary
 SAnTex allows for (Fig. 1):
