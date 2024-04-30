@@ -7,10 +7,13 @@ tags:
   - crystallographic orientation
 authors:
   - name: Utpal Singh
+    orcid: 0000-0001-8304-5615
     affiliation: 1
   - name: Sinan Özaydın
+    orcid: 0000-0002-4532-9980
     affiliation: 1
   - name: Vasileios Chatzaras
+    orcid: 0000-0001-9759-4754
     affiliation: 1
   - name: Patrice Rey
     affiliation: 1
@@ -47,7 +50,7 @@ Hooke's Law describes the behaviour of certain materials when subjected to a str
 
 where $\sigma_{ij}$ and $\epsilon_{kl}$ are the components of the stress and strain tensors, respectively, while $C_{ijkl}$ are the components of the elastic stiffness tensor. In this form, Hooke's law is more general and can account for the anisotropy and directionality of the material’s elastic properties.
 
-The pressure and temperature dependence of elastic constants is mainly linear but can include non-linear effects that can be approximated up to second-order terms. This relationship can be simplified using a Taylor series expansion, as outlined below:
+The pressure and temperature dependence of elastic constants is mainly linear but can include non-linear effects that can be approximated up to second-order terms using a Taylor series expansion, as outlied below::
 
 \begin{equation}\label{eq:elasticity}
 C_{ijkl}(p, T) = C_{ijkl}(0, 0) + \left. \frac{\partial C_{ijkl}}{\partial p} \right|{(0,0)} p + \left. \frac{\partial C{ijkl}}{\partial T} \right|_{(0,0)} T + \mathcal{O}(p^2, T^2)
@@ -59,7 +62,7 @@ In the current version of SAnTex, melt is considered as an isotropic phase with 
 C_{ijkl}(p, T) = (1-f)(C_{ijkl}(0, 0) + \left. \frac{\partial C_{ijkl}}{\partial p} \right|{(0,0)} p + \left. \frac{\partial C{ijkl}}{\partial T} \right|{(0,0)} T + \mathcal{O}(p^2, T^2)) + f{\text{melt}}(C_{\text{melt}}(p, T))
 \end{equation}
 
-The percentage of melt can be controlled by the user. The approach currently incorporated in SAnTex overlooks the complex behaviour of melt, including its viscosity, flow dynamics, and interaction with neighbouring minerals, which can influence the overall anisotropic properties of the system. Future developments of SAnTex will aim to include more functionalities towards the calculation of melt-induced anisotropy. 
+The fraction of melt, f can be controlled by the user. $C_{\text{melt}}$ is the stiffness tensor of the melt. The approach currently incorporated in SAnTex overlooks the complex behaviour of melt, including its viscosity, flow dynamics, and interaction with neighbouring minerals, which can influence the overall anisotropic properties of the system. Future developments of SAnTex will aim to include more functionalities towards the calculation of melt-induced anisotropy. 
 
 SAnTex calculates seismic anisotropy from EBSD texture data using the following steps:
 1. Calculation of the effective tensor constants by incorporating pressure and temperature derivatives. SAnTex includes an inbuilt catalogue of minerals, for which it automatically calculates the stiffness tensors and density for a range of pressure and temperature conditions.
@@ -68,9 +71,9 @@ SAnTex calculates seismic anisotropy from EBSD texture data using the following 
 4. Incorporation of the effect of melt on seismic properties through a nonlinear peridotite melting curve between solidus and liquidus [@mckenzie_volume_1988:1988]. Alternatively, the user can input a melt fraction of their choice.
 
 # Package Summary
-SAnTex allows for (Fig. 2):
+SAnTex allows for (Fig. 1):
 
-1.	Processing of EBSD data: Facilitates the processing and cleaning of EBSD data, calculating orientation distribution functions, pole density functions, and inverse pole figures.
+1.	Processing of EBSD data: Facilitates the processing and cleaning of EBSD data, calculating orientation distribution functions, pole density functions, and inverse pole figures[@johnstone_density-based_2020:2020].
 2.	Tensor operations: Tensor conversions between Voigt matrix and full stiffness tensors, as well as rotations based on euler angles.
 3.	Material analysis: SAnTex provides a catalogue of minerals to calculate seismic properties of a given composition. Users can load the catalogue and either utilise the phases of interest for EBSD-determined phase abundances or they can assume a modal mineral composition.
 4.	Calculation of Seismic Anisotropy: Performs calculations of seismic anisotropy at a range of pressure and temperature conditions (Pressure: 0 GPa to 13 GPa, Temperature: 300 K to 2000 K), with visualisation capabilities in interactive 2D and 3D plots.

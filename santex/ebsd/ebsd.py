@@ -583,7 +583,7 @@ class EBSD:
         """
         return df[df['MAD']<value]
     
-    def filterByPhaseNumberList(self, df=None, phase_list):
+    def filterByPhaseNumberList(self, phase_list, df=None):
         """
         Filters the EBSD dataframe given a list of phases
 
