@@ -12,6 +12,7 @@ from .plot_vel_grid import plot_velocity_grid
 from .utils import christoffel_tensor, wave_property
 
 from .. import Material
+
 from .. import EBSD
 
 from scipy.interpolate import griddata
