@@ -20,45 +20,53 @@ import math
 
 class Anisotropy:
     """
-    Anisotropy class for representing anisotropic material properties.
+    A class to represent anisotropic material properties.
 
     Attributes:
-        cijkl (numpy.ndarray or None): stiffness tensor in voigt notation.
-            It is converted from the input stiffness matrix using voigt_to_tensor method.
-            If stiffness_matrix is None, cijkl remains None. Units can be SI or CGS but should remain consistent
-            between stiffness matrix and density
-        rho (float or None): Density of the material.
-            If density is None, rho remains None.
+        cijkl (Optional[numpy.ndarray]): Stiffness tensor in Voigt notation.
+            It is converted from the input stiffness matrix using the `voigt_to_tensor` method.
+            If `stiffness_matrix` is None, `cijkl` remains None. Units should be consistent between the 
+            stiffness matrix and density, either in SI or CGS.
+        rho (Optional[float]): Density of the material.
+            If `density` is None, `rho` remains None.
+
+    Parameters:
+        stiffness_matrix (Optional[numpy.ndarray]): A 6x6 matrix representing the stiffness tensor in Voigt notation.
+        density (Optional[float]): The density of the material.
 
     Methods:
         __init__(stiffness_matrix, density):
             Initializes the Anisotropy object with the given stiffness_matrix and density.
-            If either stiffness_matrix or density is None, cijkl and rho remain None.
+            If either `stiffness_matrix` or `density` is None, `cijkl` and `rho` remain None.
 
-    Example Usage:
-        stiffness_matrix = np.array([[198.96, 73.595, 68.185, 0., 9.735, 0.],
-                                [73.595, 155.94, 62.23, 0., 6.295, 0.],
-                                [68.185, 62.23, 225.99, 0., 33.85, 0.],
-                                [0., 0., 0., 65.66, 0., 6.415],
-                                [9.735, 6.295, 33.85, 0., 60.23, 0.],
-                                [0., 0., 0., 6.415, 0., 65.18]]) * 10**9
-        density = 3.5 
-        anisotropy = Anisotropy(stiffness_matrix, density)
+    Example:
+        >>> import numpy as np
+        >>> stiffness_matrix = np.array([[198.96, 73.595, 68.185, 0., 9.735, 0.],
+        >>>                              [73.595, 155.94, 62.23, 0., 6.295, 0.],
+        >>>                              [68.185, 62.23, 225.99, 0., 33.85, 0.],
+        >>>                              [0., 0., 0., 65.66, 0., 6.415],
+        >>>                              [9.735, 6.295, 33.85, 0., 60.23, 0.],
+        >>>                              [0., 0., 0., 6.415, 0., 65.18]]) * 10**9
+        >>> density = 3.5  # density in g/cm³ or consistent units
+        >>> anisotropy = Anisotropy(stiffness_matrix, density)
+        >>> print(anisotropy.cijkl)
+        >>> print(anisotropy.rho)
     """
+
     
     def __init__(self, stiffness_matrix, density):
         """
-        Initializes an Anisotropy object with the given stiffness_matrix and density.
+        Initializes an Anisotropy object with the given stiffness matrix and density.
 
         Parameters:
-            stiffness_matrix (list of lists or numpy.ndarray): The 6x6 stiffness matrix representing
+            stiffness_matrix (list[list[float]] or numpy.ndarray): A 6x6 stiffness matrix representing
                 the material's anisotropic properties in Voigt notation.
             density (float): The density of the material.
 
         Raises:
-            TypeError: If stiffness_matrix is not a 6x6 list or numpy.ndarray.
-
+            TypeError: If `stiffness_matrix` is not a 6x6 list of lists or a numpy.ndarray.
         """
+
         self.cijkl = None
         self.rho = None
 
@@ -157,27 +165,31 @@ class Anisotropy:
         vp, vs1, vs2 = self.phase_velocity()
         return vp, vs1, vs2
 
-    def anisotropy_values(self, stiffness_matrix = None, density = None, method = None, return_values=None):
+    def anisotropy_values(self, stiffness_matrix=None, density=None, method=None, return_values=None):
         """
         Calculates various anisotropy values based on the velocities calculated from the given stiffness matrix and density.
 
         Parameters:
             stiffness_matrix (list or None): The stiffness matrix representing the material's anisotropic properties.
-            density (float or None): The density of the material.
-            method (str or None): The method to use for calculating anisotropy values. Options: 'array'.
+                If None, the current object's stiffness matrix is used.
+            density (float or None): The density of the material. If None, the current object's density is used.
+            method (str or None): The method to use for calculating anisotropy values. Options include 'array' for batch 
+                processing of multiple anisotropy objects.
             return_values (str or None): The specific anisotropy value to return. Options: 'maxvp', 'minvp', 'maxvs1',
-                'minvs1', 'maxvs2', 'minvs2', or None (default) to print all values.
+                'minvs1', 'maxvs2', 'minvs2', 'max_vs_anisotropy_percent', 'min_vs_anisotropy_percent',
+                'p_wave_anisotropy_percent', 's1_wave_anisotropy_percent', 's2_wave_anisotropy_percent',
+                'maxdvs', 'AVpVs1', or None (default) to print all values.
 
         Returns:
-            float or None: A dictionary containing the calculated anisotropy values if return_values is None,
-                or a single anisotropy value if return_values is specified.
+            float or dict: If `return_values` is specified, returns the corresponding anisotropy value. If None, 
+                returns a dictionary containing all calculated anisotropy values.
 
         Raises:
-            ValueError: If an error occurs during the calculation.
+            ValueError: If an error occurs during the calculation, such as invalid input values.
 
         Notes:
-            - If method='array', an array of Anisotropy objects can be provided for batch calculation.
-        
+            - If `method='array'`, an array of Anisotropy objects can be provided for batch calculation.
+            - The calculated anisotropy values include both P-wave and S-wave anisotropy percentages.
         """
 
         if method == "array":
