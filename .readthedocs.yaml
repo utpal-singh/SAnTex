@@ -14,3 +14,5 @@ python:
 sphinx:
   configuration: docs/source/conf.py
 
+submodules:
+  include: all

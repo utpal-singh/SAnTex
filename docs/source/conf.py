@@ -8,7 +8,10 @@
 
 import os
 import sys
+import sphinx_book_theme
 sys.path.insert(0, os.path.abspath('../../'))
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+
 
 project = 'santex'
 copyright = '2024, Utpal Singh, Sinan Ozaydin, Vasileios Chatzaras, Patrice Rey'
@@ -24,13 +27,24 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.intersphinx',
+    'sphinx.ext.coverage',
+    'sphinx.ext.mathjax',
+    'sphinx_design',
+    'myst_nb',
+    'jupyterlite_sphinx',
+    'sphinx.ext.viewcode',
 ]
+
+
 
 
 templates_path = ['_templates']
 exclude_patterns = []
 
 autosummary_generate = True
+autosummary_imported_members = True
+numpydoc_show_class_members = True
+class_members_toctree = True
 
 
 # -- Options for HTML output -------------------------------------------------
