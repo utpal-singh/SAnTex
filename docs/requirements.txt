@@ -5,3 +5,10 @@ sphinx_book_theme
 sphinx_rtd_theme
 sphinx
 readthedocs-sphinx-ext
+nbsphinx
+sphinxcontrib.bibtex
+myst-parser
+myst_nb
+sphinx_design
+jupyterlite_sphinx
+intersphinx_registry
