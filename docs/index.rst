@@ -11,6 +11,8 @@ Welcome to santex's documentation!
    :caption: Contents:
 
    modules
+   usage
+   api
 
 Indices and tables
 ==================
