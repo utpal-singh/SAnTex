@@ -20,9 +20,11 @@ import math
 
 class Anisotropy:
     """
+
     A class to represent anisotropic material properties.
 
     Attributes:
+
         cijkl (Optional[numpy.ndarray]): Stiffness tensor in Voigt notation.
             It is converted from the input stiffness matrix using the `voigt_to_tensor` method.
             If `stiffness_matrix` is None, `cijkl` remains None. Units should be consistent between the 
@@ -31,15 +33,18 @@ class Anisotropy:
             If `density` is None, `rho` remains None.
 
     Parameters:
+
         stiffness_matrix (Optional[numpy.ndarray]): A 6x6 matrix representing the stiffness tensor in Voigt notation.
         density (Optional[float]): The density of the material.
 
     Methods:
+
         __init__(stiffness_matrix, density):
             Initializes the Anisotropy object with the given stiffness_matrix and density.
             If either `stiffness_matrix` or `density` is None, `cijkl` and `rho` remain None.
 
     Example:
+
         >>> import numpy as np
         >>> stiffness_matrix = np.array([[198.96, 73.595, 68.185, 0., 9.735, 0.],
         >>>                              [73.595, 155.94, 62.23, 0., 6.295, 0.],
@@ -51,6 +56,7 @@ class Anisotropy:
         >>> anisotropy = Anisotropy(stiffness_matrix, density)
         >>> print(anisotropy.cijkl)
         >>> print(anisotropy.rho)
+
     """
 
     
@@ -65,6 +71,7 @@ class Anisotropy:
 
         Raises:
             TypeError: If `stiffness_matrix` is not a 6x6 list of lists or a numpy.ndarray.
+
         """
 
         self.cijkl = None
@@ -78,6 +85,7 @@ class Anisotropy:
 
     def christoffel_tensor(self, n):
         """
+
         Calculates the Christoffel tensor given a direction vector n.
 
         Parameters:
@@ -110,6 +118,7 @@ class Anisotropy:
 
         Raises:
             ValueError: If an error occurs during the calculation.
+
         """
         try:
             return wave_property(tik)
@@ -125,7 +134,8 @@ class Anisotropy:
             tuple: A tuple containing the phase velocities (vp for P-wave, vs1 for S1-wave, and vs2 for S2-wave).
 
         Raises:
-            ValueError: If an error occurs during the calculation.    
+            ValueError: If an error occurs during the calculation.
+
         """
         try:
             vp = []
@@ -172,9 +182,12 @@ class Anisotropy:
         Parameters:
             stiffness_matrix (list or None): The stiffness matrix representing the material's anisotropic properties.
                 If None, the current object's stiffness matrix is used.
+            
             density (float or None): The density of the material. If None, the current object's density is used.
+            
             method (str or None): The method to use for calculating anisotropy values. Options include 'array' for batch 
                 processing of multiple anisotropy objects.
+            
             return_values (str or None): The specific anisotropy value to return. Options: 'maxvp', 'minvp', 'maxvs1',
                 'minvs1', 'maxvs2', 'minvs2', 'max_vs_anisotropy_percent', 'min_vs_anisotropy_percent',
                 'p_wave_anisotropy_percent', 's1_wave_anisotropy_percent', 's2_wave_anisotropy_percent',
@@ -182,7 +195,7 @@ class Anisotropy:
 
         Returns:
             float or dict: If `return_values` is specified, returns the corresponding anisotropy value. If None, 
-                returns a dictionary containing all calculated anisotropy values.
+            returns a dictionary containing all calculated anisotropy values.
 
         Raises:
             ValueError: If an error occurs during the calculation, such as invalid input values.
@@ -190,6 +203,7 @@ class Anisotropy:
         Notes:
             - If `method='array'`, an array of Anisotropy objects can be provided for batch calculation.
             - The calculated anisotropy values include both P-wave and S-wave anisotropy percentages.
+
         """
 
         if method == "array":
@@ -275,32 +289,31 @@ class Anisotropy:
                 'AVpVs1': AVpVs1
             }
         
-    def plot_velocities(self, pressure_range, temperature_range, return_type, is_ebsd = False, phase = None, grid = [5, 5], filename = None, *args):
+    def plot_velocities(self, pressure_range, temperature_range, return_type, is_ebsd=False, phase=None, grid=[5, 5], filename=None, *args):
         """
         Plots velocities based on specified ranges and return types.
 
-            Parameters:
-                pressure_range (tuple): The range of pressures for which velocities will be plotted. Example: [2, 4].
-                temperature_range (tuple): The range of temperatures for which velocities will be plotted. Example: [1000, 2000]
-                return_type (str): The type of velocity to plot. Options: 'maxvp', 'minvp', 'maxvs1', 'minvs1', 'maxvs2', 'minvs2'.
-                is_ebsd (bool): Whether the data comes from electron backscatter diffraction (EBSD). Default is False.
-                phase (str or None): The phase of the material. Example, phase = 'Forsterite'
-                grid (list): The grid dimensions for the plot. Default is [5, 5].
-                filename (str or None): The filename of the EBSD data. Required if is_ebsd is True.
-                *args: can be [1, 2, 3]
+        Parameters:
+            pressure_range (tuple): The range of pressures for which velocities will be plotted. Example: [2, 4].
+            temperature_range (tuple): The range of temperatures for which velocities will be plotted. Example: [1000, 2000].
+            return_type (str): The type of velocity to plot. Options: 'maxvp', 'minvp', 'maxvs1', 'minvs1', 'maxvs2', 'minvs2'.
+            is_ebsd (bool): Whether the data comes from electron backscatter diffraction (EBSD). Default is False.
+            phase (str or None): The phase of the material. Example: phase='Forsterite'.
+            grid (list): The grid dimensions for the plot. Default is [5, 5].
+            filename (str or None): The filename of the EBSD data. Required if `is_ebsd` is True.
+            *args: Additional arguments for plot customization.
 
-            Raises:
-                ValueError: If required parameters are not provided or if an error occurs during plotting.
+        Raises:
+            ValueError: If required parameters are not provided or if an error occurs during plotting.
 
-            Notes:
-                - If is_ebsd is True, phase and filename must be provided.
-                - The plot type and appearance can be customized using *args.
+        Notes:
+            - If `is_ebsd` is True, `phase` and `filename` must be provided.
+            - The plot type and appearance can be customized using `*args`.
 
-            Example Usage:
-                anisotropy.plot_velocities((0, 100), (500, 1000), 'maxvp', is_ebsd=True, phase='phase1', filename='velocity_plot.png', 'ro-')
+        Example:
+            >>> anisotropy.plot_velocities((0, 100), (500, 1000), 'maxvp', is_ebsd=True, phase='phase1', filename='velocity_plot.png', 'ro-')
         """
-        return plot_velocity_grid(pressure_range=pressure_range, temperature_range=temperature_range, return_type=return_type, is_ebsd=is_ebsd, phase = phase, grid = grid, filename = filename, *args)
-
+        return plot_velocity_grid(pressure_range=pressure_range, temperature_range=temperature_range, return_type=return_type, is_ebsd=is_ebsd, phase=phase, grid=grid, filename=filename, *args)
 
 
     def plot(self, colormap="RdBu_r", step = 180, savefig = False, figname = None, dpi = 300):
