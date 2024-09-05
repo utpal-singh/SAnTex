@@ -15,3 +15,7 @@ build:
 
 sphinx:
   builder: none
+
+script:
+    - pip install -r requirements.txt
+    - sphinx-build -b html -d _build/doctrees . _build/html
