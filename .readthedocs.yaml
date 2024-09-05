@@ -1,5 +1,3 @@
-# .readthedocs.yaml
-
 version: 2
 
 build:
@@ -8,11 +6,12 @@ build:
     python: "3.9"
 
 python:
-   install:
-     - requirements: docs/requirements.txt
+  install:
+    - method: "pip"
+      path: "."
+
+build:
+  image: null
 
 sphinx:
-  configuration: docs/source/conf.py
-
-submodules:
-  include: all
+  builder: none

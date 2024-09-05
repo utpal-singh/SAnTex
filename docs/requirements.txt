@@ -12,3 +12,6 @@ myst_nb
 sphinx_design
 jupyterlite_sphinx
 intersphinx_registry
+numpy
+matplotlib
+pandas

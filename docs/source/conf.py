@@ -12,6 +12,14 @@ import sphinx_book_theme
 sys.path.insert(0, os.path.abspath('../../'))
 sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
 
+# autodoc_mock_imports = ['numpy', 'orix', 'diffpy', 'matplotlib', 'plotly', 'pandas']
+
+# from unittest.mock import MagicMock
+
+# MOCK_MODULES = ['numpy', 'orix', 'diffpy', 'matplotlib', 'plotly', 'pandas']
+# for mod_name in MOCK_MODULES:
+#     sys.modules[mod_name] = MagicMock()
+
 
 project = 'santex'
 copyright = '2024, Utpal Singh, Sinan Ozaydin, Vasileios Chatzaras, Patrice Rey'
@@ -34,7 +42,6 @@ extensions = [
     'jupyterlite_sphinx',
     'sphinx.ext.viewcode',
 ]
-
 
 
 

@@ -1,3 +1,6 @@
+__version__ = '1.2'
+
+
 from .material import Material
 from .ebsd import EBSD
 from .tensor import Tensor
