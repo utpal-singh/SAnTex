@@ -1,2 +1,2 @@
+sphinx
 sphinx_book_theme
-sphinx.ext.mathjax
