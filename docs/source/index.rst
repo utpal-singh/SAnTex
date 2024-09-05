@@ -10,7 +10,13 @@ Welcome to santex's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-
+   santex.ebsd.rst
+   santex.material.rst     
+   santex.tensor.rst               
+   santex.anisotropy.rst   
+   santex.isotropy.rst     
+   santex.rst
+   modules
 
 Indices and tables
 ==================
