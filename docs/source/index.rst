@@ -23,13 +23,13 @@ Features
 
 .. toctree::
    :maxdepth: 2
-   :caption: Installation:
+   :caption: Installation
 
    install.rst
 
 .. toctree::
    :maxdepth: 2
-   :caption: Working:
+   :caption: Working
 
    workingOnSantex.rst
 
@@ -37,7 +37,7 @@ Features
 
 .. toctree::
    :maxdepth: 2
-   :caption: Contents:
+   :caption: Modules and submodules within SAnTex
 
    santex.ebsd.rst
    santex.material.rst     

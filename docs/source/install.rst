@@ -1,11 +1,14 @@
 Santex can be installed using:
 
+Install using pip
+=============
+
 .. code-block:: bash
 
    pip install santex
 
-To build from source:
----------------------
+Build from source
+================
 
 Open the terminal and navigate to the `Downloads` or `Documents` directory (or any other preferred location) by typing:
 
