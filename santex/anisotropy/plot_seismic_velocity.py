@@ -1,6 +1,6 @@
 import numpy as np
 import math
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 from .utils import christoffel_tensor, wave_property
 
 def phase_velocity(cijkl, rho):

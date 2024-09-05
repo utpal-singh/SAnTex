@@ -1,17 +1,1 @@
-mock==1.0.1
-commonmark==0.9.1
-recommonmark==0.5.0
 sphinx_book_theme
-sphinx_rtd_theme
-sphinx
-readthedocs-sphinx-ext
-nbsphinx
-sphinxcontrib.bibtex
-myst-parser
-myst_nb
-sphinx_design
-jupyterlite_sphinx
-intersphinx_registry
-numpy
-matplotlib
-pandas

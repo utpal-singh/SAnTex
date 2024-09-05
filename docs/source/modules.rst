@@ -5,3 +5,4 @@ santex
    :maxdepth: 4
 
    santex
+   setup

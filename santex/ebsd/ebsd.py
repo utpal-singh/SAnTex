@@ -1,7 +1,7 @@
 # sage/ebsd/ebsd.py
 
 from ._ctf_parser import Ctf
-import matplotlib.pyplot as plt 
+from matplotlib import pyplot as plt
 from tabulate import tabulate
 import os
 

@@ -6,52 +6,25 @@
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
-import os
-import sys
-import sphinx_book_theme
-sys.path.insert(0, os.path.abspath('../../'))
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
-
-# autodoc_mock_imports = ['numpy', 'orix', 'diffpy', 'matplotlib', 'plotly', 'pandas']
-
-# from unittest.mock import MagicMock
-
-# MOCK_MODULES = ['numpy', 'orix', 'diffpy', 'matplotlib', 'plotly', 'pandas']
-# for mod_name in MOCK_MODULES:
-#     sys.modules[mod_name] = MagicMock()
-
-
 project = 'santex'
-copyright = '2024, Utpal Singh, Sinan Ozaydin, Vasileios Chatzaras, Patrice Rey'
-author = 'Utpal Singh, Sinan Ozaydin, Vasileios Chatzaras, Patrice Rey'
-release = '1.0'
+copyright = '2024, Utpal Singh'
+author = 'Utpal Singh'
+release = '1.2.1'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = [
-    'sphinx.ext.duration',
-    'sphinx.ext.doctest',
-    'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary',
-    'sphinx.ext.intersphinx',
-    'sphinx.ext.coverage',
-    'sphinx.ext.mathjax',
-    'sphinx_design',
-    'myst_nb',
-    'jupyterlite_sphinx',
-    'sphinx.ext.viewcode',
-]
-
-
+extensions = []
 
 templates_path = ['_templates']
 exclude_patterns = []
 
-autosummary_generate = True
-autosummary_imported_members = True
-numpydoc_show_class_members = True
-class_members_toctree = True
+extensions = [
+   'sphinx.ext.duration',
+   'sphinx.ext.doctest',
+   'sphinx.ext.autodoc',
+   'sphinx.ext.autosummary',
+]
 
 
 # -- Options for HTML output -------------------------------------------------

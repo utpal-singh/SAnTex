@@ -1,8 +1,7 @@
 import numpy as np
 import math
-from santex import Tensor
-
-import matplotlib.pyplot as plt
+from ..tensor import Tensor
+from matplotlib import pyplot as plt
 import numpy as np
 from .vtkplotter import Plotter
 import plotly.graph_objects as go
@@ -10,10 +9,6 @@ from plotly.subplots import make_subplots
 
 from .plot_vel_grid import plot_velocity_grid
 from .utils import christoffel_tensor, wave_property
-
-from .. import Material
-
-from .. import EBSD
 
 from scipy.interpolate import griddata
 import math

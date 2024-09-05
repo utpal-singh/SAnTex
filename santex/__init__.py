@@ -1,8 +1,1 @@
-__version__ = '1.2'
-
-
-from .material import Material
-from .ebsd import EBSD
-from .tensor import Tensor
-from .anisotropy import Anisotropy
-from .isotropy import Isotropy
+__version__ = '1.0.0'

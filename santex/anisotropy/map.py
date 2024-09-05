@@ -1,4 +1,4 @@
-import matplotlib.pyplot as plt
+from matplotlib import pyplot as plt
 import cartopy.crs as ccrs
 import cartopy
 import numpy as np
