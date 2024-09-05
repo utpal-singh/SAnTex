@@ -21,10 +21,19 @@ Features
 * Isotropic velocities: Calculates isotropic seismic wave velocities (Vp, Vs and vbulk), isothermal bulk modulus, and density at elevated temperatures and pressures (Hacker & Abers, 2004).
 
 
-Installation
--------------
+.. toctree::
+   :maxdepth: 2
+   :caption: Installation:
 
-install.rst
+   install.rst
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Working:
+
+   workingOnSantex.rst
+
+
 
 .. toctree::
    :maxdepth: 2

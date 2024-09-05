@@ -1,17 +1,28 @@
 Santex can be installed using:
 
-.. code:: bash
+.. code-block:: bash
 
    pip install santex
 
 To build from source:
------------------------
+---------------------
 
-Open the terminal and go to Downloads or Documents directory by typing cd
-~/Documents or cd ~/Downloads or any other directory, where you can store the
-repository of SAnTex. Run the following to get the updated version of SAnTex
+Open the terminal and navigate to the `Downloads` or `Documents` directory (or any other preferred location) by typing:
 
-.. code:: bash
-    git clone https://github.com/utpal-singh/SAnTex.git
-    cd santex
-    pip install .
+.. code-block:: bash
+
+   cd ~/Documents
+
+or
+
+.. code-block:: bash
+
+   cd ~/Downloads
+
+Run the following commands to clone the repository and install the updated version of SAnTex:
+
+.. code-block:: bash
+
+   git clone https://github.com/utpal-singh/SAnTex.git
+   cd SAnTex
+   pip install .
