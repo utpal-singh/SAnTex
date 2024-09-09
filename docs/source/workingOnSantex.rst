@@ -429,3 +429,150 @@ In order to illustrate the concept of inverse pole figures, let's calculate the 
         vector_title='Z',
         projection='ipf',
         crystal_symmetry='D2',)
+
+
+Material analysis
+===================
+
+The Material class from the Sage library is used for defining and working with materials calculations.
+
+Material Module can be loaded as:
+
+.. code-block:: python
+
+    import numpy as np
+    from tabulate import tabulate
+    from santex.material import Material
+
+The available material within the santex registry can be viewed as:
+
+.. code-block:: python
+
+    material_instance = Material()
+    phases_info = material_instance.availablePhases()
+    print("Available Phases:")
+    print(phases_info)
+
+This loads a list of materials present with their crystal systems and primary phase information as shown below:
+
+.. code-block:: bash
+
+    Available Phases:
+    +---------------------------------------+---------------------+-----------------------------------+
+    |                 Phase                 |   Crystal System    |           Primary Phase           |
+    +---------------------------------------+---------------------+-----------------------------------+
+    |           Almandine-pyrope            |        Cubic        |              Garnet               |
+    |               Grossular               |        Cubic        |              Garnet               |
+    |               Majorite                |        Cubic        |              Garnet               |
+    |                Pyrope                 |        Cubic        |              Garnet               |
+    |              a_quartz_1               | Hexagonal/ Trigonal |              Quartz               |
+    |              a_quartz_2               | Hexagonal/ Trigonal |              Quartz               |
+    |              a_Quartz_3               | Hexagonal/ Trigonal |              Quartz               |
+    |              a_quartz_4               | Hexagonal/ Trigonal |              Quartz               |
+    |             a_quartz_696C             | Hexagonal/ Trigonal |              Quartz               |
+    |             a_quartz_700C             | Hexagonal/ Trigonal |              Quartz               |
+    |               Calcite_1               | Hexagonal/ Trigonal |              Calcite              |
+    |               Calcite_2               | Hexagonal/ Trigonal |              Calcite              |
+    |              Forsterite               |    Orthorhombic     |              Olivine              |
+    |               Fayalite                |    Orthorhombic     |              Olivine              |
+    |               Lawsonite               |    Orthorhombic     |              Olivine              |
+    |        Orthoenstatite (MgSiO3)        |    Orthorhombic     |              Olivine              |
+    |        Orthoenstatite (MgSiO3)        |    Orthorhombic     |              Olivine              |
+    |               Enstatite               |    Orthorhombic     |              Olivine              |
+    |       Bronzite (Mg0.8Fe0.2SiO3)       |    Orthorhombic     |              Olivine              |
+    |         Ferrosilite (FeSiO3)          |    Orthorhombic     |              Olivine              |
+    |                Biotite                |     Monoclinic      | Phyllosilicates and clay minerals |
+    |               Muscovite               |     Monoclinic      | Phyllosilicates and clay minerals |
+    |              Phlogopite               |     Monoclinic      | Phyllosilicates and clay minerals |
+    |            Illite-smectite            |     Monoclinic      | Phyllosilicates and clay minerals |
+    |                Dickite                |     Monoclinic      | Phyllosilicates and clay minerals |
+    |                Augite                 |     Monoclinic      |          Clinopyroxenes           |
+    |               Diopside                |     Monoclinic      |          Clinopyroxenes           |
+    |            Chrome-diopside            |     Monoclinic      |          Clinopyroxenes           |
+    |                Jadeite                |     Monoclinic      |          Clinopyroxenes           |
+    |               Omphacite               |     Monoclinic      |          Clinopyroxenes           |
+    |                Coesite                |     Monoclinic      |          Clinopyroxenes           |
+    |       Amphobole #1 Richterite1        |     Monoclinic      |             Amphibole             |
+    |       Amphobole #2 Kataphorite1       |     Monoclinic      |             Amphibole             |
+    |  Amphobole #3 Taramite-Tschermakite1  |     Monoclinic      |             Amphibole             |
+    | Amphobole #4 Hornblende-Tschermakite1 |     Monoclinic      |             Amphibole             |
+    |        Amphobole #5 Tremolite1        |     Monoclinic      |             Amphibole             |
+    |         Amphobole #6 Edenite1         |     Monoclinic      |             Amphibole             |
+    |         Amphobole #7 Edenite1         |     Monoclinic      |             Amphibole             |
+    |        Amphobole #8 Pargasite1        |     Monoclinic      |             Amphibole             |
+    |        Amphobole #9 Pargasite1        |     Monoclinic      |             Amphibole             |
+    |            Hornblende (#1)            |     Monoclinic      |             Amphibole             |
+    |            Hornblende (#2)            |     Monoclinic      |             Amphibole             |
+    |              Glaucophane              |     Monoclinic      |             Amphibole             |
+    |          Sanidine (Or83Ab15)          |     Monoclinic      |         Alkali feldspars          |
+    |          Sanidine (Or89Ab11)          |     Monoclinic      |         Alkali feldspars          |
+    |         Orthoclase (Or93Ab7)          |     Monoclinic      |         Alkali feldspars          |
+    |           Albite (Or0Ab100)           |      Triclinic      |       Plagioclase feldspar        |
+    |             An0 (Albite)              |      Triclinic      |       Plagioclase feldspar        |
+    |           An25 (Oligoclase)           |      Triclinic      |       Plagioclase feldspar        |
+    |            An37 (Andesine)            |      Triclinic      |       Plagioclase feldspar        |
+    |            An48 (Andesine)            |      Triclinic      |       Plagioclase feldspar        |
+    |          An60 (Labradorite)           |      Triclinic      |       Plagioclase feldspar        |
+    |          An67 (Labradorite)           |      Triclinic      |       Plagioclase feldspar        |
+    |           An78 (Bytownite)            |      Triclinic      |       Plagioclase feldspar        |
+    |           An96 (Anorthite)            |      Triclinic      |       Plagioclase feldspar        |
+    |               Kaolinite               |      Triclinic      |           Clay minerals           |
+    |                Nacrite                |      Triclinic      |           Clay minerals           |
+    +---------------------------------------+---------------------+-----------------------------------+
+
+
+Hooke's Law
+===========
+
+Hooke's Law describes the behavior of certain materials when subjected to a stretching or compressing force. Hooke's law can be expressed in terms of the elastic stiffness tensor and the strain tensor, as:
+
+.. math::
+   :label: eq:hookeslaw
+
+   \sigma_{ij} = C_{ijkl} \epsilon_{kl}
+
+where :math:`\sigma_{ij}` and :math:`\epsilon_{kl}` are the components of the stress and strain tensors, respectively, while :math:`C_{ijkl}` are the components of the elastic stiffness tensor. In this form, Hooke's law is more general and can account for the anisotropy and directionality of the material’s elastic properties.
+
+The pressure and temperature dependence of elastic constants is mainly linear but can include non-linear effects that can be approximated up to second-order terms using a Taylor series expansion, as outlined below:
+
+.. math::
+   :label: eq:elasticity
+
+   C_{ijkl}(p, T) = C_{ijkl}(0, 0) + \left. \frac{\partial C_{ijkl}}{\partial p} \right|_{(0,0)} p + \left. \frac{\partial C{ijkl}}{\partial T} \right|_{(0,0)} T + \mathcal{O}(p^2, T^2)
+
+In the current version of SAnTex, melt is considered as an isotropic phase with homogenous distribution within an anisotropic host rock, e.g., [@lee_modeling_2017:2017].
+
+.. math::
+   :label: eq:elasticity_fmelt
+
+   C_{ijkl}(p, T) = (1-f)\left(C_{ijkl}(0, 0) + \left. \frac{\partial C_{ijkl}}{\partial p} \right|_{(0,0)} p + \left. \frac{\partial C{ijkl}}{\partial T} \right|_{(0,0)} T + \mathcal{O}(p^2, T^2)\right) + f\text{melt}(C_{\text{melt}}(p, T))
+
+The fraction of melt, :math:`f`, can be controlled by the user. :math:`C_{\text{melt}}` is the stiffness tensor of the melt. The approach currently incorporated in SAnTex overlooks the complex behavior of melt, including its viscosity, flow dynamics, and interaction with neighboring minerals, which can influence the overall anisotropic properties of the system. Future developments of SAnTex will aim to include more functionalities towards the calculation of melt-induced anisotropy.
+
+Modal Mineral Composition of a rock and anisotropy
+----------------
+
+within Santex, a user can parse a modal mineral composition for a rock and calculate its anisotropy as follows:
+
+.. code-block:: python
+
+    from santex.material import Material
+    from santex.anisotropy import Anisotropy
+
+    material = Material()
+    rock = ["Forsterite", "Diopside", "Enstatite"]
+    fraction = [0.6, 0.25, 0.15]
+    average_tensor, average_density = material.modalRock(rock, fraction, 2, 1000)
+    anisotropy = Anisotropy(average_tensor*10**9, average_density)
+    values = anisotropy.anisotropy_values()
+
+This returns a dictionary containing the anisotropy percent containing ``maxvp``, ``minvp``, ``minvs1``, ``minvs2``, ``maxvs1``, ``maxvs2``, ``max_vs_anisotropy_percent``, ``min_vs_anisotropy_percent``, ``p_wave_anisotropy_percent``,
+``s1_wave_anisotropy_percent``, ``s2_wave_anisotropy_percent``, ``maxdvs``, and ``AVpVs1``
+
+To plot the seismic velocities:
+
+.. code-block::python
+
+    anisotropy.plot()
+
+
