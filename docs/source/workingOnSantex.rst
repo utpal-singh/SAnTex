@@ -409,13 +409,9 @@ should be defined as following convention. The user can enter the crystal symmet
 Inverse Pole Figure
 ==========
 
-For an orientation distribution function (ODF) :math:`f : SO(3) \rightarrow \mathbb{R}`, the inverse pole density function :math:`P_{\vec{r}}` with respect to a fixed specimen direction :math:`\vec{r}` is a spherical function defined as the integral:
-
-.. math::
-
-    P_{\vec{r}}(\vec{h}) = \int_{\vec{g}\cdot\vec{h}=\vec{r}} f(\vec{g}) \, d\vec{g}
-
-The pole density function :math:`P_{\vec{r}}(\vec{h})` evaluated at a crystal direction :math:`\vec{h}` can be interpreted as the volume percentage of crystals with the crystal lattice planes :math:`\vec{h}` being normal to the specimen direction :math:`\vec{r}`.
+An inverse pole figure (IPF) is a way to represent the crystallographic orientation of a material relative to a fixed direction in the specimen. In simpler terms, 
+it shows how the orientation of crystal planes aligns with a specific direction in the material, such as the direction of applied force 
+or a particular axis in the specimen.
 
 In order to illustrate the concept of inverse pole figures, let's calculate the ipf and plot:
 
@@ -967,7 +963,3 @@ Now the same previous voigt tensor shown, is rotated, the new voigt notation of 
          73.39492984,   5.79247342],
        [ 32.19107185,  24.85704921,  -1.68082112,   6.26816834,
           5.79247342,  93.02059007]])
-
-Material analysis
-----------
-
