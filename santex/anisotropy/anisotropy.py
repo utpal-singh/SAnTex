@@ -11,6 +11,8 @@ from .plot_vel_grid import plot_velocity_grid
 from .utils import christoffel_tensor, wave_property
 
 from scipy.interpolate import griddata
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+
 import math
 
 class Anisotropy:
@@ -216,6 +218,9 @@ class Anisotropy:
         minvs1 = min(vs1)
         maxvs2 = max(vs2)
         minvs2 = min(vs2)
+        meanvp = np.mean(vp)
+        meanvs1 = np.mean(vs1)
+        meanvs2 = np.mean(vs2)
         swaveAnisotropy_percent = 200 * (np.array(vs1) - np.array(vs2)) / (np.array(vs1) + np.array(vs2))
         max_vs_anisotropy_percent = max(swaveAnisotropy_percent)
         min_vs_anisotropy_percent = min(swaveAnisotropy_percent)
@@ -268,6 +273,9 @@ class Anisotropy:
             print("S2 Wave anisotropy percent: ", s2_wave_anisotropy_percent)
             print("Velocity difference, maxdvs: ", maxdvs)
             print("Vp/Vs1 ratio: ", AVpVs1)
+            print("Mean vp: ", meanvp)
+            print("Mean Vs1: ", meanvs1)
+            print("Mean Vs2: ", meanvs2)
             return {
                 'maxvp': maxvp,
                 'minvp': minvp,
@@ -311,7 +319,7 @@ class Anisotropy:
         return plot_velocity_grid(pressure_range=pressure_range, temperature_range=temperature_range, return_type=return_type, is_ebsd=is_ebsd, phase=phase, grid=grid, filename=filename, *args)
 
 
-    def plot(self, colormap="RdBu_r", step = 180, savefig = False, figname = None, dpi = 300):
+    def plot(self, colormap="RdBu", step = 180, savefig = False, figname = None, dpi = 300, save_format = 'svg'):
         """
         Plots various anisotropic maps based on the Christoffel tensor.
 
@@ -356,6 +364,8 @@ class Anisotropy:
                             vs1 = math.sqrt(wave_moduli[1] / self.rho)
                             vs2 = math.sqrt(wave_moduli[2] / self.rho)
                             vpvs1 = vp/vs1
+                            vpvs2 = vp/vs2
+                            avs = 200*(vs1-vs2)/(vs1+vs2)
                             x.append(n[0] / (1 + n[2]))
                             y.append(n[1] / (1 + n[2]))
                             if i == 0:
@@ -366,10 +376,14 @@ class Anisotropy:
                                 c.append(vs1)
                             elif i == 3:
                                 c.append(vs2)
+                            # elif i == 4:
+                            #     c.append((vp - vs1) / (vp + vs1))
                             elif i == 4:
-                                c.append((vp - vs1) / (vp + vs1))
+                                c.append(vpvs2)
+                            # elif i == 5:
+                            #     c.append((vp - vs2) / (vp + vs2))
                             elif i == 5:
-                                c.append((vp - vs2) / (vp + vs2))
+                                c.append(avs)
 
                 # Interpolate onto a regular grid
                 xi = np.linspace(min(x), max(x), 100)
@@ -386,21 +400,25 @@ class Anisotropy:
                 ax.set_ylabel('y')
                 ax.set_aspect('equal', 'box')
 
-                # Adding above text at the bottom of each plot
                 ax.text(0.5, -0.15, texts[i], ha='center', transform=ax.transAxes)
+                # cbar = fig.colorbar(sc, ax=ax)
+                divider = make_axes_locatable(ax)
+                cax = divider.append_axes("right", size="5%", pad = 0.1)
+                cbar = fig.colorbar(sc, cax=cax, orientation='vertical')
 
-            axs[0, 0].set_title('VP/VS1')
-            axs[0, 1].set_title('VP')
-            axs[0, 2].set_title('VS1')
-            axs[1, 0].set_title('VS2')
-            axs[1, 1].set_title('AVpVs1')
-            axs[1, 2].set_title('AVpVs2')
+            axs[0, 0].set_title('Vp/Vs1')
+            axs[0, 1].set_title('Vp (m/s)')
+            axs[0, 2].set_title('Vs1 (m/s)')
+            axs[1, 0].set_title('Vs2')
+            axs[1, 1].set_title('Vp/Vs2')
+            axs[1, 2].set_title('S-wave Anisotropy (%)')
 
             plt.tight_layout()
-            plt.show()
 
             if savefig:
-                plt.savefig(f"{figname}", dpi = dpi)
+                plt.savefig(f"{figname}.{save_format}", dpi = dpi, format = save_format)
+            
+            plt.show()
         except Exception as e:
             print(f"An error occurred: {e}")
 
