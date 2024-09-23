@@ -427,6 +427,204 @@ In order to illustrate the concept of inverse pole figures, let's calculate the 
         crystal_symmetry='D2',)
 
 
+Tensor analysis
+===========
+
+Stiffness tensors of phases are a 3*3*3*3 size, however, due to its symmetricity, it can also be written as a voigt notation of 6*6 matrix. A tensor can be rotated
+in Bunge Euler (ZXZ) convention
+
+To initaially instanciate the Tensor Class, following needs to be inputted in python:
+
+.. code-block:: python
+
+    import numpy as np
+    from santex.tensor import Tensor
+
+    tensor = Tensor()
+
+Let's load some atiffness matrix values for forsterite written in voigt notation. The values can be seen in voigt matrix format
+
+.. code-block:: python
+
+    cij_forsterite = np.array([[320.5,  68.15,  71.6,     0,     0,     0],
+    [ 68.15,  196.5,  76.8,     0,     0,     0],
+    [  71.6,   76.8, 233.5,     0,     0,     0],
+    [   0,      0,      0,     64,     0,     0],
+    [   0,      0,      0,      0,    77,     0],
+    [   0,      0,      0,      0,     0,  78.7]])
+
+To convert this voigt notation to tensor notation, a user can call ``voigt_to_tensor()`` method within Tensor class as follows:
+
+.. code-block:: python
+    cijkl_forsterite = tensor.voigt_to_tensor(cij_forsterite)
+
+This gives a 3*3*3*3 array with the converted voigt in full tensor notation as seen
+
+.. code-block:: python
+
+    array([[[[320.5 ,   0.  ,   0.  ],
+         [  0.  ,  68.15,   0.  ],
+         [  0.  ,   0.  ,  71.6 ]],
+
+        [[  0.  ,  78.7 ,   0.  ],
+         [ 78.7 ,   0.  ,   0.  ],
+         [  0.  ,   0.  ,   0.  ]],
+
+        [[  0.  ,   0.  ,  77.  ],
+         [  0.  ,   0.  ,   0.  ],
+         [ 77.  ,   0.  ,   0.  ]]],
+
+
+       [[[  0.  ,  78.7 ,   0.  ],
+         [ 78.7 ,   0.  ,   0.  ],
+         [  0.  ,   0.  ,   0.  ]],
+
+        [[ 68.15,   0.  ,   0.  ],
+         [  0.  , 196.5 ,   0.  ],
+         [  0.  ,   0.  ,  76.8 ]],
+
+        [[  0.  ,   0.  ,   0.  ],
+         [  0.  ,   0.  ,  64.  ],
+         [  0.  ,  64.  ,   0.  ]]],
+
+
+       [[[  0.  ,   0.  ,  77.  ],
+         [  0.  ,   0.  ,   0.  ],
+         [ 77.  ,   0.  ,   0.  ]],
+
+        [[  0.  ,   0.  ,   0.  ],
+         [  0.  ,   0.  ,  64.  ],
+         [  0.  ,  64.  ,   0.  ]],
+
+        [[ 71.6 ,   0.  ,   0.  ],
+         [  0.  ,  76.8 ,   0.  ],
+         [  0.  ,   0.  , 233.5 ]]]])
+
+The converted tensor can be converted back to voigt notation as:
+
+.. code-block:: python
+    cij_forsterite = tensor.tensor_to_voigt(cijkl_forsterite)
+
+Which then returns the 6*6 voigt notation of the tensor
+
+.. code-block:: python
+
+    array([[320.5 ,  68.15,  71.6 ,   0.  ,   0.  ,   0.  ],
+       [ 68.15, 196.5 ,  76.8 ,   0.  ,   0.  ,   0.  ],
+       [ 71.6 ,  76.8 , 233.5 ,   0.  ,   0.  ,   0.  ],
+       [  0.  ,   0.  ,   0.  ,  64.  ,   0.  ,   0.  ],
+       [  0.  ,   0.  ,   0.  ,   0.  ,  77.  ,   0.  ],
+       [  0.  ,   0.  ,   0.  ,   0.  ,   0.  ,  78.7 ]])
+
+Rotating tensors
+-------------
+
+Rotating a Tensor in ZXZ Bunge Euler Convention
+--------------
+
+To rotate a tensor using the ZXZ Bunge Euler convention, you perform a series of three rotations about specific axes. In this convention, the Euler angles :math:`(\alpha, \beta, \gamma)` represent rotations as follows:
+
+1. **Rotation by :math:`\alpha`** (first angle) around the **Z-axis**.
+2. **Rotation by :math:`\beta`** (second angle) around the **X-axis**.
+3. **Rotation by :math:`\gamma`** (third angle) around the **Z-axis** (again).
+
+The full transformation matrix for the ZXZ convention is the product of three individual rotation matrices:
+
+Rotation Matrices
+-----------------
+
+**Rotation around the Z-axis** by angle :math:`\theta`:
+
+.. math::
+
+   R_Z(\theta) = \begin{pmatrix}
+   \cos(\theta) & -\sin(\theta) & 0 \\
+   \sin(\theta) & \cos(\theta) & 0 \\
+   0 & 0 & 1
+   \end{pmatrix}
+
+**Rotation around the X-axis** by angle :math:`\phi`:
+
+.. math::
+
+   R_X(\phi) = \begin{pmatrix}
+   1 & 0 & 0 \\
+   0 & \cos(\phi) & -\sin(\phi) \\
+   0 & \sin(\phi) & \cos(\phi)
+   \end{pmatrix}
+
+Full Rotation Matrix
+--------------------
+
+The full rotation matrix for the ZXZ convention is:
+
+.. math::
+
+   R = R_Z(\alpha) \cdot R_X(\beta) \cdot R_Z(\gamma)
+
+Substitute the rotation matrices:
+
+.. math::
+
+   R = \begin{pmatrix}
+   \cos(\alpha) & -\sin(\alpha) & 0 \\
+   \sin(\alpha) & \cos(\alpha) & 0 \\
+   0 & 0 & 1
+   \end{pmatrix}
+   \cdot
+   \begin{pmatrix}
+   1 & 0 & 0 \\
+   0 & \cos(\beta) & -\sin(\beta) \\
+   0 & \sin(\beta) & \cos(\beta)
+   \end{pmatrix}
+   \cdot
+   \begin{pmatrix}
+   \cos(\gamma) & -\sin(\gamma) & 0 \\
+   \sin(\gamma) & \cos(\gamma) & 0 \\
+   0 & 0 & 1
+   \end{pmatrix}
+
+Rotating a Tensor
+-----------------
+
+Given a second-order tensor :math:`T`, after applying the rotation matrix :math:`R`, the rotated tensor :math:`T'` can be obtained by:
+
+.. math::
+
+   T' = R \cdot T \cdot R^T
+
+where :math:`R^T` is the transpose of the rotation matrix :math:`R`.
+
+This process rotates the tensor according to the ZXZ Euler angles.
+
+To rotate a tensor within santex, we can define alpha, beta and gamma in degrees, and then call the ``rotate_tensor()`` method within Tensor class as follows:
+
+.. code-block:: python
+    alpha = 10
+    beta = 20
+    gamma = 30
+
+    rotated_forsterite = tensor.rotate_tensor(cijkl_forsterite, alpha, beta, gamma)
+    voigt_rotated_forsterite = tensor.tensor_to_voigt(rotated_forsterite)
+
+Now the same previous voigt tensor shown, is rotated, the new voigt notation of the rotated forsterite looks like:
+
+.. code-block:: bash
+
+    array([[254.40669486,  83.60527452,  74.25170921,   2.25426383,
+          9.1917399 ,  32.19107185],
+       [ 83.60527452, 229.09177813,  77.9967799 ,   3.16662267,
+          4.15506621,  24.85704921],
+       [ 74.25170921,  77.9967799 , 228.39399978,  -5.76818554,
+          4.58001959,  -1.68082112],
+       [  2.25426383,   3.16662267,  -5.76818554,  72.58824371,
+          7.02836206,   6.26816834],
+       [  9.1917399 ,   4.15506621,   4.58001959,   7.02836206,
+         73.39492984,   5.79247342],
+       [ 32.19107185,  24.85704921,  -1.68082112,   6.26816834,
+          5.79247342,  93.02059007]])
+
+
 Material analysis
 ===================
 
@@ -517,6 +715,127 @@ This loads a list of materials present with their crystal systems and primary ph
     +---------------------------------------+---------------------+-----------------------------------+
 
 
+To look at any material properties, for example Diopside, ``get_properties_by_phase()`` can be called from Material class as follows:
+
+.. code-block:: python
+
+    material_instance = Material()
+
+    # Get properties for 'Diopside'
+    diopside_properties = material_instance.get_properties_by_phase('Diopside')
+    print("Material Properties for Diopside:")
+    print(tabulate(almandine_properties.items(), headers=["Property", "Value"], tablefmt="fancy_grid"))
+    print("\n")
+
+which returns a formatted table of the properties of material (Diopside) as:
+
+..code-block:: bash
+
+    Material Properties for Diopside:
+    ╒═════════════════════════╤══════════════════════════╕
+    │ Property                │ Value                    │
+    ╞═════════════════════════╪══════════════════════════╡
+    │ Crystal System          │ Monoclinic               │
+    ├─────────────────────────┼──────────────────────────┤
+    │ Primary Phase           │ Clinopyroxenes           │
+    ├─────────────────────────┼──────────────────────────┤
+    │ Phase                   │ Diopside                 │
+    ├─────────────────────────┼──────────────────────────┤
+    │ Density(g/cm3)          │ 3.327                    │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C11                     │ 237.8                    │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C22                     │ 183.6                    │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C33                     │ 229.5                    │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C44                     │ 76.5                     │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C55                     │ 73.0                     │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C66                     │ 81.6                     │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C12                     │ 83.5                     │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C13                     │ 80.0                     │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C23                     │ 59.9                     │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C15                     │ 9.0                      │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C25                     │ 9.5                      │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C35                     │ 48.1                     │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C46                     │ 8.4                      │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C14                     │ 0                        │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C16                     │ 0                        │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C24                     │ 0                        │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C26                     │ 0                        │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C34                     │ 0                        │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C36                     │ 0                        │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C45                     │ 0                        │
+    ├─────────────────────────┼──────────────────────────┤
+    │ C56                     │ 0                        │
+    ├─────────────────────────┼──────────────────────────┤
+    │ Crystal Reference Frame │ X||a* Y|| b Z||c         │
+    ├─────────────────────────┼──────────────────────────┤
+    │ Study                   │ Collins and Brown [1998] │
+    ╘═════════════════════════╧══════════════════════════╛
+
+To get the voigt matrix of Diopside to work with, ``get_voigt_matrix()`` of can be called as:
+
+.. code-block:: python
+
+    non_isotropic_phase = 'Diopside'
+    non_isotropic_voigt_matrix = material_instance.get_voigt_matrix(non_isotropic_phase)
+    print(f'Voigt matrix for {non_isotropic_phase}:')
+    print(tabulate(non_isotropic_voigt_matrix, tablefmt="pretty"))
+
+which returns the voigt matrix for Diopside as:
+
+.. code-block:: bash
+
+    Voigt matrix for Diopside:
+    +-------+-------+-------+------+------+------+
+    | 237.8 | 83.5  | 80.0  | 0.0  | 9.0  | 0.0  |
+    | 83.5  | 183.6 | 59.9  | 0.0  | 9.5  | 0.0  |
+    | 80.0  | 59.9  | 229.5 | 0.0  | 48.1 | 0.0  |
+    |  0.0  |  0.0  |  0.0  | 76.5 | 0.0  | 8.4  |
+    |  9.0  |  9.5  | 48.1  | 0.0  | 73.0 | 0.0  |
+    |  0.0  |  0.0  |  0.0  | 8.4  | 0.0  | 81.6 |
+    +-------+-------+-------+------+------+------+
+
+
+For getting the voigt matrix at any given pressure and temperature for a material, ``voigthighPT()`` method can be called as:
+
+.. code-block:: python
+
+    material.voigthighPT('Diopside', PRESSURE = 2, TEMP = 1500)
+
+This returns voigt matrix as this
+
+.. code-block:: bash
+
+    array([[225.77,  83.47,  80.39,   0.  ,   8.25,   0.  ],
+       [ 83.47, 175.8 ,  60.2 ,   0.  ,  10.07,   0.  ],
+       [ 80.39,  60.2 , 219.36,   0.  ,  55.12,   0.  ],
+       [  0.  ,   0.  ,   0.  ,  71.1 ,   0.  ,  12.93],
+       [  8.25,  10.07,  55.12,   0.  ,  66.22,   0.  ],
+       [  0.  ,   0.  ,   0.  ,  12.93,   0.  ,  74.76]])
+
+To load the density at the different pressure and temperature, ``load_density()`` method can be called and pressure and temperature at 2GPa and 1500C can be parsed as:
+
+.. code-block:: python
+    material_instance.load_density("Diopside", 2, 1500)
+
 Hooke's Law
 ===========
 
@@ -546,7 +865,7 @@ In the current version of SAnTex, melt is considered as an isotropic phase with 
 The fraction of melt, :math:`f`, can be controlled by the user. :math:`C_{\text{melt}}` is the stiffness tensor of the melt. The approach currently incorporated in SAnTex overlooks the complex behavior of melt, including its viscosity, flow dynamics, and interaction with neighboring minerals, which can influence the overall anisotropic properties of the system. Future developments of SAnTex will aim to include more functionalities towards the calculation of melt-induced anisotropy.
 
 Modal Mineral Composition of a rock and anisotropy
-----------------
+==============
 
 within Santex, a user can parse a modal mineral composition for a rock and calculate its anisotropy as follows:
 
@@ -567,13 +886,13 @@ This returns a dictionary containing the anisotropy percent containing ``maxvp``
 
 To plot the seismic velocities:
 
-.. code-block::python
+.. code-block:: python
 
     anisotropy.plot()
 
 
 Isotropic Velocities analysis
-----------------
+===============
 
 Isotropy module can be loaded as follows:
 
@@ -758,208 +1077,12 @@ We can get the following quantities at any given temperature and pressure for a 
 3. amu: Shear Modulus, The shear modulus is essential for understanding a material's response to shear stress
 4. vp: P-wave velocity at any given pressure and temperature
 5. vs: swave velocity at any given pressure and temperature
-6. vbulk: Bulk sound velocity, The velocity of sound waves traveling through a material
+6. vbulk: Bulk velocity.
 7. akt: Isothermal bulk modulus, Similar to the bulk modulus, but specifically refers to the resistance to compression under constant 8. temperature conditions
 
-The statement that can be used as:
+The statement can be used as:
 
 .. code-block:: python
     density, aks, amu, vp, vs, vbulk, akt = isotropy.calculate_seismic_properties('Forsterite', temperature=2000, pressure=2, return_vp_vs_vbulk=True, return_aktout=True)
 
-
-Tensor analysis
--------------
-
-Stiffness tensors of phases are a 3*3*3*3 size, however, due to its symmetricity, it can also be written as a voigt notation of 6*6 matrix. A tensor can be rotated
-in Bunge Euler (ZXZ) convention
-
-To initaially instanciate the Tensor Class, following needs to be inputted in python:
-
-.. code-block:: python
-
-    import numpy as np
-    from santex.tensor import Tensor
-
-    tensor = Tensor()
-
-Let's load some atiffness matrix values for forsterite written in voigt notation. The values can be seen in voigt matrix format
-
-.. code-block:: python
-
-    cij_forsterite = np.array([[320.5,  68.15,  71.6,     0,     0,     0],
-    [ 68.15,  196.5,  76.8,     0,     0,     0],
-    [  71.6,   76.8, 233.5,     0,     0,     0],
-    [   0,      0,      0,     64,     0,     0],
-    [   0,      0,      0,      0,    77,     0],
-    [   0,      0,      0,      0,     0,  78.7]])
-
-To convert this voigt notation to tensor notation, a user can call ``voigt_to_tensor()`` method within Tensor class as follows:
-
-.. code-block:: python
-    cijkl_forsterite = tensor.voigt_to_tensor(cij_forsterite)
-
-This gives a 3*3*3*3 array with the converted voigt in full tensor notation as seen
-
-.. code-block:: python
-
-    array([[[[320.5 ,   0.  ,   0.  ],
-         [  0.  ,  68.15,   0.  ],
-         [  0.  ,   0.  ,  71.6 ]],
-
-        [[  0.  ,  78.7 ,   0.  ],
-         [ 78.7 ,   0.  ,   0.  ],
-         [  0.  ,   0.  ,   0.  ]],
-
-        [[  0.  ,   0.  ,  77.  ],
-         [  0.  ,   0.  ,   0.  ],
-         [ 77.  ,   0.  ,   0.  ]]],
-
-
-       [[[  0.  ,  78.7 ,   0.  ],
-         [ 78.7 ,   0.  ,   0.  ],
-         [  0.  ,   0.  ,   0.  ]],
-
-        [[ 68.15,   0.  ,   0.  ],
-         [  0.  , 196.5 ,   0.  ],
-         [  0.  ,   0.  ,  76.8 ]],
-
-        [[  0.  ,   0.  ,   0.  ],
-         [  0.  ,   0.  ,  64.  ],
-         [  0.  ,  64.  ,   0.  ]]],
-
-
-       [[[  0.  ,   0.  ,  77.  ],
-         [  0.  ,   0.  ,   0.  ],
-         [ 77.  ,   0.  ,   0.  ]],
-
-        [[  0.  ,   0.  ,   0.  ],
-         [  0.  ,   0.  ,  64.  ],
-         [  0.  ,  64.  ,   0.  ]],
-
-        [[ 71.6 ,   0.  ,   0.  ],
-         [  0.  ,  76.8 ,   0.  ],
-         [  0.  ,   0.  , 233.5 ]]]])
-
-The converted tensor can be converted back to voigt notation as:
-
-.. code-block:: python
-    cij_forsterite = tensor.tensor_to_voigt(cijkl_forsterite)
-
-Which then returns the 6*6 voigt notation of the tensor
-
-.. code-block:: python
-
-    array([[320.5 ,  68.15,  71.6 ,   0.  ,   0.  ,   0.  ],
-       [ 68.15, 196.5 ,  76.8 ,   0.  ,   0.  ,   0.  ],
-       [ 71.6 ,  76.8 , 233.5 ,   0.  ,   0.  ,   0.  ],
-       [  0.  ,   0.  ,   0.  ,  64.  ,   0.  ,   0.  ],
-       [  0.  ,   0.  ,   0.  ,   0.  ,  77.  ,   0.  ],
-       [  0.  ,   0.  ,   0.  ,   0.  ,   0.  ,  78.7 ]])
-
-Rotating tensors
-=========
-
-Rotating a Tensor in ZXZ Bunge Euler Convention
-===============================================
-
-To rotate a tensor using the ZXZ Bunge Euler convention, you perform a series of three rotations about specific axes. In this convention, the Euler angles :math:`(\alpha, \beta, \gamma)` represent rotations as follows:
-
-1. **Rotation by :math:`\alpha`** (first angle) around the **Z-axis**.
-2. **Rotation by :math:`\beta`** (second angle) around the **X-axis**.
-3. **Rotation by :math:`\gamma`** (third angle) around the **Z-axis** (again).
-
-The full transformation matrix for the ZXZ convention is the product of three individual rotation matrices:
-
-Rotation Matrices
------------------
-
-**Rotation around the Z-axis** by angle :math:`\theta`:
-
-.. math::
-
-   R_Z(\theta) = \begin{pmatrix}
-   \cos(\theta) & -\sin(\theta) & 0 \\
-   \sin(\theta) & \cos(\theta) & 0 \\
-   0 & 0 & 1
-   \end{pmatrix}
-
-**Rotation around the X-axis** by angle :math:`\phi`:
-
-.. math::
-
-   R_X(\phi) = \begin{pmatrix}
-   1 & 0 & 0 \\
-   0 & \cos(\phi) & -\sin(\phi) \\
-   0 & \sin(\phi) & \cos(\phi)
-   \end{pmatrix}
-
-Full Rotation Matrix
---------------------
-
-The full rotation matrix for the ZXZ convention is:
-
-.. math::
-
-   R = R_Z(\alpha) \cdot R_X(\beta) \cdot R_Z(\gamma)
-
-Substitute the rotation matrices:
-
-.. math::
-
-   R = \begin{pmatrix}
-   \cos(\alpha) & -\sin(\alpha) & 0 \\
-   \sin(\alpha) & \cos(\alpha) & 0 \\
-   0 & 0 & 1
-   \end{pmatrix}
-   \cdot
-   \begin{pmatrix}
-   1 & 0 & 0 \\
-   0 & \cos(\beta) & -\sin(\beta) \\
-   0 & \sin(\beta) & \cos(\beta)
-   \end{pmatrix}
-   \cdot
-   \begin{pmatrix}
-   \cos(\gamma) & -\sin(\gamma) & 0 \\
-   \sin(\gamma) & \cos(\gamma) & 0 \\
-   0 & 0 & 1
-   \end{pmatrix}
-
-Rotating a Tensor
------------------
-
-Given a second-order tensor :math:`T`, after applying the rotation matrix :math:`R`, the rotated tensor :math:`T'` can be obtained by:
-
-.. math::
-
-   T' = R \cdot T \cdot R^T
-
-where :math:`R^T` is the transpose of the rotation matrix :math:`R`.
-
-This process rotates the tensor according to the ZXZ Euler angles.
-
-To rotate a tensor within santex, we can define alpha, beta and gamma in degrees, and then call the ``rotate_tensor()`` method within Tensor class as follows:
-
-.. code-block:: python
-    alpha = 10
-    beta = 20
-    gamma = 30
-
-    rotated_forsterite = tensor.rotate_tensor(cijkl_forsterite, alpha, beta, gamma)
-    voigt_rotated_forsterite = tensor.tensor_to_voigt(rotated_forsterite)
-
-Now the same previous voigt tensor shown, is rotated, the new voigt notation of the rotated forsterite looks like:
-
-.. code-block:: bash
-
-    array([[254.40669486,  83.60527452,  74.25170921,   2.25426383,
-          9.1917399 ,  32.19107185],
-       [ 83.60527452, 229.09177813,  77.9967799 ,   3.16662267,
-          4.15506621,  24.85704921],
-       [ 74.25170921,  77.9967799 , 228.39399978,  -5.76818554,
-          4.58001959,  -1.68082112],
-       [  2.25426383,   3.16662267,  -5.76818554,  72.58824371,
-          7.02836206,   6.26816834],
-       [  9.1917399 ,   4.15506621,   4.58001959,   7.02836206,
-         73.39492984,   5.79247342],
-       [ 32.19107185,  24.85704921,  -1.68082112,   6.26816834,
-          5.79247342,  93.02059007]])
+which returns density, bulk modulus, shear modulus, vp, vs, bulk velocity and the isothermal bulk modulus at the specified pressure and temperature.
