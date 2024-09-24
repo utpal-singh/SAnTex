@@ -8,8 +8,8 @@
 
 project = 'santex'
 copyright = '2024, Utpal Singh'
-author = 'Utpal Singh'
-release = '1.2.1'
+author = 'Utpal Singh, Sinan Özaydin, Vasileios Chatzaras, Patrice Rey'
+release = '1.2.2'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
