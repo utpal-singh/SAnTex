@@ -1,4 +1,4 @@
-from santex import Anisotropy
+from santex.anisotropy import Anisotropy
 import numpy as np
 
 if __name__ == "__main__":
