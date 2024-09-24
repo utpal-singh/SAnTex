@@ -217,25 +217,37 @@ Compare original and clean datasets
 .. code-block:: python
 
     ebsdfile.plot()
-    ebsdfile.plot(df = filtered_df_grain_boundary)
+    ebsdfile.plot(data = filtered_df_grain_boundary)
+
+The plot method of the EBSD class can take in a few parameters namely,
+
+    data (pandas.DataFrame, optional): DataFrame containing EBSD data. If not provided, uses stored data.
+    rotation_angle (int, optional): Angle by which to rotate the EBSD data (in degrees). Accepts 0, 90, 180, 270.
+    inside_plane (bool, optional): If True, rotates the EBSD data inside the plane. If False, rotates outside the plane. Default is True.
+    mirror (bool, optional): If True, mirrors the EBSD data horizontally before rotating. Default is False.
+    save_image (bool, optional): If True, saves the plot as an image. Default is False.
+    image_filename (str, optional): Filename to use when saving the image. Required if save_image is True.
+    dpi (int, optional): Dots per inch for the saved image. Default is 300.
+    cmap (str, optional): Colormap to use for plotting. Default is 'viridis'.
+    legend_location (str, optional): Location of the legend. Options are 'upper right', 'upper left', 'lower right', 'lower left'. Default is 'upper right'.
 
 
-Calculating Anisotropy from EBSD file:
+Calculating Anisotropy from EBSD file
 ==============
 
-To prepare the dataframe, the user can instanciate Material class as follows:
+To prepare the dataframe, the user can instanciate Material class as follows, be sure to check if the Material class is imported via ``from santex.material import Material``:
 
 .. code-block:: python
 
     material_instance = Material()
 
-The densities are within the santex package registry, and can be accessed via the following directive. The pressure in GPa and Temperature can be entered as:
+The densities are within the santex package registry, and can be accessed via the following directive. The pressure in GPa (here example: 2GPa) and Temperature (here 1500 degrees Celsius) can be entered as:
 
 .. code-block:: python
 
-    rho_Fo = material_instance.load_density("Forsterite", 2, 1500)
-    rho_diop = material_instance.load_density("Diopside", 2, 1500)
-    rho_ens = material_instance.load_density("Enstatite", 2, 1500)
+    rho_Fo = material_instance.load_density("Forsterite", pressure = 2, temperature = 1500)
+    rho_diop = material_instance.load_density("Diopside", pressure = 2, temperature = 1500)
+    rho_ens = material_instance.load_density("Enstatite", pressure = 2, temperature = 1500)
 
 The registry for elastic tensors within santex can be accessed via the following commands. The pressure and temperacture
 conditions can be entered via the keyword PRESSURE and TEMP
@@ -255,6 +267,8 @@ For preparing dataframes for seismic anisotropy, the elasticstiffness tensors an
 
 The euler angles for the phases should also be bundled in list as:
 
+**Note:** Make sure to import Anisotropy class first using ``from santex.anisotropy import Anisotropy``
+
 .. code-block:: python
 
     forsterite = ebsdfile.get_euler_angles(phase = 1, data=filtered_df_grain_boundary)
@@ -263,6 +277,8 @@ The euler angles for the phases should also be bundled in list as:
     euler_angles = [forsterite, enstatite, diopside]
 
 The anisotropy can then be calculated as following:
+
+
 
 .. code-block:: python
 
@@ -275,11 +291,23 @@ To look at the plots for the seismic velocities, following command can be entere
 
     anis.plot()
 
+The plot() method can take in a few parameters namely:
+
+Parameters:
+    colormap (str): The colormap to use for plotting. Default is "RdBu_r".
+    step (int): The step size for theta and phi values. Default is 180.
+    savefig (bool): Whether to save the plot as an image. Default is False.
+    figname (str or None): The filename to save the plot. Required if savefig is True.
+    dpi (int): The resolution of the saved image. Default is 300.
+    save_format (str): svg or png or jpg
+
 To look at the anisotropy values, maxvp, minvp, maxvs1, minvs1, etc.., folllowing command can be used:
 
 .. code-block:: python
 
     anis.anisotropy_values()
+
+This also returns a dictionary of values which can be used while modelling modal rocks with modal compositions at different pressure and temperacture.
 
 This gives values such as:
 
@@ -456,6 +484,7 @@ Let's load some atiffness matrix values for forsterite written in voigt notation
 To convert this voigt notation to tensor notation, a user can call ``voigt_to_tensor()`` method within Tensor class as follows:
 
 .. code-block:: python
+
     cijkl_forsterite = tensor.voigt_to_tensor(cij_forsterite)
 
 This gives a 3*3*3*3 array with the converted voigt in full tensor notation as seen
@@ -600,6 +629,7 @@ This process rotates the tensor according to the ZXZ Euler angles.
 To rotate a tensor within santex, we can define alpha, beta and gamma in degrees, and then call the ``rotate_tensor()`` method within Tensor class as follows:
 
 .. code-block:: python
+
     alpha = 10
     beta = 20
     gamma = 30
@@ -724,7 +754,7 @@ To look at any material properties, for example Diopside, ``get_properties_by_ph
     # Get properties for 'Diopside'
     diopside_properties = material_instance.get_properties_by_phase('Diopside')
     print("Material Properties for Diopside:")
-    print(tabulate(almandine_properties.items(), headers=["Property", "Value"], tablefmt="fancy_grid"))
+    print(tabulate(diopside_properties.items(), headers=["Property", "Value"], tablefmt="fancy_grid"))
     print("\n")
 
 which returns a formatted table of the properties of material (Diopside) as:
@@ -818,7 +848,7 @@ For getting the voigt matrix at any given pressure and temperature for a materia
 
 .. code-block:: python
 
-    material.voigthighPT('Diopside', PRESSURE = 2, TEMP = 1500)
+    cij_diopside = material_instance.voigthighPT('Diopside', PRESSURE = 2, TEMP = 1500)
 
 This returns voigt matrix as this
 
@@ -834,7 +864,22 @@ This returns voigt matrix as this
 To load the density at the different pressure and temperature, ``load_density()`` method can be called and pressure and temperature at 2GPa and 1500C can be parsed as:
 
 .. code-block:: python
-    material_instance.load_density("Diopside", 2, 1500)
+
+    rho_diopside = material_instance.load_density("Diopside", 2, 1500)
+
+The above matrix which we get after evaluating at high temperature and pressure can be rotated given any 3 bunge euler rotations as:
+
+.. code-block:: python
+
+    from santex.tensor import Tensor
+    tensor = Tensor()
+    alpha = 10
+    beta = 20
+    gamma = 30
+
+    cijkl_diopside = tensor.voigt_to_tensor(cij_diopside)
+    rotated_forsterite = tensor.rotate_tensor(cijkl_diopside, alpha, beta, gamma)
+    cij_diopside_highpt = tensor.tensor_to_voigt(cijkl_diopside)
 
 Hooke's Law
 ===========
@@ -1083,6 +1128,45 @@ We can get the following quantities at any given temperature and pressure for a 
 The statement can be used as:
 
 .. code-block:: python
+
     density, aks, amu, vp, vs, vbulk, akt = isotropy.calculate_seismic_properties('Forsterite', temperature=2000, pressure=2, return_vp_vs_vbulk=True, return_aktout=True)
 
 which returns density, bulk modulus, shear modulus, vp, vs, bulk velocity and the isothermal bulk modulus at the specified pressure and temperature.
+
+3-D visualisation of vp, vs1, vs2 and vs splitting
+=================
+
+Firstly we have to calculate the anisotropy for a material as shown:
+
+.. code-block:: python
+
+    from santex.anisotropy import Anisotropy
+    from santex.material import Material
+
+    cij_diopside = material_instance.voigthighPT('Diopside', PRESSURE = 2, TEMP = 1500)
+    rho_diopside = material_instance.load_density('Diopside', 2, 1500)
+    anisotropy_instance = Anisotropy(cij_diopside, rho_diopside)
+
+3-D visualtisation of vp can be done as
+
+.. code-block:: python
+
+    anisotropy_instance.plotter_vp(rho_diopside, cij_diopside)
+
+For vs1:
+
+.. code-block:: python
+
+    anisotropy_instance.plotter_vs1(rho_diopside, cij_diopside)
+
+For vs2:
+
+.. code-block:: python
+
+    anisotropy_instance.plotter_vs1(rho_diopside, cij_diopside)
+
+For vs splitting:
+
+.. code-block:: python
+
+    anisotropy_instance.plotter_vs_splitting(rho_diopside, cij_diopside)
