@@ -32,6 +32,10 @@ pip install santex
 
 <img src="./santex.png">
 
+# Funding
+
+This research was supported by the Australian Research Council grants ARC-DP220100709 and ARC-LP190100146, and the School of Geosciences at The University of Sydney.
+
 # Contacts
 
 | **Utpal Singh** | utpal.singh@sydney.edu.au
