@@ -13,6 +13,8 @@ SAnTex is a Python library which calculates the full elastic tensor of rocks fro
 
 ## Installation
 
+### For Linux and Mac
+
 You can install SAnTex using pip from your terminal:
 
 ```bash
@@ -27,6 +29,18 @@ or
 ```bash
 pip install santex
 ```
+
+### For Windows
+
+SAnTex has a dependency 'PyCifrw' which only works in presence of C-compiler. Since windows doesnt come with a C-compiler, a conda environment can be made, and gcc compiler and SAnTex can be installed using:
+
+```bash
+conda create -n santex python=3.9
+conda install -c conda-forge m2w64-gcc
+pip install santex
+```
+
+
 
 # Workflow
 
