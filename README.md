@@ -32,11 +32,12 @@ pip install santex
 
 ### For Windows
 
-SAnTex has a dependency 'PyCifrw' which only works in presence of C-compiler. Since windows doesnt come with a C-compiler, a conda environment can be made, and gcc compiler and SAnTex can be installed using:
+SAnTex depends on 'orix', which in turn uses 'PyCifrw' for ODF and PDF calculations. However, 'PyCifrw' requires a C compiler to function properly. Since Windows does not include a C compiler by default, you can create a conda environment and install the GCC compiler along with SAnTex using the following steps:
 
 ```bash
 conda create -n santex python=3.9
 conda install -c conda-forge m2w64-gcc
+pip install orix
 pip install santex
 ```
 
