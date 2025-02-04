@@ -1,10 +1,20 @@
 import unittest
 import numpy as np
-from santex import Material, Anisotropy, Tensor, Isotropy
+from santex.anisotropy import Anisotropy
+from santex.material import Material
+from santex.tensor import Tensor
+from santex.isotropy import Isotropy
+
 
 class TestMaterialAnisotropy(unittest.TestCase):
     def setUp(self):
         # Anisotropy and Materiual test
+
+        """
+        Test seismic property calculations for Forsterite at specified P-T conditions. 
+        based on Elastic moduli, pressure derivatives, and temperature derivatives of single-crystal olivine and single-crystal forsterite
+        10.1029/JB074i025p05961
+        """
         self.material = Material()
         self.rock = ["Forsterite", "Diopside", "Enstatite"]
         self.fraction = [0.6, 0.25, 0.15]
@@ -45,6 +55,17 @@ class TestMaterialAnisotropy(unittest.TestCase):
         self.isotropy = Isotropy()
 
     def test_isotropy_calculate_seismic_properties(self):
+        """
+        Test seismic property calculations for Forsterite at specified P-T conditions.
+
+        Expected values are based on:
+        Hacker, B.R., & Abers, G.A. (2004). 
+        Subduction Factory 3: An Excel worksheet and macro for calculating the 
+        densities, seismic wave speeds, and H2O contents of minerals and rocks 
+        at pressure and temperature. 
+        Geochemistry, Geophysics, Geosystems, 5(1). https://doi.org/10.1029/2003GC000614
+        """
+
         density, aks, amu, vp, vs, vbulk, akt = self.isotropy.calculate_seismic_properties(
             'Forsterite', temperature=2000, pressure=2, return_vp_vs_vbulk=True, return_aktout=True)
         expected_density = 3034.1119267366676
