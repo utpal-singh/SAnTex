@@ -47,6 +47,12 @@ Features
    santex.rst
    modules
 
+.. toctree::
+   :maxdepth: 2
+   :caption: Notebooks
+
+   codeexample.rst
+
 Indices and tables
 ==================
 

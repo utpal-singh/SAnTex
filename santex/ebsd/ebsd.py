@@ -29,7 +29,7 @@ class EBSD:
         Initializes the EBSD object.
 
         Parameters:
-            filename (str): The filename of the EBSD data file.
+            filename (str): The filename of the EBSD data file. The EBSD file should be in ctf format.
 
         Raises:
             FileNotFoundError: If the specified file does not exist.

@@ -17,9 +17,10 @@ release = '1.2.2'
 extensions = []
 
 templates_path = ['_templates']
-exclude_patterns = []
+exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
 extensions = [
+   'nbsphinx',
    'sphinx.ext.duration',
    'sphinx.ext.doctest',
    'sphinx.ext.autodoc',
