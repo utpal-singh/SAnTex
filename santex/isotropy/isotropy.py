@@ -75,7 +75,7 @@ class Isotropy:
         Calculate velocities at P,T for a mineral given parameters.
         
         Inputs:
-        temperature (in K)
+        temperature (in C)
         pressure (in GPa)
         
         Outputs:
@@ -357,7 +357,7 @@ class Isotropy:
         if type(fraction_list) != np.ndarray:
             fraction_list = np.array(fraction_list)
             
-        all_sums = np.allclose(fraction_list.sum(axis = 1), 1.0, atol = 1e-6)
+        all_sums = np.allclose(fraction_list.sum(axis = -1), 1.0, atol = 1e-6)
         
         if all_sums == False:
             raise ValueError('The values entered in fraction_list do not sum up to 1.')

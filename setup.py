@@ -1,8 +1,18 @@
 from setuptools import setup, find_packages
 import platform
 
-VERSION = '1.2.2-beta'
 DESCRIPTION = "SAnTeX is a Python library which calculates seismic anisotropy from full elastic tensor of rocks from modal mineral composition, crystallographic orientation, and a crystal stiffness tensor catalogue that accounts for the dependency of elasticity with pressure and temperature. SAnTex facilitates the processing and cleaning of EBSD data and calculation of Orientation Distribution Function (ODF) and Inverse pole figure (IPF)"
+
+import os
+
+def get_version():
+    with open(os.path.join("santex", "__init__.py")) as f:
+        for line in f:
+            if line.startswith("__version__"):
+                return line.strip().split(" = ")[-1].strip("\"'")
+
+VERSION = get_version()
+
 
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()

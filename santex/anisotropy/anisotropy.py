@@ -395,7 +395,7 @@ class Anisotropy:
                 contours = ax.contour(xi, yi, zi, 5, colors='black')
                 ax.clabel(contours, inline=True, fontsize=8)
 
-                sc = ax.scatter(x, y, c=c, cmap=colormap, s=5)  # Reduce scatter dot size s for clarity
+                sc = ax.scatter(x, y, c=c, cmap=colormap, s=5, rasterized=True)  # Reduce scatter dot size s for clarity
                 ax.set_xlabel('x')
                 ax.set_ylabel('y')
                 ax.set_aspect('equal', 'box')

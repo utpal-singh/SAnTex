@@ -1,7 +1,6 @@
 import numpy as np
 from ..tensor.tensor import Tensor
 
-
 def calcMelttensor():
     """
     Returns the melt stiffness tensor.
@@ -29,4 +28,4 @@ def calcMelttensor():
     tensor = Tensor()
 
     tensor_melt = tensor.voigt_to_tensor(voigt_melt)
-    return tensor_melt
+    return tensor_melt, voigt_melt

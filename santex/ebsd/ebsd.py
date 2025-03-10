@@ -18,6 +18,7 @@ from .rotateEBSD import apply_custom_rotation_to_dataframe, apply_custom_rotatio
 
 # from .ebsdrotation import apply_custom_rotation_to_dataframe as rotebsd
 from .odf import ipf, odf, pdf
+import matplotlib.colors as mcolors
 
 class EBSD:
     """
@@ -61,64 +62,53 @@ class EBSD:
         return euler_angles
         
 
-    def plot(self, data=None, rotation_angle=0, inside_plane=True, mirror=False, save_image=False, image_filename=None, 
-            dpi=300, cmap='viridis', legend_location="upper right"):
-        """
-        Plots the EBSD map with colors based on phase. Allows for rotation and optional mirroring of the data.
-
-        Parameters:
-            data (pandas.DataFrame, optional): DataFrame containing EBSD data. If not provided, uses stored data.
-            rotation_angle (int, optional): Angle by which to rotate the EBSD data (in degrees). Accepts 0, 90, 180, 270.
-            inside_plane (bool, optional): If True, rotates the EBSD data inside the plane. If False, rotates outside the plane. Default is True.
-            mirror (bool, optional): If True, mirrors the EBSD data horizontally before rotating. Default is False.
-            save_image (bool, optional): If True, saves the plot as an image. Default is False.
-            image_filename (str, optional): Filename to use when saving the image. Required if save_image is True.
-            dpi (int, optional): Dots per inch for the saved image. Default is 300.
-            cmap (str, optional): Colormap to use for plotting. Default is 'viridis'.
-            legend_location (str, optional): Location of the legend. Options are 'upper right', 'upper left', 'lower right', 'lower left'. Default is 'upper right'.
-
-        Returns:
-            None
-        """
+    def plot(self, data=None, rotation_angle=0, inside_plane=True, mirror=False, save_image=False, image_filename=None,
+            dpi=300, cmap='viridis', legend_location="upper right", phase_colors=None):
         if data is None:
             data, _ = self.ctf.get_data()
 
-        # Mirror EBSD data if required
         if mirror:
-            data['X'] = -data['X']  # Mirror horizontally
+            data['X'] = -data['X']
 
-        # Rotate EBSD data
         if rotation_angle != 0:
             theta = np.radians(rotation_angle)
-            if inside_plane:
-                rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
-            else:
-                rotation_matrix = np.array([[np.cos(theta), np.sin(theta)], [-np.sin(theta), np.cos(theta)]])
+            rotation_matrix = np.array([[np.cos(theta), -np.sin(theta)], [np.sin(theta), np.cos(theta)]])
             xy = np.column_stack((data['X'], data['Y']))
             xy_rotated = np.dot(xy, rotation_matrix)
             data['X'], data['Y'] = xy_rotated[:, 0], xy_rotated[:, 1]
 
-        # Filter data based on phase
-        df_new = data
+        df_new = data.copy()
+        unique_phases = sorted(df_new['Phase'].unique())
+        phase_labels = {phase: f'Phase {phase}' for phase in unique_phases}
 
-        # Plot
-        fig, ax = plt.subplots(figsize=(16, 9))  # Adjust the figsize as per your requirement
-        scatter = ax.scatter(df_new['X'], df_new['Y'], c=df_new['Phase'], cmap=cmap, s=1)
+        if phase_colors is None:
+            cmap = plt.get_cmap(cmap)
+            norm = mcolors.Normalize(vmin=min(unique_phases), vmax=max(unique_phases))
+            colors = [cmap(norm(phase)) for phase in unique_phases]
+        else:
+            colors = phase_colors * (len(unique_phases) // len(phase_colors) + 1)
+            colors = colors[:len(unique_phases)]
+
+        phase_color_map = dict(zip(unique_phases, colors))
+        df_new['Color'] = df_new['Phase'].map(phase_color_map)
+
+        fig, ax = plt.subplots(figsize=(16, 9))
+        scatter = ax.scatter(df_new['X'], df_new['Y'], c=df_new['Color'], s=1, rasterized=True)
+
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_title('EBSD Map with Color Based on Phase')
+        ax.set_aspect('equal')
 
-        ax.set_aspect('equal')  # Set aspect ratio to 'equal' to ensure equal scaling along both axes
-
-        # Create legend for phase colors
-        handles, _ = scatter.legend_elements()
-        legend = ax.legend(handles, [f'Phase {phase}' for phase in sorted(df_new['Phase'].unique())], title="Phases", loc=legend_location)
-        ax.add_artist(legend)
+        handles = [plt.Line2D([0], [0], marker='o', color='w', markerfacecolor=phase_color_map[phase], markersize=8)
+                for phase in unique_phases]
+        ax.legend(handles, [phase_labels[phase] for phase in unique_phases], title="Phases", loc=legend_location)
 
         if save_image and image_filename:
-            plt.savefig(image_filename, dpi=dpi)  # Save the plot as an image with user-specified filename and DPI
-
+            plt.savefig(image_filename, dpi=dpi)
+        
         plt.show()
+
 
 
     def get_index_of_phases(self, phases_list):
@@ -303,7 +293,7 @@ class EBSD:
             data = data[data['Phase'] != index]
         return data
     
-    def getAnisotropyForEBSD(self, cij, euler_angles, density, melt=0):
+    def getAnisotropyForEBSD(self, cij, euler_angles, density, melt=0, density_melt=2100):
         """
         Calculates average density and tensor for EBSD data
 
@@ -311,13 +301,15 @@ class EBSD:
         cij: array, stiffness tensor of phase
         euler_angles: list, euler angles of phases in list
         density: float, density of phases
-        melt: float, fraction of melt available
+        melt: float, percentage of melt available
+        density_melt: float, in g/cm3
 
         Returns:
         - average_tensor: array, average tensor calculated
         - density: float, average density
         """
         if melt:
+            # from ..material.material import Material
             tensor = Tensor()
             tensor_list = []
             for voigt in cij:
@@ -340,10 +332,13 @@ class EBSD:
 
             tensor_sum = np.sum(rotated_tensor_list, axis=0)
             tensor_sum= tensor_sum/sum(len_euler)
+            tensor_sum = tensor.tensor_to_voigt(tensor_sum)
 
-            tensor_sum = (1 - melt*0.01)*tensor_sum + melt*0.01*calcMelttensor
+            tensor_sum = np.multiply((1 - (melt * 0.01)), tensor_sum) + np.multiply(melt * 0.01, calcMelttensor()[1])
+            density_averaged = ((1 - melt*0.01)*density_averaged) + (melt*0.01*density_melt)
+            average_tensor = tensor_sum
 
-            return tensor_sum, density_averaged
+            return average_tensor, density_averaged
 
         tensor = Tensor()
         tensor_list = []
@@ -736,3 +731,14 @@ class EBSD:
         self.pdf(df = df, phase=phase, random_val=random_val, crystal_symmetry=crystal_symmetry)
         ipf(df = df, phase=phase, vector_sample=vector_sample, random_val=random_val,
             vector_title=vector_title, projection=projection, crystal_symmetry=crystal_symmetry)
+        
+    def __repr__(self):
+        """
+        String representation of the EBSD object.
+        """
+        data, header_data = self.ctf.get_data()
+        index = self.get_ebsd_data_header()[0].columns.to_list()
+        num_points = len(data)
+        phases_info = self.phases()
+        num_phases = len(phases_info)
+        return f"EBSD(filename='{self._filename}', points={num_points}, phases={num_phases}, Properties: {index})"

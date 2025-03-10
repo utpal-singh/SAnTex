@@ -328,7 +328,7 @@ This gives values such as:
     Vp/Vs1 ratio:  3.4012758430117644
 
 
-Ordinary Distribution Function (ODF)
+Orientation Distribution Function (ODF)
 =========
 
 The orientation distribution function (ODF) is a function on the orientation space that associates to each orientation g the volume percentage of crystals in a polycrystaline specimen that are in this specific orientation
