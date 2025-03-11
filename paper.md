@@ -26,7 +26,7 @@ bibliography: paper.bib
 
 # Summary
 
-Seismic anisotropy, the directional dependency of seismic wave velocities, is essentialimportant for mapping the Earth’s structure and understanding geodynamic processes. Seismic anisotropy primarily stems from the development of mineral crystallographic preferred orientation (i.e., texture) during the plastic deformation of rocks. In-depth analysis of data from texture characterization techniques like Electron Backscatter Diffraction (EBSD) enables the determination of mineral and bulk-rock elastic properties. Although the influence of pressure, temperature, and melt on elastic properties and seismic anisotropy is well understood, they are often disregarded. To help address this gap, we developed SAnTex: Seismic Anisotropy from Texture, an open-source Python library that calculates the full elastic tensor of rocks from modal mineral composition, crystallographic orientation, and a crystal stiffness tensor catalogue that accounts for the dependency of elasticity with pressure, temperature and melt. Then, elastic wave velocities (Vp, Vs) and seismic wave anisotropy are calculated from these elastic tensors. SAnTex extends its utility beyond the solidus by estimating melt volume in a rock and assessing its impact on seismic wave velocities and anisotropy.
+Seismic anisotropy, the directional dependency of seismic wave velocities, is important for mapping the Earth’s structure and understanding geodynamic processes. Seismic anisotropy primarily stems from the development of mineral crystallographic preferred orientation (i.e., texture) during the plastic deformation of rocks. In-depth analysis of data from texture characterization techniques like Electron Backscatter Diffraction (EBSD) enables the determination of mineral and bulk-rock elastic properties. Although the influence of pressure, temperature, and melt on elastic properties and seismic anisotropy is well understood, they are often disregarded. To help address this gap, we developed SAnTex: Seismic Anisotropy from Texture, an open-source Python library that calculates the full elastic tensor of rocks from modal mineral composition, crystallographic orientation, and a crystal stiffness tensor catalogue that accounts for the dependency of elasticity with pressure, temperature and melt. Then, elastic wave velocities (Vp, Vs) and seismic wave anisotropy are calculated from these elastic tensors. SAnTex extends its utility beyond the solidus by estimating melt volume in a rock and assessing its impact on seismic wave velocities and anisotropy.
 
 # Statement of need
 
@@ -61,7 +61,8 @@ C_{ijkl}(p, T) = C_{ijkl}(0, 0) + \left. \frac{\partial C_{ijkl}}{\partial p} \r
 
 Pressure and temperature have competing effects on the stiffness tensor.  Higher temperatures increase atomic vibrations, making it easier for the material to deform. Higher pressures force atoms closer together, making it more difficult for the material to deform. 
 
-In the current version of SAnTex, melt is considered as an isotropic phase with homogenous distribution within an anisotropic host rock e.g., [@lee_modeling_2017:2017].
+In the current version of SAnTex, melt is considered as an isotropic phase with homogenous distribution within an anisotropic host rock e.g., (Lee et al., 2017).
+
 
 \begin{equation}\label{eq:elasticity_fmelt}
 \begin{aligned}
@@ -99,7 +100,9 @@ SAnTex allows for (Fig. 2):
 
 5.	Calculation of isotropic velocities: Computes isotropic seismic wave velocities (Vp, Vs, and Vbulk), along with the isothermal bulk modulus and density, under geological conditions (Hacker & Abers, 2004) (Fig. 1g, h).  The calculated velocities and elastic properties can be fed to geophysical interpretation tools such as pide (Özaydin et al., 2025).
 
-![Workflow of SAnTex with important methods and classes outlined.](santex.png){ width=100% }
+![EBSD maps after cleaning using (a) MTEX and (b) SAnTex. Seismic Anisotropy maps using(c) MTEX at ambient pressure and temperature and SAnTex at (d) ambient pressure and temperature, (e) at 1.4 GPa and 1100° K, and (f) 1.4 GPa and 1100° K with 7% silicate melt.  Density, P and S wave velocities against (g) temperature and (h) pressure.](santex_fig_1.png){ width=100% }
+![Workflow of SAnTex with fundamental methods and classes outlined.](santex_fig_2.png){ width=100% }
+![3D visualisation of (a) Forsterite Vs splitting, (b) Olivine Vs splitting, (c) Olivine Vp.](santex_fig_3.png){ width=100% }
 
 # Acknowledgements
 
