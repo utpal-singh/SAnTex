@@ -85,7 +85,7 @@ SAnTex calculates seismic properties from EBSD crystal orientation data using th
 
 4.  Incorporation of the effect of melt on seismic properties through a nonlinear peridotite melting curve between solidus and liquidus (McKenzie & Bickle, 1988). Alternatively, a melt fraction value can be imposed by the user.
 
-The capabilities of SAnTex are tested on previously published data using MTEX for a peridotite xenolith from Marie Byrd Land volcanic province in West Antarctica (Figure 1) [@chatzaras_axial-type_2016]. Here, we demonstrate the outputs of SAnTex match those generated using MTEX, at ambient pressure and temperature conditions (Figure1c vs d). On the other hand, Figure 1e depicts the seismic anisotropies for the same sample at higher temperature and pressure conditions.  Moreover, Figure 1f illustrates the effects of 7% melt at the same pressure and temperature conditions. Figure 1c and 1d shows seismic wave velocities and densities as a function of temperature and pressure for the same modal composition. The gray shaded areas show the Hashin ShtrikmanBounds, the area is scaled to see the difference clearly.
+The capabilities of SAnTex are tested on previously published data using MTEX for a peridotite xenolith from Marie Byrd Land volcanic province in West Antarctica (Figure 1) [@chatzaras_axial-type_2016]. Here, we demonstrate the outputs of SAnTex match those generated using MTEX, at ambient pressure and temperature conditions (Figure1c vs d). On the other hand, Figure 1e depicts the seismic anisotropies for the same sample at higher temperature and pressure conditions.  Moreover, Figure 1f illustrates the effects of 7% melt at the same pressure and temperature conditions. Figure 1c and 1d shows seismic wave velocities and densities as a function of temperature and pressure for the same modal composition. The gray shaded areas show the upper and lower Hashin-Shtrikman bounds.
 
 
 # Package Summary
@@ -100,7 +100,7 @@ SAnTex allows for (Fig. 2):
 
 5.	Calculation of isotropic velocities: Computes isotropic seismic wave velocities (Vp, Vs, and Vbulk), along with the isothermal bulk modulus and density, under geological conditions [@hacker_subduction_2004] (Fig. 1g, h).  The calculated velocities and elastic properties can be fed to geophysical interpretation tools such as pide [@ozaydin_pide_2025].
 
-![EBSD maps after cleaning using (a) MTEX and (b) SAnTex. Seismic Anisotropy maps using(c) MTEX at ambient pressure and temperature and SAnTex at (d) ambient pressure and temperature, (e) at 1.4 GPa and 1100° K, and (f) 1.4 GPa and 1100° K with 7% silicate melt.  Density, P and S wave velocities against (g) temperature and (h) pressure.](santex_fig_1.png){ width=100% }
+![EBSD maps after cleaning using (a) MTEX and (b) SAnTex. Seismic Anisotropy maps using(c) MTEX at ambient pressure and temperature and SAnTex at (d) ambient pressure and temperature, (e) at 1.4 GPa and 1100° K, and (f) 1.4 GPa and 1100° K with 7% silicate melt.  Density, P and S wave velocities against (g) temperature and (h) pressure. The gray shaded areas show the upper and lower Hashin-Shtrikman Bounds scaled by a factor of 1000 to see the difference](santex_fig_1.png){ width=100% }
 
 ![Workflow of SAnTex with fundamental methods and classes outlined.](santex_fig_2.png){ width=100% }
 
