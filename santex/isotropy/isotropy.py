@@ -227,7 +227,7 @@ class Isotropy:
         except ZeroDivisionError as e:
             print(f"Error in pressure function: {e}")
             
-    def HashinShtrikmanBounds(self, phase_constant_list, fraction_list, temperature, pressure, fractions_matches_T = False):
+    def HashinShtrikmanBounds(self, phase_constant_list, fraction_list, temperature, pressure, fractions_matches_T = False, density_mix_calc = False):
     
         """
         Calculates Hashin-Shtrikman Bounds for the given parameters:
@@ -245,6 +245,7 @@ class Isotropy:
         """
         aks_list = []
         amu_list = []
+        arho_list = []
         
         if isinstance(temperature,(int,float)):
             if isinstance(pressure,(int,float)):
@@ -282,6 +283,9 @@ class Isotropy:
             #appending moduli into lists
             aks_list.append(aks)
             amu_list.append(amu)
+            
+            if density_mix_calc == True:
+                arho_list.append(density_mix)
             
         
         aks_list = np.array(aks_list)
@@ -331,8 +335,12 @@ class Isotropy:
         Vbulk_upper, Vp_upper, Vs_upper = self.calculate_velocities(density = density_mix, aks = khsp ,amu = mhsp)
         Vbulk_lower, Vp_lower, Vs_lower = self.calculate_velocities(density = density_mix, aks = khsm ,amu = mhsm)
         
-        return [Vbulk_medium,Vp_medium,Vs_medium], [Vbulk_upper,Vp_upper,Vs_upper], [Vbulk_lower, Vp_lower, Vs_lower]
-        
+        if density_mix_calc == True:
+            return [Vbulk_medium,Vp_medium,Vs_medium], [Vbulk_upper,Vp_upper,Vs_upper], [Vbulk_lower, Vp_lower, Vs_lower], arho_list
+        else:
+            return [Vbulk_medium,Vp_medium,Vs_medium], [Vbulk_upper,Vp_upper,Vs_upper], [Vbulk_lower, Vp_lower, Vs_lower]
+
+
     def set_modal_composition(self, phase_list, fraction_list):
         
         """
