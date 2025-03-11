@@ -30,7 +30,7 @@ Seismic anisotropy, the directional dependency of seismic wave velocities, is im
 
 # Statement of need
 
-Understanding seismic wave velocities and anisotropy is crucial for deciphering the composition, structure, and rheological behaviour of the Earth’s crust and mantle. Seismic anisotropy primarily emerges from the propagation of waves through rocks that have developed crystallographic preferred orientations (CPO) as a result of plastic deformation (Mainprice & Nicolas, 1989). The rock composition (e.g., mineralogy, presence of melt or water) and microstructure (e.g., grain size, microcracks) can further influence both seismic velocities and anisotropy (Almqvist & Mainprice, 2017; Karato et al., 2008; Nicolas & Christensen, 1987).
+Understanding seismic wave velocities and anisotropy is crucial for deciphering the composition, structure, and rheological behaviour of the Earth’s crust and mantle. Seismic anisotropy primarily emerges from the propagation of waves through rocks that have developed crystallographic preferred orientations (CPO) as a result of plastic deformation [@mainprice_development_1989]. The rock composition (e.g., mineralogy, presence of melt or water) and microstructure (e.g., grain size, microcracks) can further influence both seismic velocities and anisotropy [@almqvist_seismic_2017; @karato_geodynamic_2008; @nicolas_formation_1987].
 
 Seismic anisotropy calculations that rely on the integration of textural data obtained by Electron Backscatter Diffraction (EBSD) with experimentally determined elastic stiffness tensors have become standard practice in rock-based geodynamic studies (Bernard et al., 2019; Boneh et al., 2015; Chatzaras & Kruckenberg, 2023; Demouchy et al., 2019; Jung et al., 2006; Tommasi & Ishikawa, 2014; Vauchez et al., 2005). While established tools like MTEX (Bachmann et al., 2010) allow for robust texture analysis, they rely on stiffness tensors derived under ambient conditions to constrain elastic properties (Figure 1c, d). However, first-principles simulations and laboratory experiments reveal that standard reference tensors can significantly deviate from those at deep crustal and mantle conditions (Kumazawa, 1969; Kumazawa & Anderson, 1969; Qian et al., 2017; Su et al., 2021; Walker, 2012). Therefore, seismic properties derived from textural analyses (EBSD) need to integrate the effects of temperature, pressure, and melt.
 
@@ -101,7 +101,9 @@ SAnTex allows for (Fig. 2):
 5.	Calculation of isotropic velocities: Computes isotropic seismic wave velocities (Vp, Vs, and Vbulk), along with the isothermal bulk modulus and density, under geological conditions (Hacker & Abers, 2004) (Fig. 1g, h).  The calculated velocities and elastic properties can be fed to geophysical interpretation tools such as pide (Özaydin et al., 2025).
 
 ![EBSD maps after cleaning using (a) MTEX and (b) SAnTex. Seismic Anisotropy maps using(c) MTEX at ambient pressure and temperature and SAnTex at (d) ambient pressure and temperature, (e) at 1.4 GPa and 1100° K, and (f) 1.4 GPa and 1100° K with 7% silicate melt.  Density, P and S wave velocities against (g) temperature and (h) pressure.](santex_fig_1.png){ width=100% }
+
 ![Workflow of SAnTex with fundamental methods and classes outlined.](santex_fig_2.png){ width=100% }
+
 ![3D visualisation of (a) Forsterite Vs splitting, (b) Olivine Vs splitting, (c) Olivine Vp.](santex_fig_3.png){ width=100% }
 
 # Acknowledgements
