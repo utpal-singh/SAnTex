@@ -34,7 +34,7 @@ Understanding seismic wave velocities and anisotropy is crucial for deciphering 
 
 Seismic anisotropy calculations that rely on the integration of textural data obtained by Electron Backscatter Diffraction (EBSD) with experimentally determined elastic stiffness tensors have become standard practice in rock-based geodynamic studies [@bernard_relationships_2019; @boneh_modeling_2015; @chatzaras_effects_2023; @demouchy_microstructures_2019; @jung_effect_2006; @tommasi_microstructures_2014; @vauchez_microstructure_2005]. While established tools like MTEX [@mainprice_descriptive_2015] allow for robust texture analysis, they rely on stiffness tensors derived under ambient conditions to constrain elastic properties (Figure 1c, d). However, first-principles simulations and laboratory experiments reveal that standard reference tensors can significantly deviate from those at deep crustal and mantle conditions [@kumazawa_elastic_1969; @kumazawa_elastic_1969-1; @qian_elasticity_2017; @su_self-consistent_2021; @walker_effect_2012]. Therefore, seismic properties derived from textural analyses need to integrate the effects of temperature, pressure, and melt.
 
-Melt characteristics - such as fraction, shape, distribution, and orientation - have well-understood effects on seismic properties (e.g., [@hammond_upper_2000; @kendall_teleseismic_1994; @takei_constitutive_1998]). However, the combined effect of melt and rock texture is less commonly considered [@holtzman_organized_2010; @lee_modeling_2017]. Functionalities that allow us to estimate how the combination of texture-induced anisotropy and melt affect the elastic properties under varying pressure and temperature have yet to be incorporated into an open-source toolkit.
+Melt characteristics - such as fraction, shape, distribution, and orientation - have well-understood effects on seismic properties [@hammond_upper_2000; @kendall_teleseismic_1994; @takei_constitutive_1998]. However, the combined effect of melt and rock texture is less commonly considered [@holtzman_organized_2010; @lee_modeling_2017]. Functionalities that allow us to estimate how the combination of texture-induced anisotropy and melt affect the elastic properties under varying pressure and temperature have yet to be incorporated into an open-source toolkit.
 
 To address these gaps, we have developed SAnTex (Seismic Anisotropy from Texture), a free, open-source Python library. Built upon open-source libraries such as ORIX [@johnstone_density-based_2020] for orientation analysis, SanTeX provides an accessible platform for the geoscientific community, embodying the principles of free and open science, and promoting reproducibility and transparency.
 
@@ -61,7 +61,7 @@ C_{ijkl}(p, T) = C_{ijkl}(0, 0) + \left. \frac{\partial C_{ijkl}}{\partial p} \r
 
 Pressure and temperature have competing effects on the stiffness tensor.  Higher temperatures increase atomic vibrations, making it easier for the material to deform. Higher pressures force atoms closer together, making it more difficult for the material to deform. 
 
-In the current version of SAnTex, melt is considered as an isotropic phase with homogenous distribution within an anisotropic host rock (e.g., [@lee_modeling_2017]).
+In the current version of SAnTex, melt is considered as an isotropic phase with homogenous distribution within an anisotropic host rock [@lee_modeling_2017].
 
 
 \begin{equation}\label{eq:elasticity_fmelt}
