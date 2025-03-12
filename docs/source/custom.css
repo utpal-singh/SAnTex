@@ -1,0 +1,15 @@
+div.highlight pre {
+    position: relative;
+}
+
+div.highlight pre .copy-button {
+    position: absolute;
+    top: 5px; 
+    right: 5px;
+    padding: 5px;
+    background-color: #f7f7f7;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 16px;
+    z-index: 10;
+}
