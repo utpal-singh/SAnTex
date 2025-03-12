@@ -45,7 +45,7 @@ pip install santex
 
 # Workflow
 
-<img src="./santex.png">
+<img src="./santex_fig_1.png">
 
 # Funding
 

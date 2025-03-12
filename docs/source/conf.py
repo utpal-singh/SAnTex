@@ -21,6 +21,7 @@ exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
 extensions = [
    'nbsphinx',
+   'sphinx_copybutton',
    'sphinx.ext.duration',
    'sphinx.ext.doctest',
    'sphinx.ext.autodoc',
