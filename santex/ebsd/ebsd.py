@@ -724,6 +724,12 @@ class EBSD:
                 DataFrame containing the calculated Pole Figure (PF) values.
             - figure: matplotlib Figure or None
                 If return_figure is True, the Figure object containing the pf plot; otherwise, None.
+
+            WARNING:
+                MTEX and SAnTex (via Orix) do not necessarily use the same point group symmetry 
+                operation conventions. MTEX has different default crystal axes alignments for 
+                different crystal systems, while Orix always assumes X || a, Z || c*. 
+                Users should verify conventions and expectations before trusting the results.
             """
         pf(df=df, phase=phase, crystal_symmetry=crystal_symmetry, random_val=random_val, uvw=uvw, hemisphere = hemisphere, 
             axes_labels=axes_labels, alpha = alpha, figure = figure, vector_labels = vector_labels, reproject=reproject, show_hemisphere_label = show_hemisphere_label,
@@ -779,6 +785,12 @@ class EBSD:
                 DataFrame containing the calculated Orientation Distribution Function (PDF) values.
             - figure: matplotlib Figure or None
                 If return_figure is True, the Figure object containing the PDF plot; otherwise, None.
+
+            WARNING:
+                MTEX and SAnTex (via Orix) do not necessarily use the same point group symmetry 
+                operation conventions. MTEX has different default crystal axes alignments for 
+                different crystal systems, while Orix always assumes X || a, Z || c*. 
+                Users should verify conventions and expectations before trusting the results.
             """
 
         pdf(df = df, phase=phase, crystal_symmetry=crystal_symmetry, random_val=random_val, uvw=uvw, sigma=sigma, hemisphere=hemisphere, axes_labels=axes_labels, figure = figure, show_hemisphere_label = show_hemisphere_label,
@@ -809,12 +821,25 @@ class EBSD:
             Returns:
             - fig: matplotlib Figure
                 The generated matplotlib Figure object containing the IPF visualization.
+
+            WARNING:
+                MTEX and SAnTex (via Orix) do not necessarily use the same point group symmetry 
+                operation conventions. MTEX has different default crystal axes alignments for 
+                different crystal systems, while Orix always assumes X || a, Z || c*. 
+                Users should verify conventions and expectations before trusting the results.
         """
 
         ipf(df = df, phase=phase, vector_sample=vector_sample, random_val=random_val,
             vector_title=vector_title, crystal_symmetry=crystal_symmetry)
         
     def ipf_colorkey(self, df, phase=1, crystal_symmetry='D2'):
+        """
+            WARNING:
+                MTEX and SAnTex (via Orix) do not necessarily use the same point group symmetry 
+                operation conventions. MTEX has different default crystal axes alignments for 
+                different crystal systems, while Orix always assumes X || a, Z || c*. 
+                Users should verify conventions and expectations before trusting the results.
+        """
         ipf_colorkey(df = df, phase=phase, crystal_symmetry=crystal_symmetry)
 
         
