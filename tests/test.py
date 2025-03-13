@@ -12,8 +12,10 @@ class TestMaterialAnisotropy(unittest.TestCase):
 
         """
         Test seismic property calculations for Forsterite at specified P-T conditions. 
-        based on Elastic moduli, pressure derivatives, and temperature derivatives of single-crystal olivine and single-crystal forsterite
+        based on 
+        1. Elastic moduli, pressure derivatives, and temperature derivatives of single-crystal olivine and single-crystal forsterite
         10.1029/JB074i025p05961
+        2. Faccenda, Manuele, et al. "ECOMAN: an open-source package for geodynamic and seismological modelling of mechanical anisotropy." Solid Earth 15.10 (2024): 1241-1264.
         """
         self.material = Material()
         self.rock = ["Forsterite", "Diopside", "Enstatite"]
@@ -77,6 +79,30 @@ class TestMaterialAnisotropy(unittest.TestCase):
         self.assertAlmostEqual(vp, expected_vp, places=5)
         self.assertAlmostEqual(vs, expected_vs, places=5)
         self.assertAlmostEqual(vbulk, expected_vbulk, places=5)
+
+    def test_seismic_anisotropy(self):
+        self.cij_forsterite = np.array([
+            [320.5, 68.15, 71.6, 0, 0, 0],
+            [68.15, 196.5, 76.8, 0, 0, 0],
+            [71.6, 76.8, 233.5, 0, 0, 0],
+            [0, 0, 0, 64, 0, 0],
+            [0, 0, 0, 0, 77, 0],
+            [0, 0, 0, 0, 0, 78.7]
+        ])
+        self.average_density = 3355
+        self.anisotropy = Anisotropy(self.cij_forsterite*10**9, self.average_density)
+        self.anisotropy_values = self.anisotropy.anisotropy_values()
+
+        self.assertAlmostEqual(self.anisotropy_values['maxvp'], 9773.8, places=0)
+        self.assertAlmostEqual(self.anisotropy_values['minvp'], 7653.1, places=0)
+        self.assertAlmostEqual(self.anisotropy_values['maxvs1'], 5459.3, places=0)
+        self.assertAlmostEqual(self.anisotropy_values['minvs1'], 4790.8, places=0)
+        self.assertAlmostEqual(self.anisotropy_values['maxvs2'], 4832.7, places=0)
+        self.assertAlmostEqual(self.anisotropy_values['minvs2'], 4367.6, places=0)
+        
+        
+
+
 
 if __name__ == '__main__':
     unittest.main()

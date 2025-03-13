@@ -547,3 +547,41 @@ class Anisotropy:
         """
 
         Plotter.plot_vp(voigt_stiffness, density)
+
+    def voigt_velocity(self):
+        tensor = Tensor()
+        C = tensor.tensor_to_voigt(self.cijkl)
+        # Bulk modulus
+        Kv = (C[0,0] + C[1,1] + C[2,2] + 2*(C[0,1] + C[1,2] + C[0,2])) / 9
+        # Shear modulus
+        Gv = ((C[0,0] + C[1,1] + C[2,2]) - (C[0,1] + C[0,2] + C[1,2])) / 15 + (C[3,3] + C[4,4] + C[5,5]) / 5
+        # velocities
+        vp = np.sqrt((Kv + (4/3)*Gv) / self.rho)
+        vs = np.sqrt(Gv / self.rho)
+
+        return vp, vs
+
+    def reuss_velocity(self):
+        tensor = Tensor()
+        C = tensor.tensor_to_voigt(self.cijkl)
+        S = np.linalg.inv(C)
+        Kr = 1 / (S[0,0] + S[1,1] + S[2,2] + 2*(S[0,1] + S[0,2] + S[1,2]))
+        Gr = 15 / (4*(S[0,0]+S[1,1]+S[2,2]-S[0,1]-S[0,2]-S[1,2]) + 3*(S[3,3]+S[4,4]+S[5,5]))
+        vp = np.sqrt((Kr + (4/3)*Gr) / self.rho)
+        vs = np.sqrt(Gr / self.rho)
+
+        return vp, vs
+
+    def hill_velocity(self):
+        vp_voigt, vs_voigt = self.voigt_velocity()
+        vp_reuss, vs_reuss = self.reuss_velocity()
+        vp_hill = (vp_voigt + vp_reuss) / 2
+        vs_hill = (vs_voigt + vs_reuss) / 2
+
+        return vp_hill, vs_hill, vs_hill
+
+    def get_compliance(self):
+        tensor = Tensor()
+        C_voigt = tensor.tensor_to_voigt(self.cijkl)
+        compliance = np.linalg.inv(C_voigt)
+        return compliance

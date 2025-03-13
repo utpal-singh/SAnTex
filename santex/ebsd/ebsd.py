@@ -293,81 +293,164 @@ class EBSD:
             data = data[data['Phase'] != index]
         return data
     
-    def getAnisotropyForEBSD(self, cij, euler_angles, density, melt=0, density_melt=2100):
+    def getAnisotropyForEBSD(self, cij, euler_angles, density, method = 0, melt=0, density_melt=2100):
         """
         Calculates average density and tensor for EBSD data
 
         Parameters:
-        cij: array, stiffness tensor of phase
+        cij: array, stiffness tensor of phase, 2D array
         euler_angles: list, euler angles of phases in list
         density: float, density of phases
         melt: float, percentage of melt available
         density_melt: float, in g/cm3
+        method: 0 for voigt, 1 for voigt, 2 for reuss, 3 for hill
 
         Returns:
         - average_tensor: array, average tensor calculated
         - density: float, average density
         """
-        if melt:
-            # from ..material.material import Material
+
+        if method == 1:
+
+            average_tensor, density_averaged = self.getVoigtReussHill(cij=cij, euler_angles=euler_angles, density=density, melt=melt, density_melt=density_melt, method = 'voigt')
+            return average_tensor, density_averaged
+        
+        elif method == 2:
+            average_tensor, density_averaged = self.getVoigtReussHill(cij=cij, euler_angles=euler_angles, density=density, melt=melt, density_melt=density_melt, method = 'reuss')
+            return average_tensor, density_averaged
+        
+        elif method == 3:
+            average_tensor, density_averaged = self.getVoigtReussHill(cij=cij, euler_angles=euler_angles, density=density, melt=melt, density_melt=density_melt, method = 'hill')
+            return average_tensor, density_averaged
+
+        else:
+            if melt:
+                # from ..material.material import Material
+                tensor = Tensor()
+                tensor_list = []
+                for voigt in cij:
+                    tensor_list.append(tensor.voigt_to_tensor(voigt))
+
+                rotated_tensor_list = []
+                len_euler = []
+                x = 0
+                for euler_angle in euler_angles:
+                    len_euler.append(len(euler_angle))
+                    for i in range(len(euler_angle)):
+                        alpha = euler_angle.iloc[i]["Euler1"]
+                        beta = euler_angle.iloc[i]["Euler2"]
+                        gamma = euler_angle.iloc[i]["Euler3"]
+                        output = np.array(tensor.rotate_tensor(tensor_list[x], alpha, beta, gamma))
+                        rotated_tensor_list.append(output)
+                    x+= 1
+
+                density_averaged = (np.sum(np.multiply(density,len_euler)))/(np.sum(len_euler))
+
+                tensor_sum = np.sum(rotated_tensor_list, axis=0)
+                tensor_sum= tensor_sum/sum(len_euler)
+                tensor_sum = tensor.tensor_to_voigt(tensor_sum)
+
+                tensor_sum = np.multiply((1 - (melt * 0.01)), tensor_sum) + np.multiply(melt * 0.01, calcMelttensor()[1])
+                density_averaged = ((1 - melt*0.01)*density_averaged) + (melt*0.01*density_melt)
+                average_tensor = tensor_sum
+
+                return average_tensor, density_averaged
+
             tensor = Tensor()
             tensor_list = []
             for voigt in cij:
                 tensor_list.append(tensor.voigt_to_tensor(voigt))
+                
+            tensor = Tensor()
+            rotated_tensor = []
 
-            rotated_tensor_list = []
-            len_euler = []
-            x = 0
-            for euler_angle in euler_angles:
-                len_euler.append(len(euler_angle))
-                for i in range(len(euler_angle)):
-                    alpha = euler_angle.iloc[i]["Euler1"]
-                    beta = euler_angle.iloc[i]["Euler2"]
-                    gamma = euler_angle.iloc[i]["Euler3"]
-                    output = np.array(tensor.rotate_tensor(tensor_list[x], alpha, beta, gamma))
-                    rotated_tensor_list.append(output)
-                x+= 1
+            total_len_euler = []
 
-            density_averaged = (np.sum(np.multiply(density,len_euler)))/(np.sum(len_euler))
+            for j in (euler_angles):
+                total_len_euler.append(len(j))
 
-            tensor_sum = np.sum(rotated_tensor_list, axis=0)
-            tensor_sum= tensor_sum/sum(len_euler)
-            tensor_sum = tensor.tensor_to_voigt(tensor_sum)
+            a = np.array(total_len_euler)
+            b = np.array(density)
+            average_density = sum(b*a)/sum(a)
 
-            tensor_sum = np.multiply((1 - (melt * 0.01)), tensor_sum) + np.multiply(melt * 0.01, calcMelttensor()[1])
-            density_averaged = ((1 - melt*0.01)*density_averaged) + (melt*0.01*density_melt)
-            average_tensor = tensor_sum
+            for i in range(len(euler_angles)):
+                for index, row in euler_angles[i].iterrows():
+                    euler1_value = row['Euler1']
+                    euler2_value = row['Euler2']
+                    euler3_value = row['Euler3']
+                
+                    rotated_tensor.append(np.array((tensor.rotate_tensor(tensor.voigt_to_tensor(cij[i]), euler1_value, euler2_value, euler3_value))))
 
-            return average_tensor, density_averaged
+            average_tensor = np.mean(rotated_tensor, axis=0)
 
+            return tensor.tensor_to_voigt(average_tensor), average_density
+    
+
+    def getVoigtReussHill(self, cij, euler_angles, density, melt=0, density_melt=2100, method = 'voigt'):
+        """
+        Calculate average density and tensor using Voigt, Reuss, and Hill averages.
+
+        Parameters:
+        cij: list of arrays, stiffness tensors (Voigt notation) for each phase
+        euler_angles: list of pandas DataFrames, each containing Euler angles for the phases
+        density: array, density of each phase
+        melt: float, percentage of melt
+        density_melt: float, density of melt
+
+        Returns:
+        dict: Voigt, Reuss, Hill averaged tensors and density
+        """
         tensor = Tensor()
         tensor_list = []
         for voigt in cij:
             tensor_list.append(tensor.voigt_to_tensor(voigt))
-            
-        tensor = Tensor()
-        rotated_tensor = []
 
-        total_len_euler = []
+        rotated_C_list = []
+        rotated_S_list = []
 
-        for j in (euler_angles):
-            total_len_euler.append(len(j))
+        len_euler = [len(euler_df) for euler_df in euler_angles]
+        total_grains = sum(len_euler)
 
-        a = np.array(total_len_euler)
-        b = np.array(density)
-        average_density = sum(b*a)/sum(a)
+        for idx, euler_df in enumerate(euler_angles):
+            volume_fraction = len_euler[idx] / total_grains
+            for _, row in euler_df.iterrows():
+                alpha, beta, gamma = row['Euler1'], row['Euler2'], row['Euler3']
 
-        for i in range(len(euler_angles)):
-            for index, row in euler_angles[i].iterrows():
-                euler1_value = row['Euler1']
-                euler2_value = row['Euler2']
-                euler3_value = row['Euler3']
-            
-                rotated_tensor.append(np.array((tensor.rotate_tensor(tensor.voigt_to_tensor(cij[i]), euler1_value, euler2_value, euler3_value))))
+                rotated_C = tensor.rotate_tensor(tensor_list[idx], alpha, beta, gamma)
+                rotated_S = np.linalg.inv(rotated_C)
 
-        average_tensor = np.mean(rotated_tensor, axis=0)
+                rotated_C_list.append(rotated_C * volume_fraction)
+                rotated_S_list.append(rotated_S * volume_fraction)
 
-        return tensor.tensor_to_voigt(average_tensor), average_density
+        # Voigt
+        C_voigt = np.sum(rotated_C_list, axis=0)
+
+        # Reuss
+        S_reuss_avg = np.sum(rotated_S_list, axis=0)
+        C_reuss = np.linalg.inv(S_reuss_avg)
+
+        # Hill
+        C_hill = 0.5 * (C_voigt + C_reuss)
+
+        average_density = np.sum(np.multiply(density, len_euler)) / total_grains
+
+        if melt:
+            melt_tensor = calcMelttensor()[1]
+            melt_frac = melt * 0.01
+
+            C_voigt = (1 - melt_frac) * C_voigt + melt_frac * melt_tensor
+            C_reuss = (1 - melt_frac) * C_reuss + melt_frac * melt_tensor
+            C_hill = (1 - melt_frac) * C_hill + melt_frac * melt_tensor
+
+            average_density = (1 - melt_frac) * average_density + melt_frac * density_melt
+
+        if method == 'voigt':
+            return tensor.tensor_to_voigt(C_voigt), average_density
+        elif method == 'reuss':
+            return tensor.tensor_to_voigt(C_reuss), average_density
+        elif method == 'hill':
+            return tensor.tensor_to_voigt(C_hill), average_density
+
     
 
     def euler_to_quaternion(self, phi, phi1, phi2):
