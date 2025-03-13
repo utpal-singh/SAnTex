@@ -17,7 +17,7 @@ from .melt_tensor import calcMelttensor
 from .rotateEBSD import apply_custom_rotation_to_dataframe, apply_custom_rotation_to_dataframe_noxy
 
 # from .ebsdrotation import apply_custom_rotation_to_dataframe as rotebsd
-from .crystal import ipf, pf, pdf
+from .crystal import ipf, pf, pdf, ipf_colorkey, plot_orientations_3d
 import matplotlib.colors as mcolors
 
 class EBSD:
@@ -592,7 +592,7 @@ class EBSD:
         df_filtered = df[~df['Phase'].isin(phase_list)]
         return df_filtered
     
-    def pf(self, df, phase=1, crystal_symmetry='D2', random_val=True, miller=[1, 0, 0], hemisphere = 'both', 
+    def pf(self, df, phase=1, crystal_symmetry='D2', random_val=True, uvw=[1, 0, 0], hemisphere = 'both', 
             axes_labels=["Xs", "Ys"], alpha = 0.01, figure = None, vector_labels = None, reproject=False, show_hemisphere_label = None,
             grid = None, grid_resolution = None, return_figure = None):
         """
@@ -642,11 +642,11 @@ class EBSD:
             - figure: matplotlib Figure or None
                 If return_figure is True, the Figure object containing the pf plot; otherwise, None.
             """
-        pf(df=df, phase=phase, crystal_symmetry=crystal_symmetry, random_val=random_val, miller=miller, hemisphere = hemisphere, 
+        pf(df=df, phase=phase, crystal_symmetry=crystal_symmetry, random_val=random_val, uvw=uvw, hemisphere = hemisphere, 
             axes_labels=axes_labels, alpha = alpha, figure = figure, vector_labels = vector_labels, reproject=reproject, show_hemisphere_label = show_hemisphere_label,
             grid = grid, grid_resolution = grid_resolution, return_figure = return_figure)
 
-    def pdf(self, df, phase=1, crystal_symmetry='D2', random_val=True, miller=[0, 1, 0], hemisphere = 'both', sigma = 4,
+    def pdf(self, df, phase=1, crystal_symmetry='D2', random_val=True, uvw=[0, 1, 0], hemisphere = 'both', sigma = 4,
         axes_labels=["Xs", "Ys"], figure = None, show_hemisphere_label = None,
         grid = None, grid_resolution = None, return_figure = None, log = False, colorbar=True, weights = None):
 
@@ -698,11 +698,11 @@ class EBSD:
                 If return_figure is True, the Figure object containing the PDF plot; otherwise, None.
             """
 
-        pdf(df = df, phase=phase, crystal_symmetry=crystal_symmetry, random_val=random_val, miller=miller, sigma=sigma, hemisphere=hemisphere, axes_labels=axes_labels, figure = figure, show_hemisphere_label = show_hemisphere_label,
+        pdf(df = df, phase=phase, crystal_symmetry=crystal_symmetry, random_val=random_val, uvw=uvw, sigma=sigma, hemisphere=hemisphere, axes_labels=axes_labels, figure = figure, show_hemisphere_label = show_hemisphere_label,
         grid = grid, grid_resolution = grid_resolution, return_figure = return_figure, log = log, colorbar=colorbar, weights = weights)
 
     def ipf(self, df, phase=1, vector_sample=[0, 0, 1], random_val=True,
-            vector_title='Z', projection='ipf', crystal_symmetry='D2'):
+            vector_title='Z', crystal_symmetry='D2'):
         
         """
             Generate and visualize an Inverse Pole Figure (IPF) from EBSD data.
@@ -728,9 +728,12 @@ class EBSD:
                 The generated matplotlib Figure object containing the IPF visualization.
         """
 
-        self.pdf(df = df, phase=phase, random_val=random_val, crystal_symmetry=crystal_symmetry)
         ipf(df = df, phase=phase, vector_sample=vector_sample, random_val=random_val,
-            vector_title=vector_title, projection=projection, crystal_symmetry=crystal_symmetry)
+            vector_title=vector_title, crystal_symmetry=crystal_symmetry)
+        
+    def ipf_colorkey(self, df, phase=1, crystal_symmetry='D2'):
+        ipf_colorkey(df = df, phase=phase, crystal_symmetry=crystal_symmetry)
+
         
     def __repr__(self):
         """

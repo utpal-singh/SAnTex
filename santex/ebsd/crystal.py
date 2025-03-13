@@ -217,7 +217,7 @@ def pf(df, phase=1, crystal_symmetry='D2', random_val=True, uvw=[1, 0, 0], hemis
     return r_
 
 def ipf(df, phase=1, vector_sample=[0, 0, 1], random_val=True,
-            vector_title='Z', projection='ipf', crystal_symmetry='D2'):
+            vector_title='Z', crystal_symmetry='D2'):
     """
     Generate and visualize an Inverse Pole Figure (IPF) from EBSD data.
 
@@ -397,8 +397,8 @@ def ipf(df, phase=1, vector_sample=[0, 0, 1], random_val=True,
     vec_sample = Vector3d(vector_sample)
     # print(vec_sample)
     vec_crystal = orientations * vec_sample
-    subplot_kw = dict(projection=projection, symmetry=symmetry_)
-    fig = plt.figure(figsize=(9, 8))
+    subplot_kw = dict(projection='ipf', symmetry=symmetry_)
+    # fig = plt.figure(figsize=(9, 8))
 
     ax0 = fig.add_subplot(221, direction=vec_sample, **subplot_kw)
     ax0.scatter(orientations, alpha=0.05)
