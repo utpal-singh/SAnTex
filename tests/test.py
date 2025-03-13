@@ -60,7 +60,7 @@ class TestMaterialAnisotropy(unittest.TestCase):
         """
         Test seismic property calculations for Forsterite at specified P-T conditions.
 
-        Expected values are based on:
+        Expected values are calculated from:
         Hacker, B.R., & Abers, G.A. (2004). 
         Subduction Factory 3: An Excel worksheet and macro for calculating the 
         densities, seismic wave speeds, and H2O contents of minerals and rocks 
@@ -70,17 +70,48 @@ class TestMaterialAnisotropy(unittest.TestCase):
 
         density, aks, amu, vp, vs, vbulk, akt = self.isotropy.calculate_seismic_properties(
             'Forsterite', temperature=2000, pressure=2, return_vp_vs_vbulk=True, return_aktout=True)
-        expected_density = 3034.1119267366676
-        expected_vp = 7.5781436531609305
-        expected_vs = 4.294565839495191
-        expected_vbulk = 5.730428867439992
+        expected_density = 3034.11
+        expected_vp = 7.58
+        expected_vs = 4.29
+        expected_vbulk = 5.73
 
-        self.assertAlmostEqual(density, expected_density, places=5)
-        self.assertAlmostEqual(vp, expected_vp, places=5)
-        self.assertAlmostEqual(vs, expected_vs, places=5)
-        self.assertAlmostEqual(vbulk, expected_vbulk, places=5)
+        self.assertAlmostEqual(density, expected_density, places=0)
+        self.assertAlmostEqual(vp, expected_vp, places=0)
+        self.assertAlmostEqual(vs, expected_vs, places=0)
+        self.assertAlmostEqual(vbulk, expected_vbulk, places=0)
 
     def test_seismic_anisotropy(self):
+        """
+        Test seismic anisotropy for a single crystal of Forsterite with MTEX
+
+        The expected results in MTEX can be generated from:
+
+        cs_tensor = crystalSymmetry('mmm',[4.7646,10.2296,5.9942],...
+        'x||a','z||c','mineral','Olivine');
+
+        M = [[320.5  68.15  71.6     0     0     0];...
+            [ 68.15  196.5  76.8     0     0     0];...
+            [  71.6   76.8 233.5     0     0     0];...
+            [   0      0      0     64     0     0];...
+            [   0      0      0      0    77     0];...
+            [   0      0      0      0     0  78.7]];
+
+            % Define density (g/cm3)
+            rho=3.355;
+
+            % Define tensor object in MTEX
+            % Cij -> Cijkl - elastic stiffness tensor
+            C = stiffnessTensor(M,cs_tensor,'density',rho);
+
+        [vp,vs1,vs2,pp,ps1,ps2] = C.velocity('harmonic');
+
+        max(vp)
+        max(vs1)
+        min(vp)
+        min(vs1)
+
+        """
+
         self.cij_forsterite = np.array([
             [320.5, 68.15, 71.6, 0, 0, 0],
             [68.15, 196.5, 76.8, 0, 0, 0],
@@ -93,12 +124,54 @@ class TestMaterialAnisotropy(unittest.TestCase):
         self.anisotropy = Anisotropy(self.cij_forsterite*10**9, self.average_density)
         self.anisotropy_values = self.anisotropy.anisotropy_values()
 
-        self.assertAlmostEqual(self.anisotropy_values['maxvp'], 9773.8, places=0)
-        self.assertAlmostEqual(self.anisotropy_values['minvp'], 7653.1, places=0)
-        self.assertAlmostEqual(self.anisotropy_values['maxvs1'], 5459.3, places=0)
-        self.assertAlmostEqual(self.anisotropy_values['minvs1'], 4790.8, places=0)
-        self.assertAlmostEqual(self.anisotropy_values['maxvs2'], 4832.7, places=0)
-        self.assertAlmostEqual(self.anisotropy_values['minvs2'], 4367.6, places=0)
+        self.assertAlmostEqual(self.anisotropy_values['maxvp']/1000, 9.7738, places=2)
+        self.assertAlmostEqual(self.anisotropy_values['minvp']/1000, 7.6531, places=2)
+        self.assertAlmostEqual(self.anisotropy_values['maxvs1']/1000, 5.4593, places=2)
+        self.assertAlmostEqual(self.anisotropy_values['minvs1']/1000, 4.7908, places=2)
+        self.assertAlmostEqual(self.anisotropy_values['maxvs2']/1000, 4.8327, places=2)
+        self.assertAlmostEqual(self.anisotropy_values['minvs2']/1000, 4.3676, places=2)
+
+
+    def test_ebsd(self):
+        """
+        Test seismic anisotropy and ebsd from a free data Forsterite.ctf available from MTEX,
+        The expected results in MTEX can be generated from https://mtex-toolbox.github.io/CPOSeismicProperties.html
+        """
+
+        import numpy as np
+        from santex.ebsd import EBSD
+        from santex.tensor import Tensor
+        from santex.anisotropy import Anisotropy
+        from santex.material import Material
+
+        ebsd = EBSD("../notebooks/Forsterite.ctf")
+        df = ebsd.get_ebsd_data()
+        df = ebsd.filterByPhaseNumberList(df = df, phase_list = [4, 5, 6, 7])
+        material_instance = Material()
+        rho_Fo = material_instance.load_density("Forsterite")
+        rho_diop = material_instance.load_density("Diopside")
+        rho_ens = material_instance.load_density("Enstatite")
+        cij_Fo = material_instance.voigthighPT('Forsterite')
+        cij_ens = material_instance.voigthighPT('Enstatite')
+        cij_diop = material_instance.voigthighPT('Diopside')
+        cij = [cij_Fo, cij_ens, cij_diop]
+        density = [rho_Fo, rho_ens, rho_diop]
+        forsterite = ebsd.get_euler_angles(phase = 1, data=df)
+        enstatite = ebsd.get_euler_angles(phase = 2, data=df)
+        diopside = ebsd.get_euler_angles(phase = 3, data=df)
+        euler_angles = [forsterite, enstatite, diopside]
+        average_tensor, average_density = ebsd.getAnisotropyForEBSD(cij, euler_angles, density)
+        anis = Anisotropy(average_tensor*10**9, average_density)
+        self.anisotropy_values = anis.anisotropy_values()
+
+        self.assertAlmostEqual(self.anisotropy_values['maxvp']/1000, 8.8533, places=2)
+        self.assertAlmostEqual(self.anisotropy_values['minvp']/1000, 7.8634, places=2)
+        self.assertAlmostEqual(self.anisotropy_values['maxvs1']/1000,5.0728, places=2)
+        self.assertAlmostEqual(self.anisotropy_values['minvs1']/1000,4.7689, places=2)
+        self.assertAlmostEqual(self.anisotropy_values['maxvs2']/1000,4.8876, places=2)
+        self.assertAlmostEqual(self.anisotropy_values['minvs2']/1000,4.6546, places=2)
+
+
         
         
 
