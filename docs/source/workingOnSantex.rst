@@ -328,29 +328,6 @@ This gives values such as:
     Vp/Vs1 ratio:  3.4012758430117644
 
 
-Orientation Distribution Function (ODF)
-=========
-
-The orientation distribution function (ODF) is a function on the orientation space that associates to each orientation g the volume percentage of crystals in a polycrystaline specimen that are in this specific orientation
-
-ODF can be calculated and plotted as:
-
-.. code-block:: python
-
-    ebsdfile.odf(df = filtered_df_grain_boundary, phase=1, crystal_symmetry='D2',
-            random_val=True,
-            miller=[1, 0, 0],
-            hemisphere='both',
-            axes_labels=['Xs', 'Ys'],
-            alpha=0.01,
-            figure=None,
-            vector_labels=None,
-            reproject=False,
-            show_hemisphere_label=None,
-            grid=None,
-            grid_resolution=None,
-            return_figure=None)
-
 
 Pole Figures
 ===========
@@ -454,6 +431,12 @@ In order to illustrate the concept of inverse pole figures, let's calculate the 
         projection='ipf',
         crystal_symmetry='D2',)
 
+IPF color key
+==========
+
+.. code-block:: python
+
+    ebsdfile.ipf_colorkey(phase=1, crystal_symmetry='D2')
 
 Tensor analysis
 ===========

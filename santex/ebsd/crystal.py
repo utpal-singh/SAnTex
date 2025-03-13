@@ -398,15 +398,15 @@ def ipf(df, phase=1, vector_sample=[0, 0, 1], random_val=True,
     # print(vec_sample)
     vec_crystal = orientations * vec_sample
     subplot_kw = dict(projection='ipf', symmetry=symmetry_)
-    # fig = plt.figure(figsize=(9, 8))
+    fig = plt.figure(figsize=(9, 8))
 
-    ax0 = fig.add_subplot(221, direction=vec_sample, **subplot_kw)
-    ax0.scatter(orientations, alpha=0.05)
-    _ = ax0.set_title(f"Phase{phase}, {vector_title}")
+    # ax0 = fig.add_subplot(221, direction=vec_sample, **subplot_kw)
+    # ax0.scatter(orientations, alpha=0.05)
+    # _ = ax0.set_title(f"Phase{phase}, {vector_title}")
 
-    ax2 = fig.add_subplot(223, direction=vec_sample, **subplot_kw)
-    ax2.pole_density_function(vec_crystal)
-    _ = ax2.set_title(f"Phase{phase}, {vector_title}")
+    ax = fig.add_subplot(223, direction=vec_sample, **subplot_kw)
+    ax.pole_density_function(vec_crystal)
+    _ = ax.set_title(f"Phase{phase}, {vector_title}")
 
 
 def pdf(df, phase=1, crystal_symmetry='D2', random_val=True, uvw=[0, 1, 0], hemisphere = 'both', sigma = 4,
@@ -705,182 +705,137 @@ def ipf_colorkey(df, phase=1, crystal_symmetry='D2'):
 
     if crystal_symmetry in ["triclinic", "C1", "1", "-1", "1"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C1)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C1))
         point_group=symmetry.C1
     elif crystal_symmetry in ["triclinic", "Ci", "-1", "-1", "1"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.Ci)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.Ci))
         point_group=symmetry.Ci
     elif crystal_symmetry in ["monoclinic", "C2", "211", "2/m11", "211"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C2)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C2))
     elif crystal_symmetry in ["monoclinic", "Cs", "m11", "2/m11", "211"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.Cs)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.Cs))
         point_group=symmetry.Cs
     elif crystal_symmetry in ["monoclinic", "C2h", "12/m1", "12/m1", "121"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C2h)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C2h))
         point_group=symmetry.C2h
     elif crystal_symmetry in ["monoclinic", "C2", "121", "12/m1", "121"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C2)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C2))
         point_group=symmetry.C2
     elif crystal_symmetry in ["monoclinic", "Cs", "1m1", "12/m1", "121"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.Cs)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.Cs))
         point_group=symmetry.Cs
     elif crystal_symmetry in ["monoclinic", "C2h", "12/m1", "12/m1", "121"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C2h)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C2h))
         point_group=symmetry.C2h
     elif crystal_symmetry in ["monoclinic", "C2", "112", "112/m", "112"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C2)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C2))
         point_group=symmetry.C2
     elif crystal_symmetry in ["monoclinic", "Cs", "11m", "112/m", "112"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.Cs)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.Cs))
         point_group=symmetry.Cs
     elif crystal_symmetry in ["monoclinic", "C2h", "112/m", "112/m", "112"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C2h)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C2h))
         point_group=symmetry.C2h
     elif crystal_symmetry in ["orthorhombic", "D2", "222", "mmm", "222"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.D2)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.D2))
         point_group=symmetry.D2
     elif crystal_symmetry in ["orthorhombic", "C2v", "2mm", "mmm", "222"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C2v)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C2v))
         point_group=symmetry.C2v
     elif crystal_symmetry in ["orthorhombic", "C2v", "m2m", "mmm", "222"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C2v)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C2v))
         point_group=symmetry.C2v
     elif crystal_symmetry in ["orthorhombic", "C2v", "mm2", "mmm", "222"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C2v)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C2v))
         point_group=symmetry.C2v
     elif crystal_symmetry in ["orthorhombic", "D2h", "mmm", "mmm", "222"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.D2h)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.D2h))
         point_group=symmetry.D2h
     elif crystal_symmetry in ["trigonal", "C3", "3", "-3", "3"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C3)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C3))
         point_group=symmetry.C3
     elif crystal_symmetry in ["trigonal", "C3i", "-3", "-3", "3"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C3i)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C3i))
         point_group=symmetry.C3i
     elif crystal_symmetry in ["trigonal", "D3", "321", "-3m1", "321"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.D3)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.D3))
         point_group=symmetry.D3
     elif crystal_symmetry in ["trigonal", "C3v", "3m1", "-3m1", "321"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C3v)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C3v))
         point_group=symmetry.C3v
     elif crystal_symmetry in ["trigonal", "D3d", "-3m1", "-3m1", "321"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.D3d)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.D3d))
         point_group=symmetry.D3d
     elif crystal_symmetry in ["trigonal", "D3", "312", "-31m", "312"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.D3)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.D3))
         point_group=symmetry.D3
     elif crystal_symmetry in ["trigonal", "C3v", "31m", "-31m", "312"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C3v)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C3v))
         point_group=symmetry.C3v
     elif crystal_symmetry in ["trigonal", "D3d", "-31m", "-31m", "312"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.D3d)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.D3d))
         point_group=symmetry.D3d
     elif crystal_symmetry in ["tetragonal", "C4", "4", "4/m", "4"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C4)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C4))
         point_group=symmetry.C4
     elif crystal_symmetry in ["tetragonal", "S4", "-4", "4/m", "4"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.S4)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.S4))
         point_group=symmetry.S4
     elif crystal_symmetry in ["tetragonal", "C4h", "4/m", "4/m", "4"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C4h)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C4h))
         point_group=symmetry.C4h
     elif crystal_symmetry in ["tetragonal", "D4", "422", "4/mmm", "422"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.D4)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.D4))
         point_group=symmetry.D4
     elif crystal_symmetry in ["tetragonal", "C4v", "4mm", "4/mmm", "422"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C4v)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C4v))
         point_group=symmetry.C4v
     elif crystal_symmetry in ["tetragonal", "D2d", "-42m", "4/mmm", "422"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.D2d)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.D2d))
         point_group=symmetry.D2d
     elif crystal_symmetry in ["tetragonal", "D2d", "-4m2", "4/mmm", "422"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.D2d)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.D2d))
         point_group=symmetry.D2d
     elif crystal_symmetry in ["tetragonal", "D4h", "4/mmm", "4/mmm", "422"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.D4h)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.D4h))
         point_group=symmetry.D4h
     elif crystal_symmetry in ["hexagonal", "C6", "6", "6/m", "6"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C6)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C6))
         point_group=symmetry.C6
     elif crystal_symmetry in ["hexagonal", "C3h", "-6", "6/m", "6"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C3h)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C3h))
         point_group=symmetry.C3h
     elif crystal_symmetry in ["hexagonal", "C6h", "6/m", "6/m", "6"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C6h)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C6h))
         point_group=symmetry.C6h
     elif crystal_symmetry in ["hexagonal", "D6", "622", "6/mmm", "622"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.D6)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.D6))
         point_group=symmetry.D6
     elif crystal_symmetry in ["hexagonal", "C6v", "6mm", "6/mmm", "622"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.C6v)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.C6v))
         point_group=symmetry.C6v
     elif crystal_symmetry in ["hexagonal", "D3h", "-62m", "6/mmm", "622"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.D3h)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.D3h))
         point_group=symmetry.D3h
     elif crystal_symmetry in ["hexagonal", "D3h", "-6m2", "6/mmm", "622"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.D3h)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.D3h))
         point_group=symmetry.D3h
     elif crystal_symmetry in ["hexagonal", "D6h", "6/mmm", "6/mmm", "622"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.D6h)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.D6h))
         point_group=symmetry.D6h
     elif crystal_symmetry in ["cubic", "T", "23", "m-3", "23"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.T)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.T))
         point_group=symmetry.T
     elif crystal_symmetry in ["cubic", "Th", "m-3", "m-3", "23"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.Th)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.Th))
         point_group=symmetry.Th
     elif crystal_symmetry in ["cubic", "O", "432", "m-3m", "432"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.O)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.O))
         point_group=symmetry.O
     elif crystal_symmetry in ["cubic", "Td", "-43m", "m-3m", "432"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.Td)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.Td))
         point_group=symmetry.Td
     elif crystal_symmetry in ["cubic", "Oh", "m-3m", "m-3m", "432"]:
         orientations = Orientation.from_euler(np.deg2rad(euler_values), symmetry.Oh)
-        uvw_ = Miller(uvw = miller, phase=Phase(point_group=symmetry.Oh))
         point_group=symmetry.Oh
 
     ipfkey = plot.IPFColorKeyTSL(point_group)
