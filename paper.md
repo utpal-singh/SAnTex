@@ -56,24 +56,24 @@ The pressure and temperature dependence of elastic constants is primarily linear
 
 
 \begin{equation}\label{eq:elasticity}
-C_{ijkl}(p, T) = C_{ijkl}(0, 0) + \left. \frac{\partial C_{ijkl}}{\partial p} \right|{(0,0)} p + \left. \frac{\partial C{ijkl}}{\partial T} \right|_{(0,0)} T + \mathcal{O}(p^2, T^2)
+C_{ijkl}(p, T) = C_{ijkl}(0, 0) + \left. \frac{\partial C_{ijkl}}{\partial p} \right|{(0,0)} \Delta p + \left. \frac{\partial C{ijkl}}{\partial T} \right|_{(0,0)} \Delta T + \mathcal{O}(p^2, \Delta T^2)
 \end{equation}
 
-Pressure and temperature have competing effects on the stiffness tensor.  Higher temperatures increase atomic vibrations, making it easier for the material to deform. Higher pressures force atoms closer together, making it more difficult for the material to deform. 
+Pressure and temperature have competing effects on the effective stiffness tensor $C_{ijkl}(p, T)$.  Higher temperatures increase atomic vibrations, making it easier for the material to deform. Higher pressures force atoms closer together, making it more difficult for the material to deform. 
 
 In the current version of SAnTex, melt is considered as an isotropic phase with homogenous distribution within an anisotropic host rock [@lee_modeling_2017].
 
 
 \begin{equation}\label{eq:elasticity_fmelt}
 \begin{aligned}
-C_{ijkl}(p, T) = (1-f) \Big(C_{ijkl}(0, 0) + \left. \frac{\partial C_{ijkl}}{\partial p} \right|_{(0,0)} p 
+C_{ijkl}(p, T) = (1-f) \Big(C_{ijkl}(P_0, T_0) + \left. \frac{\partial C_{ijkl}}{\partial p} \right|_{(0,0)} p 
 + \left. \frac{\partial C_{ijkl}}{\partial T} \right|_{(0,0)} T \\
 + \mathcal{O}(p^2, T^2) \Big) + f_{\text{melt}}(C_{\text{melt}}(p, T))
 \end{aligned}
 \end{equation}
 
 
-The fraction of melt, f, can be controlled by the user. Cmelt is the stiffness tensor of the melt, which assumes an anisotropic solid host rock and an evenly distributed isotropic melt [@lee_modeling_2017]. The approach currently incorporated in SAnTex overlooks the complex behaviour of melt, including its viscosity, flow dynamics, and interaction with neighbouring minerals, which can influence the overall anisotropic properties of the system. Future updates of SAnTex will incorporate additional capabilities, such as modelling melt–grain interactions, to further refine the calculation of melt-induced anisotropy.
+The fraction of melt, $f$, can be controlled by the user. $C_{melt}$ is the stiffness tensor of the melt, which assumes an anisotropic solid host rock and an evenly distributed isotropic melt [@lee_modeling_2017]. The approach currently incorporated in SAnTex overlooks the complex behaviour of melt, including its viscosity, flow dynamics, and interaction with neighbouring minerals, which can influence the overall anisotropic properties of the system. Future updates of SAnTex will incorporate additional capabilities, such as modelling melt–grain interactions, to further refine the calculation of melt-induced anisotropy.
 
 SAnTex calculates seismic properties from EBSD crystal orientation data using the following steps:
 
