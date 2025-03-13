@@ -56,18 +56,18 @@ The pressure and temperature dependence of elastic constants is primarily linear
 
 
 \begin{equation}\label{eq:elasticity}
-C_{ijkl}(p, T) = C_{ijkl}(0, 0) + \left. \frac{\partial C_{ijkl}}{\partial p} \right|{(0,0)} \Delta p + \left. \frac{\partial C{ijkl}}{\partial T} \right|_{(0,0)} \Delta T + \mathcal{O}(p^2, \Delta T^2)
+C_{ijkl}(p, T) = C_{ijkl}(P_0, T_0) + \left. \frac{\partial C_{ijkl}}{\partial p} \right|_{(P_0,T_0)} \Delta p + \left. \frac{\partial C{ijkl}}{\partial T} \right|_{(P_0,T_0)} \Delta T + \mathcal{O}(\Delta p^2, \Delta T^2)
 \end{equation}
 
-Pressure and temperature have competing effects on the effective stiffness tensor $C_{ijkl}(p, T)$.  Higher temperatures increase atomic vibrations, making it easier for the material to deform. Higher pressures force atoms closer together, making it more difficult for the material to deform. 
+Pressure and temperature have competing effects on the effective stiffness tensor $C_{ijkl}(p, T)$.  $C_{ijkl}(P_0, T_0)$ is the reference stiffness tensor obtained at ambient conditions ($P$ = $10^-4$GPa and $T$ = $298$K) and $\Delta p$ and $\Delta T$ are deviations from the ambient conditions. Higher temperatures increase atomic vibrations, making it easier for the material to deform. Higher pressures force atoms closer together, making it more difficult for the material to deform. The partial derivatives $\frac{\partial C_{ijkl}}{\partial p}$ and \frac{\partial C_{ijkl}}{\partial T} are sourced from literature mentioned in the data package within santex.
 
 In the current version of SAnTex, melt is considered as an isotropic phase with homogenous distribution within an anisotropic host rock [@lee_modeling_2017].
 
 
 \begin{equation}\label{eq:elasticity_fmelt}
 \begin{aligned}
-C_{ijkl}(p, T) = (1-f) \Big(C_{ijkl}(P_0, T_0) + \left. \frac{\partial C_{ijkl}}{\partial p} \right|_{(0,0)} p 
-+ \left. \frac{\partial C_{ijkl}}{\partial T} \right|_{(0,0)} T \\
+C_{ijkl}(p, T) = (1-f) \Big(C_{ijkl}(P_0, T_0) + \left. \frac{\partial C_{ijkl}}{\partial p} \right|_{(P_0,T_0)} \Delta p 
++ \left. \frac{\partial C_{ijkl}}{\partial T} \right|_{(0,0)} \Delta T \\
 + \mathcal{O}(p^2, T^2) \Big) + f_{\text{melt}}(C_{\text{melt}}(p, T))
 \end{aligned}
 \end{equation}
