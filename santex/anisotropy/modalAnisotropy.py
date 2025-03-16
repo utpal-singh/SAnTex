@@ -3,7 +3,7 @@ from ..anisotropy import Anisotropy
 
 import numpy as np
 
-def modalAnisotropy(material, fraction, pressure, temperature):
+def modal_anisotropy(material, fraction, pressure, temperature):
     voigtMatrixTotal = []
     density = []
     for i in range(len(material)):

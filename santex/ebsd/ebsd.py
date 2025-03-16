@@ -13,7 +13,7 @@ from scipy.spatial.transform import Rotation
 from .calcGrainBoundary import assign_to_grains_parallel
 import plotly.express as px
 
-from .melt_tensor import calcMelttensor
+from .melt_tensor import calc_melt_tensor
 from .rotateEBSD import apply_custom_rotation_to_dataframe, apply_custom_rotation_to_dataframe_noxy
 
 # from .ebsdrotation import apply_custom_rotation_to_dataframe as rotebsd
@@ -227,7 +227,7 @@ class EBSD:
         data, header_data = self.ctf.get_data()
         return data
     
-    def downsampleEBSD(self, factor=10, df=None):
+    def downsample_EBSD(self, factor=10, df=None):
         """
         Downsamples EBSD data.
 
@@ -271,7 +271,7 @@ class EBSD:
         
         return data
 
-    def filterByPhase(self, phase_list, data=None):
+    def filter_by_phase(self, phase_list, data=None):
         """
         Filters EBSD data by phase.
 
@@ -293,7 +293,7 @@ class EBSD:
             data = data[data['Phase'] != index]
         return data
     
-    def getAnisotropyForEBSD(self, cij, euler_angles, density, method = 0, melt=0, density_melt=2100):
+    def get_anisotropy_for_ebsd(self, cij, euler_angles, density, method = 0, melt=0, density_melt=2100):
         """
         Calculates average density and tensor for EBSD data
 
@@ -350,7 +350,7 @@ class EBSD:
                 tensor_sum= tensor_sum/sum(len_euler)
                 tensor_sum = tensor.tensor_to_voigt(tensor_sum)
 
-                tensor_sum = np.multiply((1 - (melt * 0.01)), tensor_sum) + np.multiply(melt * 0.01, calcMelttensor()[1])
+                tensor_sum = np.multiply((1 - (melt * 0.01)), tensor_sum) + np.multiply(melt * 0.01, calc_melt_tensor()[1])
                 density_averaged = ((1 - melt*0.01)*density_averaged) + (melt*0.01*density_melt)
                 average_tensor = tensor_sum
 
@@ -386,7 +386,7 @@ class EBSD:
             return tensor.tensor_to_voigt(average_tensor), average_density
     
 
-    def getVoigtReussHill(self, cij, euler_angles, density, melt=0, density_melt=2100, method = 'voigt'):
+    def get_voigt_reuss_hill(self, cij, euler_angles, density, melt=0, density_melt=2100, method = 'voigt'):
         """
         Calculate average density and tensor using Voigt, Reuss, and Hill averages.
 
@@ -435,7 +435,7 @@ class EBSD:
         average_density = np.sum(np.multiply(density, len_euler)) / total_grains
 
         if melt:
-            melt_tensor = calcMelttensor()[1]
+            melt_tensor = calc_melt_tensor()[1]
             melt_frac = melt * 0.01
 
             C_voigt = (1 - melt_frac) * C_voigt + melt_frac * melt_tensor
@@ -472,7 +472,7 @@ class EBSD:
         r = Rotation.from_euler('ZXZ', [phi, phi1, phi2], degrees=True)
         return r.as_quat()
     
-    def calcGrains(self, df, phase_names, threshold = 10, downsampling_factor=20):
+    def calc_grains(self, df, phase_names, threshold = 10, downsampling_factor=20):
         """
         Calculated the grains in the ebsd data
 
@@ -510,10 +510,10 @@ class EBSD:
             dominant_phase = phase_counts.idxmax()
             print(f"Grain {grain_idx}: Dominant Phase - {phase_names[dominant_phase]}, Size - {len(group)}")
 
-        self.plotGrains(df)
+        self.plot_grains(df)
         return df
     
-    def filterByGrainSize(self, df, phases_names, min_grain_size = 100):
+    def filter_by_grain_size(self, df, phases_names, min_grain_size = 100):
         """
         Filters ebsd by grain size
 
@@ -544,11 +544,11 @@ class EBSD:
             dominant_phase = phase_counts.idxmax()
             print(f"Grain {grain_idx}: Dominant Phase - {phases_names[dominant_phase]}, Size - {len(group)}")
 
-        self.plotGrains(df_filtered)
+        self.plot_grains(df_filtered)
 
         return df_filtered
     
-    def plotGrains(self, df, color_continuous_scale='viridis', save_name=None, dpi=None):
+    def plot_grains(self, df, color_continuous_scale='viridis', save_name=None, dpi=None):
         """
         Create a 2D scatter plot with phase coloring.
 
@@ -581,7 +581,7 @@ class EBSD:
         else:
             fig.show()
 
-    def rotateEBSD(self, ebsd_df, angles, keepXY = True):
+    def rotate_ebsd(self, ebsd_df, angles, keepXY = True):
 
         """
         Rotate EBSD with a certain angles
@@ -648,7 +648,7 @@ class EBSD:
 
         return rotated_ebsd_df
     
-    def filterMAD(self, df, value=0.7):
+    def filter_MAD(self, df, value=0.7):
         """
         Filters the ebsd dataframe with MAD greater than a certain threshold
 
@@ -661,7 +661,7 @@ class EBSD:
         """
         return df[df['MAD']<value]
     
-    def filterByPhaseNumberList(self, phase_list, df=None):
+    def filter_by_phase_number_list(self, phase_list, df=None):
         """
         Filters the EBSD dataframe given a list of phases
 

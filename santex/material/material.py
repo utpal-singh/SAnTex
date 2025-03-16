@@ -312,7 +312,7 @@ class Material:
     
 
     
-    def availablePhases(self):
+    def available_phases(self):
         """
         Generate a formatted table listing available phases along with their crystal systems and primary phases.
         
@@ -323,7 +323,7 @@ class Material:
         data = [(material['Phase'], material['Crystal System'], material['Primary Phase']) for material in self.materials_data]
         return tabulate(data, headers=headers, tablefmt="pretty")
 
-    def availablePrimaryPhases(self):
+    def available_primary_phases(self):
         """
         Generate a formatted table listing available primary phases along with their crystal systems and phases.
         
@@ -343,7 +343,7 @@ class Material:
         data = [(key, ", ".join(info[key]['Crystal Systems']), ", ".join(info[key]['Phases'])) for key in info]
         return tabulate(data, headers=headers, tablefmt="pretty")
 
-    def availableCrystalSystems(self):
+    def available_crystal_systems(self):
         """
         Generate a formatted table listing available crystal systems along with their associated phases.
         
@@ -361,7 +361,7 @@ class Material:
         return tabulate(data, headers=headers, tablefmt="pretty")
     
 
-    def voigthighPT(self, phase, PRESSURE=0, TEMP=300):
+    def voigt_high_PT(self, phase, PRESSURE=0, TEMP=300):
         """
         Perform calculations to obtain the Voigt matrix at high pressure and temperature conditions.
         
@@ -379,7 +379,7 @@ class Material:
         tensor_calc = self.get_voigt_matrix(phase) + (dCdT * (TEMP - 300) * 0.001) + (dCdP * PRESSURE)
         return tensor_calc
     
-    def modalRock(self, rock, fraction, pressure, temperature, melt=0):
+    def modal_rock(self, rock, fraction, pressure, temperature, melt=0):
         """
         Calculate the average Voigt matrix and density of a rock composed of multiple minerals.
         
@@ -409,7 +409,7 @@ class Material:
         return cij_average, rho_average
     
 
-    def modalRockFromExcel(self, excel_path, pressure, temperature, melt=0):
+    def modal_rock_from_excel(self, excel_path, pressure, temperature, melt=0):
         """
         Calculate the average Voigt matrix and density of rocks from an Excel worksheet.
         

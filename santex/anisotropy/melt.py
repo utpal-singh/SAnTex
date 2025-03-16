@@ -108,7 +108,7 @@ def calc_melt_density_from_excel(input_file, output_file):
 
 
 
-def modalRock(rock, fraction, pressure, temperature, melt=0, weight_per = []):
+def modal_rock(rock, fraction, pressure, temperature, melt=0, weight_per = []):
 
     """
     Calculates the average elastic constants and density of a rock mixture.
