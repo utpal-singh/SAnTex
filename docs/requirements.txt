@@ -2,3 +2,4 @@ sphinx
 sphinx_book_theme
 ipykernel
 nbsphinx
+sphinx_copybutton
