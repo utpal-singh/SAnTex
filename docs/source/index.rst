@@ -37,6 +37,13 @@ Features
 
 .. toctree::
    :maxdepth: 2
+   :caption: Notebooks
+
+   codeexample.rst
+
+
+.. toctree::
+   :maxdepth: 2
    :caption: Modules and submodules within SAnTex
 
    santex.ebsd.rst
@@ -47,12 +54,7 @@ Features
    santex.rst
    modules
 
-.. toctree::
-   :maxdepth: 2
-   :caption: Notebooks
-
-   codeexample.rst
-
+   
 Indices and tables
 ==================
 

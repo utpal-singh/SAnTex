@@ -399,7 +399,7 @@ class Material:
         cij = []
         rho = []
         for item in rock:
-            cij.append(self.voigthighPT(item, pressure, temperature))
+            cij.append(self.voigt_high_PT(item, pressure, temperature))
             rho.append(self.load_density(item, pressure, temperature))
         rho_average = np.sum(np.multiply(fraction, rho))
         cij_average = np.zeros((6, 6))

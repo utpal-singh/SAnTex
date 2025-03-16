@@ -16,7 +16,7 @@ Load the EBSD file:
 
 .. code-block:: python
 
-    ebsdfile = EBSD("ebsd.ctf")
+    ebsdfile = EBSD("fdmrn02x01.ctf")
 
 
 This loads the `ebsd.ctf` file in the Python object `ebsdfile` of class `EBSD`, from which users are able to call methods for further processing, cleaning of the ebsd data, and ultimately calculate elastic properties.
@@ -91,12 +91,19 @@ To plot this ebsd file, following can be enterred:
 
     ebsdfile.plot(df)
 
+This will plot the ebsd file in the default orientation of x2east and zOutOfPlane.
+
+.. image:: images/fig1.png
+    :align: center
+
 To save this image, following can be used:
 
 .. code-block:: python
 
     ebsdfile.plot(df, cmap = "viridis", save_image= True, image_filename= "ebsd.jpg", legend_location="lower right")
 
+.. image:: images/fig2.png
+    :align: center
 
 Plotting Conventions
 ===================
@@ -138,19 +145,24 @@ To plot this rotated_df, user can enter the following command:
 
     ebsdfile.plot(rotated_df)
 
+.. image:: images/fig3.png
+    :align: center
 
 To rotate the EBSD data to match the SEM orientation in any custom angles, a user can enter the angles in Bunze ZXZ format as:
 
 .. code-block:: python
 
     angles = (180, 0, 0)
-    updatedebsd = ebsdfile.rotateEBSD(rotated_df, angles)
+    updatedebsd = ebsdfile.rotate_ebsd(rotated_df, angles)
 
 To view the current orientations, a user can always look at the ebsd plot using:
 
 .. code-block:: python
 
     ebsdfile.plot(updatedebsd)
+
+.. image:: images/fig4.png
+    :align: center
 
 Get the phases names using the following:
 
@@ -171,7 +183,7 @@ Remove the phases which are mis-indexed (enter the endex of the phases):
 
 .. code-block:: python
 
-    df = ebsdfile.filterByPhaseNumberList(df = updatedebsd, phase_list = [4, 5, 6, 7])
+    df = ebsdfile.filter_by_phase_number_list(df = updatedebsd, phase_list = [0, 2])
 
 Remove pixel data with MAD higher than a user specified value
 ---------
@@ -181,7 +193,7 @@ cleaned dataset into a new dataframe called filtered_df:
 
 .. code-block:: python
 
-    filtered_df = ebsdfile.filterMAD(df, 0.8)
+    filtered_df = ebsdfile.filter_MAD(df, 0.8)
 
 
 Reconstruct grains with boundaries whose misorientation exceeds a minimum of 10 degrees:
@@ -196,7 +208,10 @@ into a new dataframe called df_grain_boundary:
     phases_names = phases_names['phase'].tolist()
     phases_names.insert(0, "na")
 
-    df_grain_boundary = ebsdfile.calcGrains(df = filtered_df, threshold = 10, phase_names=phases_names, downsampling_factor=10)
+    df_grain_boundary = ebsdfile.calc_grains(df = filtered_df, threshold = 10, phase_names=phases_names, downsampling_factor=10)
+
+.. image:: images/fig5.png
+    :align: center
 
 **Note:** Here the downsampling_factor is applied just for speedy handson!
 
@@ -208,7 +223,10 @@ new dataframe called filtered_df_grain_boundary:
 
 .. code-block:: python
 
-    filtered_df_grain_boundary = ebsdfile.filterByGrainSize(df_grain_boundary, phases_names, min_grain_size=7)
+    filtered_df_grain_boundary = ebsdfile.filter_by_grain_size(df_grain_boundary, phases_names, min_grain_size=7)
+
+.. image:: images/fig6.png
+    :align: center
 
 Compare original and clean datasets
 ----------------
@@ -218,6 +236,9 @@ Compare original and clean datasets
 
     ebsdfile.plot()
     ebsdfile.plot(data = filtered_df_grain_boundary)
+
+.. image:: images/fig7.png
+    :align: center
 
 The plot method of the EBSD class can take in a few parameters namely,
 
@@ -254,9 +275,9 @@ conditions can be entered via the keyword PRESSURE and TEMP
 
 .. code-block:: python
 
-    cij_Fo = material_instance.voigthighPT('Forsterite', PRESSURE = 2, TEMP = 1500)
-    cij_ens = material_instance.voigthighPT('Enstatite', PRESSURE = 2, TEMP = 1500)
-    cij_diop = material_instance.voigthighPT('Diopside', PRESSURE = 2, TEMP = 1500)
+    cij_Fo = material_instance.voigt_high_PT('Forsterite', PRESSURE = 2, TEMP = 1500)
+    cij_ens = material_instance.voigt_high_PT('Enstatite', PRESSURE = 2, TEMP = 1500)
+    cij_diop = material_instance.voigt_high_PT('Diopside', PRESSURE = 2, TEMP = 1500)
 
 For preparing dataframes for seismic anisotropy, the elasticstiffness tensors and densities needs to be passed as a list, as:
 
@@ -282,7 +303,7 @@ The anisotropy can then be calculated as following:
 
 .. code-block:: python
 
-    average_tensor, average_density = ebsdfile.getAnisotropyForEBSD(cij, euler_angles, density)
+    average_tensor, average_density = ebsdfile.get_anisotropy_for_ebsd(cij, euler_angles, density)
     anis = Anisotropy(average_tensor*10**9, average_density)
 
 To look at the plots for the seismic velocities, following command can be entered:
@@ -290,6 +311,9 @@ To look at the plots for the seismic velocities, following command can be entere
 .. code-block:: python
 
     anis.plot()
+
+.. image:: images/fig9.png
+    :align: center
 
 The plot() method can take in a few parameters namely:
 
@@ -338,22 +362,20 @@ The pole figures can be calculated and plotted as:
 
 .. code-block:: python
 
-    ebsdfile.pdf(df=filtered_df_grain_boundary,
+    ebsdfile.pf(df=filtered_df_grain_boundary,
         phase=1,
         crystal_symmetry='D2',
         random_val=True,
-        miller=[0, 1, 0],
+        uvw=[0, 1, 0],
         hemisphere='both',
-        sigma=4,
         axes_labels=['Xs', 'Ys'],
         figure=None,
         show_hemisphere_label=None,
         grid=None,
-        grid_resolution=None,
-        return_figure=None,
-        log=False,
-        colorbar=True,
-        weights=None,)
+        grid_resolution=None)
+
+.. image:: images/fig10.png
+    :align: center
 
 Following is the conversion tables which can be found from https://mtex-toolbox.github.io/HomepageOld/files/doc/symmetry_index.html . The crystal symmetry above
 should be defined as following convention. The user can enter the crystal symmetry as in either Schoenflies, or International, or Laue class, or Rotational axes convention.
@@ -428,15 +450,21 @@ In order to illustrate the concept of inverse pole figures, let's calculate the 
         vector_sample=[0, 0, 1],
         random_val=True,
         vector_title='Z',
-        projection='ipf',
         crystal_symmetry='D2',)
+
+
+.. image:: images/fig11.png
+    :align: center        
 
 IPF color key
 ==========
 
 .. code-block:: python
 
-    ebsdfile.ipf_colorkey(phase=1, crystal_symmetry='D2')
+    ebsdfile.ipf_colorkey(df = df, phase=1, crystal_symmetry='D2')
+
+.. image:: images/fig12.png
+    :align: center
 
 Tensor analysis
 ===========
@@ -656,7 +684,7 @@ The available material within the santex registry can be viewed as:
 .. code-block:: python
 
     material_instance = Material()
-    phases_info = material_instance.availablePhases()
+    phases_info = material_instance.available_phases()
     print("Available Phases:")
     print(phases_info)
 
@@ -831,7 +859,7 @@ For getting the voigt matrix at any given pressure and temperature for a materia
 
 .. code-block:: python
 
-    cij_diopside = material_instance.voigthighPT('Diopside', PRESSURE = 2, TEMP = 1500)
+    cij_diopside = material_instance.voigt_high_PT('Diopside', PRESSURE = 2, TEMP = 1500)
 
 This returns voigt matrix as this
 
@@ -905,7 +933,7 @@ within Santex, a user can parse a modal mineral composition for a rock and calcu
     material = Material()
     rock = ["Forsterite", "Diopside", "Enstatite"]
     fraction = [0.6, 0.25, 0.15]
-    average_tensor, average_density = material.modalRock(rock, fraction, 2, 1000)
+    average_tensor, average_density = material.modal_rock(rock, fraction, 2, 1000)
     anisotropy = Anisotropy(average_tensor*10**9, average_density)
     values = anisotropy.anisotropy_values()
 
@@ -1116,6 +1144,29 @@ The statement can be used as:
 
 which returns density, bulk modulus, shear modulus, vp, vs, bulk velocity and the isothermal bulk modulus at the specified pressure and temperature.
 
+Hashin Shtrikman bounds for a modal rock
+----------------------------------------
+Let's define a rock with 62% Forsterite, 22% Diopside, and 16% enstatite (from the above ebsd data) as:
+
+.. code-block:: python
+
+    phases = ['fo', 'di', 'en']
+    fraction = [0.62, 0.22, 0.16]
+
+Set modal composition as
+
+.. code-block:: python
+
+    ph, fr = isotropy.set_modal_composition(phase_list=phases, fraction_list=fraction)
+
+Calculate the Hashin Shtrikman bounds for the rock as:
+
+.. code-block:: python
+
+    mid, upper, lower, rho = isotropy.hashin_shtrikman_bounds(phase_constant_list=ph, fraction_list=fr, temperature=1100, pressure=1.4, density_mix_calc=True)
+
+
+
 3-D visualisation of vp, vs1, vs2 and vs splitting
 =================
 
@@ -1126,7 +1177,7 @@ Firstly we have to calculate the anisotropy for a material as shown:
     from santex.anisotropy import Anisotropy
     from santex.material import Material
 
-    cij_diopside = material_instance.voigthighPT('Diopside', PRESSURE = 2, TEMP = 1500)
+    cij_diopside = material_instance.voigt_high_PT('Diopside', PRESSURE = 2, TEMP = 1500)
     rho_diopside = material_instance.load_density('Diopside', 2, 1500)
     anisotropy_instance = Anisotropy(cij_diopside, rho_diopside)
 
