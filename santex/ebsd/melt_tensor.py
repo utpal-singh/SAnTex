@@ -1,7 +1,7 @@
 import numpy as np
 from ..tensor.tensor import Tensor
 
-def calcMelttensor():
+def calc_melt_tensor():
     """
     Returns the melt stiffness tensor.
     

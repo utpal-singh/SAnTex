@@ -2,9 +2,9 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 def plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd = False, phase = None, grid = [5, 5], filename = None,fig_name=None, save_plot=False, dpi=300, *args):
-    from santex import Anisotropy
-    from santex import EBSD
-    from santex import Material
+    from santex.anisotropy import Anisotropy
+    from santex.ebsd import EBSD
+    from santex.material import Material
     """
     Generates a grid of velocity values based on specified pressure and temperature ranges.
 
@@ -42,7 +42,7 @@ def plot_velocity_grid(pressure_range, temperature_range, return_type, is_ebsd =
         for i, p in enumerate(pressure_grid):
             for j, t in enumerate(temperature_grid):
                 material = Material()
-                cij_highpt = material.voigthighPT(phase, p, t)*10**9
+                cij_highpt = material.voigt_high_PT(phase, p, t)*10**9
                 density_highpt = material.load_density(phase, p, t)
                 anisotropy = Anisotropy(cij_highpt, density_highpt)
                 vp_matrix[i, j] = anisotropy.anisotropy_values(return_values=return_type)

@@ -3,13 +3,13 @@ from ..anisotropy import Anisotropy
 
 import numpy as np
 
-def modalAnisotropy(material, fraction, pressure, temperature):
+def modal_anisotropy(material, fraction, pressure, temperature):
     voigtMatrixTotal = []
     density = []
     for i in range(len(material)):
         material_instance = Material()
         phase = 'Diopside'
-        voigtMatrix = material_instance.voigthighPT(material[i], PRESSURE = pressure, TEMP = temperature)
+        voigtMatrix = material_instance.voigt_high_PT(material[i], PRESSURE = pressure, TEMP = temperature)
         voigtMatrixTotal.append(voigtMatrix)
         density.append(material_instance.load_density(material[i]))
 

@@ -11,7 +11,7 @@ SAnTex code examples
    :maxdepth: 2
 
 
-   notebooks/01_SAnTex.ipynb
+   notebooks/01_SAnTex_Chatzaras_et_al_2016.ipynb
    notebooks/02_Anisotropy_analysis.ipynb
    notebooks/03_Material_analysis.ipynb
    notebooks/04-tensor-analysis.ipynb

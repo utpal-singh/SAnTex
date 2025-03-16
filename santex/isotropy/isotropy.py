@@ -227,7 +227,7 @@ class Isotropy:
         except ZeroDivisionError as e:
             print(f"Error in pressure function: {e}")
             
-    def HashinShtrikmanBounds(self, phase_constant_list, fraction_list, temperature, pressure, fractions_matches_T = False, density_mix_calc = False):
+    def hashin_shtrikman_bounds(self, phase_constant_list, fraction_list, temperature, pressure, fractions_matches_T = False, density_mix_calc = False):
     
         """
         Calculates Hashin-Shtrikman Bounds for the given parameters:

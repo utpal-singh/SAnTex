@@ -108,7 +108,7 @@ def calc_melt_density_from_excel(input_file, output_file):
 
 
 
-def modalRock(rock, fraction, pressure, temperature, melt=0, weight_per = []):
+def modal_rock(rock, fraction, pressure, temperature, melt=0, weight_per = []):
 
     """
     Calculates the average elastic constants and density of a rock mixture.
@@ -141,7 +141,7 @@ def modalRock(rock, fraction, pressure, temperature, melt=0, weight_per = []):
         rho = []
         material = Material()
         for item in rock:
-            cij.append(material.voigthighPT(item, pressure, temperature))
+            cij.append(material.voigt_high_PT(item, pressure, temperature))
             rho.append(material.load_density(item, pressure, temperature))
         rho_average = np.sum(np.multiply(fraction, rho))
         cij_average = np.zeros((6, 6))
@@ -156,7 +156,7 @@ def modalRock(rock, fraction, pressure, temperature, melt=0, weight_per = []):
     rho = []
     material = Material()
     for item in rock:
-        cij.append(material.voigthighPT(item, pressure, temperature))
+        cij.append(material.voigt_high_PT(item, pressure, temperature))
         rho.append(material.load_density(item, pressure, temperature))
     rho_average = np.sum(np.multiply(fraction, rho))
     cij_average = np.zeros((6, 6))
