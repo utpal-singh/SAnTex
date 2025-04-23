@@ -52,6 +52,8 @@ pip install santex
 To help users get started quickly, we provide example notebooks demonstrating typical usage and workflows.  
 You can find them [here](./notebooks/) or in the `notebooks/` directory of this repository.
 
+The documentation is found [here](https://github.com/utpal-singh/SAnTex/issues)
+
 
 # Contributing
 
