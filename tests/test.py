@@ -146,21 +146,21 @@ class TestMaterialAnisotropy(unittest.TestCase):
 
         ebsd = EBSD("../notebooks/Forsterite.ctf")
         df = ebsd.get_ebsd_data()
-        df = ebsd.filterByPhaseNumberList(df = df, phase_list = [4, 5, 6, 7])
+        df = ebsd.filter_by_phase_number_list(df = df, phase_list = [4, 5, 6, 7])
         material_instance = Material()
         rho_Fo = material_instance.load_density("Forsterite")
         rho_diop = material_instance.load_density("Diopside")
         rho_ens = material_instance.load_density("Enstatite")
-        cij_Fo = material_instance.voigthighPT('Forsterite')
-        cij_ens = material_instance.voigthighPT('Enstatite')
-        cij_diop = material_instance.voigthighPT('Diopside')
+        cij_Fo = material_instance.voigt_high_PT('Forsterite')
+        cij_ens = material_instance.voigt_high_PT('Enstatite')
+        cij_diop = material_instance.voigt_high_PT('Diopside')
         cij = [cij_Fo, cij_ens, cij_diop]
         density = [rho_Fo, rho_ens, rho_diop]
         forsterite = ebsd.get_euler_angles(phase = 1, data=df)
         enstatite = ebsd.get_euler_angles(phase = 2, data=df)
         diopside = ebsd.get_euler_angles(phase = 3, data=df)
         euler_angles = [forsterite, enstatite, diopside]
-        average_tensor, average_density = ebsd.getAnisotropyForEBSD(cij, euler_angles, density)
+        average_tensor, average_density = ebsd.get_anisotropy_for_ebsd(cij, euler_angles, density)
         anis = Anisotropy(average_tensor*10**9, average_density)
         self.anisotropy_values = anis.anisotropy_values()
 
