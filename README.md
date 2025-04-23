@@ -47,6 +47,41 @@ pip install santex
 
 <img src="./santex_fig_1.png">
 
+# Example Notebooks
+
+To help users get started quickly, we provide example notebooks demonstrating typical usage and workflows.  
+You can find them [here](./notebooks/) or in the `notebooks/` directory of this repository.
+
+
+# Contributing
+
+We welcome contributions from the community! To get started:
+
+- Fork the repository
+- Create a new branch (`git checkout -b feature-xyz`)
+- Commit your changes (`git commit -am 'Add some feature'`)
+- Push to the branch (`git push origin feature-xyz`)
+- Open a Pull Request
+
+
+## Reporting Issues
+
+If you encounter any bugs, unexpected behavior, or have feature requests:
+
+- Search the [Issues](https://github.com/utpal-singh/SAnTex/issues) to check if it’s already been reported.
+- If not, open a new issue and include details such as:
+  - Steps to reproduce the problem
+  - Expected and actual behavior
+  - Relevant logs, screenshots, or code snippets
+
+## Support
+
+Need help or have questions?
+
+- Open an issue for reporting bugs or feature discussions.
+- Use the [Discussions](https://github.com/utpal-singh/SAnTex/discussions) tab.
+- Alternatively, you can contact us at [utpal.singh@sydney.edu.au] or [sinan.ozaydin@sydney.edu.au].
+
 # Funding
 
 This research was supported by the Australian Research Council grants ARC-DP220100709 and ARC-LP190100146, and the School of Geosciences at The University of Sydney.
