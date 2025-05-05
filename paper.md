@@ -70,9 +70,9 @@ In the current version of SAnTex, melt is considered as a homogeneously distribu
 
 \begin{equation}\label{eq:elasticity_fmelt}
 \begin{aligned}
-C_{ijkl}(P, T) = (1-f) \Big(C_{ijkl}(P_0, T_0) + \left. \frac{\partial C_{ijkl}}{\partial P} \right|_{(P_0,T_0)} \Delta P 
+C_{ijkl}(P, T) = (1-f_{\text{melt}}) \Big(C_{ijkl}(P_0, T_0) + \left. \frac{\partial C_{ijkl}}{\partial P} \right|_{(P_0,T_0)} \Delta P 
 + \left. \frac{\partial C_{ijkl}}{\partial T} \right|_{(P_0,T_0)} \Delta T \\ + \mathcal{O}(\Delta P^2, \Delta T^2) \Big) 
-+ f_{\text{melt}} \big(C_{\text{melt}}(P, T) \big)
++ f_{\text{melt}} \cdot C_{\text{melt}}(P, T)
 \end{aligned}
 \end{equation}
 
