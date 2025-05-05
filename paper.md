@@ -26,13 +26,13 @@ bibliography: paper.bib
 
 # Summary
 
-Seismic anisotropy, the directional dependency of seismic wave velocities, is important for mapping the Earth’s structure and understanding geodynamic processes. Seismic anisotropy primarily stems from the development of mineral crystallographic preferred orientation (i.e., texture) during the plastic deformation of rocks. In-depth analysis of data from texture characterization techniques like Electron Backscatter Diffraction (EBSD) enables the determination of mineral and bulk-rock elastic properties. Although the influences of pressure, temperature, and melt on elastic properties and seismic anisotropy is well understood, they are often disregarded. To help address this gap, we developed SAnTex: Seismic Anisotropy from Texture, an open-source Python library that calculates the full elastic tensor of rocks from modal mineral composition, crystallographic orientation, and a crystal stiffness tensor catalogue that accounts for the dependency of elasticity with pressure, temperature and melt. The elastic wave velocities ($V_{p}$, $V_{s}$) and seismic anisotropy are calculated from the full elastic tensors. SAnTex extends its utility beyond the solidus by estimating melt volume in a rock and assessing its impact on seismic wave velocities and anisotropy.
+Seismic anisotropy, the directional dependency of seismic wave velocities, is important for mapping the Earth’s structure and understanding geodynamic processes. Seismic anisotropy primarily stems from the development of mineral crystallographic preferred orientation (i.e. texture) during the plastic deformation of rocks. In-depth analysis of data from texture characterization techniques like Electron Backscatter Diffraction (EBSD) enables the determination of mineral and bulk-rock elastic properties. Although the influences of pressure, temperature, and melt on elastic properties and seismic anisotropy is well understood, they are often disregarded. To help address this gap, we developed SAnTex: Seismic Anisotropy from Texture, an open-source Python library that calculates the full elastic tensor of rocks from modal mineral composition, crystallographic orientation, and a crystal stiffness tensor catalogue that accounts for the dependency of elasticity with pressure, temperature and melt. The elastic wave velocities ($V_{p}$, $V_{s}$) and seismic anisotropy are calculated from the full elastic tensors. SAnTex extends its utility beyond the solidus by estimating melt volume in a rock and assessing its impact on seismic wave velocities and anisotropy.
 
 # Statement of need
 
 Understanding seismic wave velocities and anisotropy is crucial for deciphering the composition, structure, and rheological behaviour of the Earth’s crust and mantle. Seismic anisotropy primarily emerges from the propagation of waves through rocks that have developed crystallographic preferred orientations (CPO) as a result of plastic deformation [@mainprice_development_1989]. The rock composition (e.g., mineralogy, presence of melt or water) and microstructure (e.g., grain size, microcracks) can further influence both seismic velocities and anisotropy [@almqvist_seismic_2017; @karato_geodynamic_2008; @nicolas_formation_1987].
 
-Seismic anisotropy calculations that rely on the integration of textural data obtained by Electron Backscatter Diffraction (EBSD) with experimentally determined elastic stiffness tensors have become standard practice in rock-based geodynamic studies [@bernard_relationships_2019; @boneh_modeling_2015; @chatzaras_effects_2023; @demouchy_microstructures_2019; @jung_effect_2006; @tommasi_microstructures_2014; @vauchez_microstructure_2005]. While established tools like MTEX [@mainprice_descriptive_2015] allow for robust texture analysis, they rely on 'reference stiffness tensors' derived under ambient conditions to constrain elastic properties (Fig. 1c, d). However, first-principles simulations and laboratory experiments reveal that reference stiffness tensors can significantly deviate from those at deep crustal and mantle conditions [@kumazawa_elastic_1969; @kumazawa_elastic_1969-1; @qian_elasticity_2017; @su_self-consistent_2021; @walker_effect_2012]. Therefore, seismic properties derived from textural analyses need to integrate the effects of temperature, pressure, and melt.
+Seismic anisotropy calculations that rely on the integration of textural data obtained by Electron Backscatter Diffraction (EBSD) with experimentally determined elastic stiffness tensors have become standard practice in rock-based geodynamic studies [@bernard_relationships_2019; @boneh_modeling_2015; @chatzaras_effects_2023; @demouchy_microstructures_2019; @jung_effect_2006; @tommasi_microstructures_2014; @vauchez_microstructure_2005]. While established tools like MTEX [@mainprice_descriptive_2015] allow for robust texture analysis, they rely on 'reference stiffness tensors' derived under ambient conditions to constrain elastic properties (Fig. 1c). However, first-principles simulations and laboratory experiments reveal that reference stiffness tensors can significantly deviate from those at deep crustal and mantle conditions [@kumazawa_elastic_1969; @kumazawa_elastic_1969-1; @qian_elasticity_2017; @su_self-consistent_2021; @walker_effect_2012]. Therefore, seismic properties derived from textural analyses need to integrate the effects of temperature, pressure, and melt.
 
 Melt characteristics — such as fraction, shape, distribution, and orientation have well-understood effects on seismic properties [@hammond_upper_2000; @kendall_teleseismic_1994; @takei_constitutive_1998]. However, the combined effect of melt and rock texture is less commonly considered [@holtzman_organized_2010; @lee_modeling_2017]. Functionalities that allow us to estimate how the combination of texture-induced anisotropy and melt affect the elastic properties under varying pressure and temperature have yet to be incorporated into an open-source toolkit.
 
@@ -56,8 +56,8 @@ The pressure and temperature dependence of elastic constants is primarily linear
 
 
 \begin{equation}\label{eq:elasticity}
-C_{ijkl}(p, T) = C_{ijkl}(P_0, T_0) + \left. \frac{\partial C_{ijkl}}{\partial p} \right|_{(P_0,T_0)} \Delta p 
-+ \left. \frac{\partial C_{ijkl}}{\partial T} \right|_{(P_0,T_0)} \Delta T + \mathcal{O}(\Delta p^2, \Delta T^2)
+C_{ijkl}(P, T) = C_{ijkl}(P_0, T_0) + \left. \frac{\partial C_{ijkl}}{\partial P} \right|_{(P_0,T_0)} \Delta P 
++ \left. \frac{\partial C_{ijkl}}{\partial T} \right|_{(P_0,T_0)} \Delta T + \mathcal{O}(\Delta P^2, \Delta T^2)
 \end{equation}
 
 
@@ -70,15 +70,18 @@ In the current version of SAnTex, melt is considered as a homogeneously distribu
 
 \begin{equation}\label{eq:elasticity_fmelt}
 \begin{aligned}
-C_{ijkl}(p, T) = (1-f) \Big(C_{ijkl}(P_0, T_0) + \left. \frac{\partial C_{ijkl}}{\partial p} \right|_{(P_0,T_0)} \Delta p 
-+ \left. \frac{\partial C_{ijkl}}{\partial T} \right|_{(P_0,T_0)} \Delta T \\ + \mathcal{O}(\Delta p^2, \Delta T^2) \Big) 
-+ f_{\text{melt}} \big(C_{\text{melt}}(p, T) \big)
+C_{ijkl}(P, T) = (1-f_{\text{melt}}) \Big(C_{ijkl}(P_0, T_0) + \left. \frac{\partial C_{ijkl}}{\partial P} \right|_{(P_0,T_0)} \Delta P 
++ \left. \frac{\partial C_{ijkl}}{\partial T} \right|_{(P_0,T_0)} \Delta T \\ + \mathcal{O}(\Delta P^2, \Delta T^2) \Big) 
++ f_{\text{melt}} \cdot \mathbf{C}_{\text{melt}}(P, T)
+
 \end{aligned}
 \end{equation}
 
 
 
-The fraction of melt, $f$, can be controlled by the user. $C_{melt}$ is the stiffness tensor of the melt, which assumes an anisotropic solid host rock and an evenly distributed isotropic melt [@lee_modeling_2017]. The approach currently incorporated in SAnTex overlooks the complex behaviour of melt, including its viscosity, flow dynamics, and interaction with neighbouring minerals, which can influence the overall anisotropic properties of the system. Future updates of SAnTex will incorporate additional capabilities, such as modelling melt–grain interactions, to further refine the calculation of melt-induced anisotropy.
+The fraction of melt, $f$, can be controlled by the user. $C_{melt}$ is the stiffness tensor of the melt, which assumes an anisotropic solid host rock and an evenly distributed isotropic melt [@lee_modeling_2017]. The approach currently incorporated in SAnTex overlooks the complex behaviour of melt, not including its viscosity, flow dynamics, and interaction with neighbouring minerals, which can influence the overall anisotropic properties of the system. Future updates of SAnTex will incorporate additional capabilities, such as modelling melt–grain interactions, to further refine the calculation of melt-induced anisotropy.
+
+![EBSD maps after cleaning using (a) MTEX and (b) SAnTex. Seismic Anisotropy maps using (c) MTEX at ambient pressure and temperature and SAnTex at (d) ambient pressure and temperature, (e) at 1.4 GPa and 1100° K, and (f) 1.4 GPa and 1100° K with 7% silicate melt.  Density, P and S wave velocities against (g) temperature and (h) pressure. The gray shaded areas show the upper and lower Hashin-Shtrikman bounds scaled by a factor of 1000 to demonstrate the difference between lower and upper bounds.](santex_fig_1.png){ width=100% }
 
 SAnTex calculates seismic properties from EBSD crystal orientation data using the following steps:
 
@@ -104,8 +107,6 @@ SAnTex allows for (Fig. 2):
 4.	Calculation of seismic anisotropy: Computes seismic velocities and anisotropy across a range of pressure (0–13 GPa) and temperature (300–2000 K) conditions (Fig. 1d, e, f), and provides interactive 2D and 3D plots for visualizing the results (Fig. 3).
 
 5.	Calculation of isotropic velocities: Computes isotropic seismic wave velocities and Hashin-Shtrikman bounds ($V_{p}$, $V_{s}$, and $V_{bulk}$), along with the isothermal bulk modulus and density, under geological conditions [@hacker_subduction_2004] (Fig. 1g, h).  The calculated velocities and elastic properties can be fed to geophysical interpretation tools such as pide [@ozaydin_pide_2025].
-
-![EBSD maps after cleaning using (a) MTEX and (b) SAnTex. Seismic Anisotropy maps using (c) MTEX at ambient pressure and temperature and SAnTex at (d) ambient pressure and temperature, (e) at 1.4 GPa and 1100° K, and (f) 1.4 GPa and 1100° K with 7% silicate melt.  Density, P and S wave velocities against (g) temperature and (h) pressure. The gray shaded areas show the upper and lower Hashin-Shtrikman bounds scaled by a factor of 1000 to demonstrate the difference between lower and upper bounds.](santex_fig_1.png){ width=100% }
 
 ![Workflow of SAnTex with fundamental methods and classes outlined.](santex_fig_2.png){ width=100% }
 
