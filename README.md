@@ -10,6 +10,28 @@ SAnTex is a Python library which calculates the full elastic tensor of rocks fro
 - **Seismic Anisotropy**: SAnTex performs calculations of seismic anisotropy at a range of pressure and temperature conditions.  It also offers visualisation capabilities, allowing users to view the calculated seismic anisotropy in 2D and 3D plots. 
 - **Isotropic velocities**: Calculates isotropic seismic wave velocities (Vp, Vs and vbulk), isothermal bulk modulus, and density at elevated temperatures and pressures (Hacker & Abers, 2004). 
 
+## How to Cite
+
+If you are using this library in a scientific publication, please consider citing the following paper:
+
+- Singh, U., Özaydın, S., Chatzaras, V., & Rey, P. (2025). SAnTex: A Python-based Library for Seismic Anisotropy Calculation. Journal of Open Source Software, 10(110), 6886, https://doi.org/10.21105/joss.06886.
+
+Bibtex:
+
+```bibtex
+@article{Sing2025,
+  title={SAnTex: A Python-based Library for Seismic Anisotropy Calculation},
+  author={Singh, Utpal and {\"O}zayd{\i}n, Sinan and Chatzaras, Vasileios and Rey, Patrice},
+  journal={Journal of Open Source Software},
+  volume={10},
+  number={110},
+  pages={6886},
+  year={2025},
+  doi={10.21105/joss.06886}
+}
+
+```
+
 
 ## Installation
 
