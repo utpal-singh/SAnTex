@@ -172,6 +172,7 @@ class Anisotropy:
         vp, vs1, vs2 = self.phase_velocity()
         return vp, vs1, vs2
 
+
     def anisotropy_values(self, stiffness_matrix=None, density=None, method=None, return_values=None):
         """
         Calculates various anisotropy values based on the velocities calculated from the given stiffness matrix and density.
@@ -224,13 +225,16 @@ class Anisotropy:
         swaveAnisotropy_percent = 200 * (np.array(vs1) - np.array(vs2)) / (np.array(vs1) + np.array(vs2))
         max_vs_anisotropy_percent = max(swaveAnisotropy_percent)
         min_vs_anisotropy_percent = min(swaveAnisotropy_percent)
+        mean_vs_anisotropy_percent = np.mean(swaveAnisotropy_percent)
         p_wave_anisotropy_percent = 200 * (maxvp - minvp) / (maxvp + minvp)
         s1_wave_anisotropy_percent = 200 * (maxvs1 - minvs1) / (maxvs1 + minvs1)
         s2_wave_anisotropy_percent = 200 * (maxvs2 - minvs2) / (maxvs2 + minvs2)
         dvs = np.array(vs1) - np.array(vs2)
         maxdvs = max(dvs)
         vp_vs1 = np.array(vp) / np.array(vs1)
+        vp_vs2 = np.array(vp) / np.array(vs2)
         AVpVs1 = 200 * (max(vp_vs1) - min(vp_vs1)) / (max(vp_vs1) + min(vp_vs1))
+        AVpVs2 = 200 * (max(vp_vs2) - min(vp_vs2)) / (max(vp_vs2) + min(vp_vs2))
 
         if return_values == 'maxvp':
             return maxvp
@@ -283,15 +287,25 @@ class Anisotropy:
                 'minvs1': minvs1,
                 'maxvs2': maxvs2,
                 'minvs2': minvs2,
+                'meanvp': meanvp,
+                'meanvs1': meanvs1,
+                'meanvs2': meanvs2,
+                'maxvp_vs1': max(vp_vs1),
+                'minvp_vs1': min(vp_vs1),
+                'maxvp_vs2': max(vp_vs2),
+                'minvp_vs2': min(vp_vs2),
                 'max_vs_anisotropy_percent': max_vs_anisotropy_percent,
                 'min_vs_anisotropy_percent': min_vs_anisotropy_percent,
+                'mean_vs_anisotropy_percent': mean_vs_anisotropy_percent,
                 'p_wave_anisotropy_percent': p_wave_anisotropy_percent,
                 's1_wave_anisotropy_percent': s1_wave_anisotropy_percent,
                 's2_wave_anisotropy_percent': s2_wave_anisotropy_percent,
                 'maxdvs': maxdvs,
-                'AVpVs1': AVpVs1
+                'AVpVs1': AVpVs1,
+                'AVpVs2': AVpVs2,
             }
-        
+ 
+    
     def plot_velocities(self, pressure_range, temperature_range, return_type, is_ebsd=False, phase=None, grid=[5, 5], filename=None, *args):
         """
         Plots velocities based on specified ranges and return types.
