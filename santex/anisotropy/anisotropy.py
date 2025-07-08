@@ -231,6 +231,8 @@ class Anisotropy:
         s2_wave_anisotropy_percent = 200 * (maxvs2 - minvs2) / (maxvs2 + minvs2)
         dvs = np.array(vs1) - np.array(vs2)
         maxdvs = max(dvs)
+        mindvs = min(dvs)
+        mean_dvs = np.mean(dvs)
         vp_vs1 = np.array(vp) / np.array(vs1)
         vp_vs2 = np.array(vp) / np.array(vs2)
         AVpVs1 = 200 * (max(vp_vs1) - min(vp_vs1)) / (max(vp_vs1) + min(vp_vs1))
@@ -303,8 +305,9 @@ class Anisotropy:
                 'maxdvs': maxdvs,
                 'AVpVs1': AVpVs1,
                 'AVpVs2': AVpVs2,
+                'mean_dvs': mean_dvs,
+                'mindvs': mindvs
             }
- 
     
     def plot_velocities(self, pressure_range, temperature_range, return_type, is_ebsd=False, phase=None, grid=[5, 5], filename=None, *args):
         """
