@@ -335,8 +335,7 @@ class Anisotropy:
         """
         return plot_velocity_grid(pressure_range=pressure_range, temperature_range=temperature_range, return_type=return_type, is_ebsd=is_ebsd, phase=phase, grid=grid, filename=filename, *args)
 
-
-    def plot(self, colormap="RdBu", step = 180, savefig = False, figname = None, dpi = 300, save_format = 'svg'):
+    def plot(self, colormap="RdBu", step=180, savefig=False, figname=None, dpi=300, save_format='svg', vmin_vmax=None, show_box=False, show_contour_labels=False):
         """
         Plots various anisotropic maps based on the Christoffel tensor.
 
@@ -346,6 +345,13 @@ class Anisotropy:
             savefig (bool): Whether to save the plot as an image. Default is False.
             figname (str or None): The filename to save the plot. Required if savefig is True.
             dpi (int): The resolution of the saved image. Default is 300.
+            save_format (str): The format to save the image. Default is 'svg'.
+            vmin_vmax (dict or None): Dictionary containing vmin and vmax values for each plot.
+                                    Expected keys: 'vpvs1', 'vp', 'vs1', 'vs2', 'vpvs2', 'avs'
+                                    Each value should be a tuple (vmin, vmax) or None for default.
+                                    Example: {'vpvs1': (1.5, 2.0), 'vp': None, 'vs1': (3000, 4000)}
+            show_box (bool): Whether to show the box (axes spines) around each subplot. Default is True.
+            show_contour_labels (bool): Whether to show contour value labels on contour lines. Default is True.
 
         Raises:
             ValueError: If an error occurs during the plotting process.
@@ -353,13 +359,50 @@ class Anisotropy:
         Notes:
             - This method generates a 2x3 grid of subplots, each representing different anisotropic maps based on the Christoffel tensor.
             - The colormap, step size, and other parameters can be customized.
+            - vmin and vmax can be set individually for each subplot using the vmin_vmax dictionary.
 
         Example Usage:
-            anisotropy.plot(colormap="viridis", step=120, savefig=True, figname="anisotropy_plot.png", dpi=600)
+            # With custom vmin/vmax for specific plots
+            vmin_vmax_dict = {
+                'vpvs1': (1.5, 2.2),
+                'vp': (5000, 7000),
+                'vs1': None,  # Use default
+                'vs2': (3000, 4500),
+                'vpvs2': (1.8, 2.5),
+                'avs': (-10, 10)
+            }
+            anisotropy.plot(colormap="viridis", step=120, savefig=True, 
+                        figname="anisotropy_plot", dpi=600, vmin_vmax=vmin_vmax_dict)
+            
+            # Without boxes around subplots
+            anisotropy.plot(show_box=False)
+            
+            # Without contour labels
+            anisotropy.plot(show_contour_labels=False)
+            
+            # Clean stereonet plot without boxes or contour labels
+            anisotropy.plot(show_box=False, show_contour_labels=False)
         """
         try:
             fig, axs = plt.subplots(2, 3, figsize=(15, 10))
             step = math.pi / step
+
+            # Default vmin_vmax dictionary if not provided
+            if vmin_vmax is None:
+                vmin_vmax = {}
+            
+            # Default values for each plot type (used when vmin_vmax[key] is None or key is missing)
+            default_ranges = {
+                'vpvs1': None,  # Will use data range
+                'vp': None,     # Will use data range
+                'vs1': None,    # Will use data range
+                'vs2': None,    # Will use data range
+                'vpvs2': None,  # Will use data range
+                'avs': None     # Will use data range
+            }
+            
+            # Plot type keys corresponding to each subplot
+            plot_keys = ['vpvs1', 'vp', 'vs1', 'vs2', 'vpvs2', 'avs']
 
             # texts for each subplot
             texts = ['Ratio of VP to VS1', 'Velocity of P-waves (VP)', 'Velocity of S1-waves (VS1)', 
@@ -393,12 +436,8 @@ class Anisotropy:
                                 c.append(vs1)
                             elif i == 3:
                                 c.append(vs2)
-                            # elif i == 4:
-                            #     c.append((vp - vs1) / (vp + vs1))
                             elif i == 4:
                                 c.append(vpvs2)
-                            # elif i == 5:
-                            #     c.append((vp - vs2) / (vp + vs2))
                             elif i == 5:
                                 c.append(avs)
 
@@ -406,21 +445,62 @@ class Anisotropy:
                 xi = np.linspace(min(x), max(x), 100)
                 yi = np.linspace(min(y), max(y), 100)
                 xi, yi = np.meshgrid(xi, yi)
+                
+                # Create circular mask for stereographic projection
+                x_center = (max(x) + min(x)) / 2
+                y_center = (max(y) + min(y)) / 2
+                radius = max(max(x) - min(x), max(y) - min(y)) / 2
+                
+                # Calculate distance from center for each grid point
+                distances = np.sqrt((xi - x_center)**2 + (yi - y_center)**2)
+                
                 zi = griddata((x, y), c, (xi, yi), method='linear')
+                
+                # Mask points outside the natural circular boundary
+                zi = np.where(distances <= radius * 1.1, zi, np.nan)  # Allow 10% margin
+
+                # Get vmin and vmax for current plot
+                plot_key = plot_keys[i]
+                vmin_vmax_current = vmin_vmax.get(plot_key, default_ranges[plot_key])
+                
+                if vmin_vmax_current is not None:
+                    vmin, vmax = vmin_vmax_current
+                else:
+                    vmin, vmax = None, None
 
                 # Plotting contour lines for each subplot
                 contours = ax.contour(xi, yi, zi, 5, colors='black')
-                ax.clabel(contours, inline=True, fontsize=8)
+                if show_contour_labels:
+                    ax.clabel(contours, inline=True, fontsize=8)
 
-                sc = ax.scatter(x, y, c=c, cmap=colormap, s=5, rasterized=True)  # Reduce scatter dot size s for clarity
+                sc = ax.scatter(x, y, c=c, cmap=colormap, s=5, rasterized=True, vmin=vmin, vmax=vmax)
                 ax.set_xlabel('x')
                 ax.set_ylabel('y')
-                ax.set_aspect('equal', 'box')
+                
+                # Set axis limits to prevent squishing
+                max_extent = max(max(x) - min(x), max(y) - min(y)) / 2
+                x_center = (max(x) + min(x)) / 2
+                y_center = (max(y) + min(y)) / 2
+                ax.set_xlim(x_center - max_extent * 1.05, x_center + max_extent * 1.05)
+                ax.set_ylim(y_center - max_extent * 1.05, y_center + max_extent * 1.05)
+                
+                ax.set_aspect('equal')
 
                 ax.text(0.5, -0.15, texts[i], ha='center', transform=ax.transAxes)
-                # cbar = fig.colorbar(sc, ax=ax)
+                
+                # Control box visibility
+                if not show_box:
+                    ax.spines['top'].set_visible(False)
+                    ax.spines['right'].set_visible(False)
+                    ax.spines['bottom'].set_visible(False)
+                    ax.spines['left'].set_visible(False)
+                    # Also hide tick marks when box is hidden
+                    ax.tick_params(left=False, bottom=False)
+                    ax.set_xticks([])
+                    ax.set_yticks([])
+                
                 divider = make_axes_locatable(ax)
-                cax = divider.append_axes("right", size="5%", pad = 0.1)
+                cax = divider.append_axes("right", size="5%", pad=0.1)
                 cbar = fig.colorbar(sc, cax=cax, orientation='vertical')
 
             axs[0, 0].set_title('Vp/Vs1')
@@ -433,12 +513,12 @@ class Anisotropy:
             plt.tight_layout()
 
             if savefig:
-                plt.savefig(f"{figname}.{save_format}", dpi = dpi, format = save_format)
+                plt.savefig(f"{figname}.{save_format}", dpi=dpi, format=save_format)
             
             plt.show()
         except Exception as e:
             print(f"An error occurred: {e}")
-
+            
 
     def plotly(self):
         """
