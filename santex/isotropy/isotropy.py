@@ -110,7 +110,7 @@ class Isotropy:
             tolerance = 1.e-8
 
             # input
-            if ref_density == None:
+            if ref_density is None:
                 rho0 = phase_constants['rho0']
             else:
                 rho0 = ref_density
