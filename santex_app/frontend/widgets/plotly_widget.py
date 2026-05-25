@@ -28,7 +28,7 @@ except ModuleNotFoundError:
     QWebEngineView = None
     QWebEngineSettings = None
 
-from PyQt5.QtCore import QUrl
+from PyQt5.QtCore import QUrl, Qt
 from PyQt5.QtWidgets import QSizePolicy, QLabel
 
 
@@ -149,7 +149,7 @@ class PlotlyWidget(_make_base()):
             s.setAttribute(QWebEngineSettings.LocalContentCanAccessRemoteUrls, False)
         else:
             self.setWordWrap(True)
-            self.setAlignment(0x84)  # Qt.AlignHCenter | Qt.AlignVCenter
+            self.setAlignment(Qt.AlignCenter)  # AlignHCenter | AlignVCenter
 
         self.clear()
 
