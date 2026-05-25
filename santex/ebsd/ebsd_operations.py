@@ -6,7 +6,6 @@ can be called from any frontend.
 
 Functions
 ---------
-orix_symmetry(name)            → orix Symmetry object
 ipf_map_colors(data, ...)      → dict(x, y, rgb_hex, r, g, b)
 bc_bs_map_data(data)           → dict(x, y, bc, bs)
 compute_kam(data, ...)         → (N,) array of KAM angles (degrees)
@@ -23,118 +22,29 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-
-# ---------------------------------------------------------------------------
-# Symmetry helper — avoids the 300-line if/elif in crystal.py
-# ---------------------------------------------------------------------------
-
-_ORIX_SYM_ALIASES: dict[str, str] = {
-    # triclinic
-    "1": "C1", "Ci": "Ci", "-1": "Ci",
-    # monoclinic
-    "2": "C2", "m": "Cs", "2/m": "C2h",
-    # orthorhombic
-    "222": "D2", "mm2": "C2v", "mmm": "D2h",
-    # tetragonal
-    "4": "C4", "-4": "S4", "4/m": "C4h",
-    "422": "D4", "4mm": "C4v", "-42m": "D2d", "-4m2": "D2d", "4/mmm": "D4h",
-    # trigonal
-    "3": "C3", "-3": "C3i",
-    "32": "D3", "3m": "C3v", "-3m": "D3d",
-    "321": "D3", "3m1": "C3v", "-3m1": "D3d",
-    "312": "D3", "31m": "C3v", "-31m": "D3d",
-    # hexagonal
-    "6": "C6", "-6": "C3h", "6/m": "C6h",
-    "622": "D6", "6mm": "C6v", "-62m": "D3h", "-6m2": "D3h", "6/mmm": "D6h",
-    # cubic
-    "23": "T", "m-3": "Th",
-    "432": "O", "-43m": "Td", "m-3m": "Oh",
-}
-
-
-def orix_symmetry(name: str):
-    """Return the orix symmetry object for *name*.
-
-    Accepts both the canonical class names (``'D2h'``, ``'Oh'``, …) and the
-    Hermann–Mauguin or Schoenflies short forms (``'mmm'``, ``'m-3m'``, …).
-    Falls back to ``D2h`` (mmm) if the name is unrecognised.
-    """
-    from orix.quaternion import symmetry as sym
-
-    _MAP = {
-        "C1": sym.C1, "Ci": sym.Ci,
-        "C2": sym.C2, "Cs": sym.Cs, "C2h": sym.C2h,
-        "D2": sym.D2, "C2v": sym.C2v, "D2h": sym.D2h,
-        "C3": sym.C3, "C3i": sym.C3i,
-        "D3": sym.D3, "C3v": sym.C3v, "D3d": sym.D3d,
-        "C4": sym.C4, "S4": sym.S4, "C4h": sym.C4h,
-        "D4": sym.D4, "C4v": sym.C4v, "D2d": sym.D2d, "D4h": sym.D4h,
-        "C6": sym.C6, "C3h": sym.C3h, "C6h": sym.C6h,
-        "D6": sym.D6, "C6v": sym.C6v, "D3h": sym.D3h, "D6h": sym.D6h,
-        "T": sym.T, "Th": sym.Th,
-        "O": sym.O, "Td": sym.Td, "Oh": sym.Oh,
-    }
-    key = _ORIX_SYM_ALIASES.get(name, name)
-    return _MAP.get(key, sym.D2h)
+# IPF colouring is handled by the internal module (no orix dependency)
+from .ipf_coloring import ipf_map_colors, laue_group, get_sym_ops   # noqa: F401
 
 
 # ---------------------------------------------------------------------------
 # IPF map colours
 # ---------------------------------------------------------------------------
+# ipf_map_colors is imported directly from ipf_coloring above.
+# The old docstring is kept here for reference only.
+#
+# def ipf_map_colors(data, phase_index=1, direction="ND",
+#                    crystal_symmetry="D2h") -> dict | None:
+#     """
+#     Compute per-pixel IPF colour for a single phase.
+#
+#     Parameters
+#     ----------
+#     data            : EBSD DataFrame (Phase, X, Y, Euler1, Euler2, Euler3)
+#     phase_index     : phase number (>0)
+#     direction       : ``'ND'`` (Z), ``'RD'`` (X), or ``'TD'`` (Y)
+#     crystal_symmetry: e.g. ``'D2h'``, ``'Oh'``, ``'mmm'``, ``'m-3m'``
 
-def ipf_map_colors(
-    data: pd.DataFrame,
-    phase_index: int = 1,
-    direction: str = "ND",
-    crystal_symmetry: str = "D2h",
-) -> dict | None:
-    """
-    Compute per-pixel IPF colour for a single phase using orix.
-
-    Parameters
-    ----------
-    data            : EBSD DataFrame (Phase, X, Y, Euler1, Euler2, Euler3)
-    phase_index     : phase number (>0)
-    direction       : ``'ND'`` (Z), ``'RD'`` (X), or ``'TD'`` (Y)
-    crystal_symmetry: e.g. ``'D2h'``, ``'Oh'``, ``'mmm'``, ``'m-3m'``
-
-    Returns
-    -------
-    dict with keys x, y, r, g, b (float 0-1), rgb_hex (list of str),
-    or ``None`` if the phase has no indexed pixels.
-    """
-    from orix.quaternion import Orientation
-    from orix.vector import Vector3d
-    from orix import plot as orix_plot
-
-    _DIR = {"ND": Vector3d([0, 0, 1]), "RD": Vector3d([1, 0, 0]),
-            "TD": Vector3d([0, 1, 0])}
-    vec = _DIR.get(direction.upper(), _DIR["ND"])
-
-    phase_data = data[data["Phase"] == phase_index].copy()
-    if len(phase_data) == 0:
-        return None
-
-    euler = phase_data[["Euler1", "Euler2", "Euler3"]].to_numpy()
-    sym_obj = orix_symmetry(crystal_symmetry)
-    ori = Orientation.from_euler(np.deg2rad(euler), sym_obj)
-
-    ipfkey = orix_plot.IPFColorKeyTSL(sym_obj, direction=vec)
-    rgb = ipfkey.orientation2color(ori)          # (N, 3) float in [0, 1]
-    rgb = np.clip(rgb, 0.0, 1.0)
-
-    hex_colors = [
-        "#{:02x}{:02x}{:02x}".format(int(r * 255), int(g * 255), int(b * 255))
-        for r, g, b in rgb
-    ]
-    return {
-        "x":       phase_data["X"].values,
-        "y":       phase_data["Y"].values,
-        "r":       rgb[:, 0],
-        "g":       rgb[:, 1],
-        "b":       rgb[:, 2],
-        "rgb_hex": hex_colors,
-    }
+# (ipf_map_colors implementation lives in ipf_coloring.py and is imported above)
 
 
 # ---------------------------------------------------------------------------
