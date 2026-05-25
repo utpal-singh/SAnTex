@@ -6,7 +6,11 @@ Three visual styles are supported:
 
   "Smooth fill"     go.Heatmap(zsmooth='best')            — seamless colour wash
   "Filled contours" go.Contour(coloring='heatmap')        — MTEX-default look
-  "Scatter (dots)"  go.Scattergl with markers             — original fast scatter
+  "Scatter (dots)"  go.Scattergl with markers             — fast scatter
+
+**Projection**: Lambert equal-area (Schmidt net), matching MTEX default.
+  r = √2 · sin(θ/2),  where θ is the polar angle from the upper pole.
+  The equator maps to r = 1; areas are correctly preserved.
 
 Every style gets:
   • Solid circular border
@@ -34,9 +38,11 @@ def _circle_xy(n: int = 300):
 
 
 def _ring_r(theta_deg: float) -> float:
-    """Stereographic radius for a small-circle at *theta_deg* from the pole."""
-    t = np.deg2rad(theta_deg)
-    return np.sin(t) / (1.0 + np.cos(t))
+    """Lambert equal-area radius for a small-circle at *theta_deg* from the pole.
+
+    r = √2 · sin(θ/2)   — matches MTEX's default Schmidt-net projection.
+    """
+    return np.sqrt(2.0) * np.sin(np.deg2rad(theta_deg) / 2.0)
 
 
 def _add_stereonet_decorations(fig: go.Figure) -> None:
@@ -92,6 +98,15 @@ def _add_stereonet_decorations(fig: go.Figure) -> None:
             line=dict(color="rgba(0,0,0,0.18)", width=0.8, dash="dot"),
             layer="below",
         )
+
+    # ── projection label ─────────────────────────────────────────────────
+    fig.add_annotation(
+        x=-1.18, y=-1.18,
+        text="<i>equal-area</i>",
+        showarrow=False,
+        font=dict(size=9, color="grey"),
+        xref="x", yref="y",
+    )
 
 
 def _base_layout(title: str) -> dict:

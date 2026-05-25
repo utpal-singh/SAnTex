@@ -64,10 +64,17 @@ class EBSDBackend:
     # ------------------------------------------------------------------
 
     def phase_rows(self) -> list[tuple[int, str, float]]:
-        """Return list of (index, name, percentage) tuples."""
+        """Return list of (index, name, percentage) tuples for *indexed* phases.
+
+        Phase 0 (unindexed / NaN pixels) is intentionally excluded: those
+        pixels carry no valid orientation and must never contribute to any
+        elastic-tensor average.
+        """
         if not self.is_loaded:
             return []
-        return self.ebsd.phases()          # [(index, name, pct), ...]
+        return [(idx, name, pct)
+                for idx, name, pct in self.ebsd.phases()
+                if idx != 0]   # skip unindexed pixels
 
     def phase_names(self) -> list[str]:
         if not self.is_loaded:

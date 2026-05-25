@@ -412,7 +412,6 @@ class EBSD:
         total_grains = sum(len_euler)
 
         for idx, euler_df in enumerate(euler_angles):
-            volume_fraction = len_euler[idx] / total_grains
             for _, row in euler_df.iterrows():
                 alpha, beta, gamma = row['Euler1'], row['Euler2'], row['Euler3']
 
@@ -420,14 +419,17 @@ class EBSD:
                 rotated_C_voigt = tensor.tensor_to_voigt(rotated_C)
                 rotated_S_voigt = np.linalg.inv(rotated_C_voigt)
 
-                rotated_C_list.append(rotated_C_voigt * volume_fraction)
-                rotated_S_list.append(rotated_S_voigt * volume_fraction)
+                # Each pixel carries equal weight 1/N_total; volume fractions
+                # emerge automatically from the pixel counts per phase.
+                # Using np.mean below gives the properly normalised average.
+                rotated_C_list.append(rotated_C_voigt)
+                rotated_S_list.append(rotated_S_voigt)
 
-        # Voigt average (stiffness)
-        C_voigt = np.sum(rotated_C_list, axis=0)
+        # Voigt average (arithmetic mean of rotated stiffness tensors)
+        C_voigt = np.mean(rotated_C_list, axis=0)
 
-        # Reuss average (compliance → stiffness)
-        S_reuss_avg = np.sum(rotated_S_list, axis=0)
+        # Reuss average (arithmetic mean of compliances, then invert)
+        S_reuss_avg = np.mean(rotated_S_list, axis=0)
         C_reuss = np.linalg.inv(S_reuss_avg)
 
         # Hill average

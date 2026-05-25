@@ -86,11 +86,15 @@ class AnisotropyBackend:
     ) -> dict | None:
         """
         Return velocity data on a ``grid_size × grid_size`` Cartesian grid
-        in stereographic coordinates.  Values outside the unit disk are NaN.
+        using the **Lambert equal-area** (Schmidt) projection — the same
+        default used by MTEX.  Values outside the unit disk are NaN.
 
-        Uses inverse-stereographic mapping + bilinear interpolation on the
-        regular (theta, phi) source grid — no scattered-data interpolation
-        needed, so there are no edge artefacts.
+        Projection:  r = √2 · sin(θ/2),  inverse: θ = 2·arcsin(r/√2)
+        This preserves area (unlike the equal-angle/Wulff projection) so
+        the visual weight of each solid-angle element is constant.
+
+        Uses bilinear interpolation on the regular (theta, phi) source grid
+        — no scattered-data interpolation, no edge artefacts.
         """
         if self.cijkl is None or self.rho is None:
             return None
@@ -109,7 +113,7 @@ class AnisotropyBackend:
         n_flat = np.stack([nx_g.ravel(), ny_g.ravel(), nz_g.ravel()], axis=1)
 
         tik   = np.einsum("ijkl,nj,nl->nik", self.cijkl, n_flat, n_flat)
-        evals = np.linalg.eigh(tik)[0][:, ::-1]
+        evals = np.linalg.eigh(tik)[0][:, ::-1]   # descending → Vp, Vs1, Vs2
 
         vp  = np.sqrt(np.maximum(evals[:, 0], 0) / self.rho).reshape(n_th, n_ph)
         vs1 = np.sqrt(np.maximum(evals[:, 1], 0) / self.rho).reshape(n_th, n_ph)
@@ -118,20 +122,23 @@ class AnisotropyBackend:
         vpvs1 = np.where(vs1 > 0, vp / vs1, 0.0)
         vpvs2 = np.where(vs2 > 0, vp / vs2, 0.0)
 
-        # ── output Cartesian grid ────────────────────────────────────────
+        # ── Lambert equal-area output grid ──────────────────────────────
+        # Disk radius r ∈ [0,1] ↔ θ ∈ [0, 90°]
+        # Forward:  r = √2 · sin(θ/2)
+        # Inverse:  θ = 2 · arcsin(r / √2)   (valid for r ≤ 1 since r/√2 ≤ 1/√2 < 1)
         xi = np.linspace(-1.0, 1.0, grid_size)
         yi = np.linspace(-1.0, 1.0, grid_size)
-        XI, YI = np.meshgrid(xi, yi)                    # (grid, grid)
+        XI, YI = np.meshgrid(xi, yi)                    # (grid_size, grid_size)
 
         r2      = XI ** 2 + YI ** 2
         outside = r2 > 1.0
         r_safe  = np.sqrt(np.where(outside, 0.0, r2))
 
-        # Inverse stereographic: r = tan(θ/2)  →  θ = 2·atan(r)
-        theta_out = 2.0 * np.arctan(r_safe)             # [0, π/2]
+        # Inverse Lambert equal-area: r = √2·sin(θ/2)  →  θ = 2·arcsin(r/√2)
+        theta_out = 2.0 * np.arcsin(np.clip(r_safe / np.sqrt(2.0), 0.0, 1.0))
         phi_out   = np.arctan2(YI, XI) % (2 * np.pi)   # [0, 2π)
 
-        # Convert to fractional grid indices
+        # Convert to fractional source-grid indices
         th_idx = theta_out / (np.pi / 2) * (n_th - 1)
         ph_idx = phi_out   / (2 * np.pi) * (n_ph - 1)
 
@@ -173,11 +180,13 @@ class AnisotropyBackend:
         vs1 = np.sqrt(np.maximum(evals[:, 1], 0) / self.rho)
         vs2 = np.sqrt(np.maximum(evals[:, 2], 0) / self.rho)
 
-        # Stereographic projection: x = n_x/(1+n_z), y = n_y/(1+n_z)
+        # Lambert equal-area projection (same as MTEX default):
+        #   x = √(2/(1+nz)) · nx,  y = √(2/(1+nz)) · ny
+        # This is equivalent to  r = √2·sin(θ/2),  x = r·cos(φ),  y = r·sin(φ)
         nz_flat = nz.ravel()
-        denom   = 1 + nz_flat
-        x = nx.ravel() / denom
-        y = ny.ravel() / denom
+        scale   = np.sqrt(np.maximum(2.0 / (1.0 + nz_flat), 0.0))
+        x = scale * nx.ravel()
+        y = scale * ny.ravel()
 
         avs   = np.where((vs1 + vs2) > 0, 200 * (vs1 - vs2) / (vs1 + vs2), 0.0)
         vpvs1 = np.where(vs1 > 0, vp / vs1, 0.0)

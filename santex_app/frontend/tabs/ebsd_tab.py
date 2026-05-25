@@ -78,6 +78,18 @@ class _VRHWorker(QThread):
 # Helper: PlotOptions group box
 # ---------------------------------------------------------------------------
 
+_ANIS_SCALARS = ["vp", "vs1", "vs2", "avs", "vpvs1", "vpvs2"]
+
+_SCALAR_LABELS = {
+    "vp":    "Vp  — P-wave velocity",
+    "vs1":   "Vs1 — fast S-wave",
+    "vs2":   "Vs2 — slow S-wave",
+    "avs":   "AVs — S-wave anisotropy (%)",
+    "vpvs1": "Vp/Vs1 ratio",
+    "vpvs2": "Vp/Vs2 ratio",
+}
+
+
 class _PlotOptions(QGroupBox):
     """Reusable plot-options panel with colormap, style, vmin/vmax, point size, colorbar."""
 
@@ -85,10 +97,20 @@ class _PlotOptions(QGroupBox):
                  show_cmap: bool = True,
                  default_cmap: str = "Viridis",
                  default_pt_size: int = 3,
+                 show_scalar: bool = False,
                  parent=None):
         super().__init__(title, parent)
         f = QFormLayout(self)
         f.setSpacing(3)
+
+        # ── scalar selector (optional) ─────────────────────────────────────
+        if show_scalar:
+            self.scalar_combo = QComboBox()
+            for key in _ANIS_SCALARS:
+                self.scalar_combo.addItem(_SCALAR_LABELS.get(key, key), userData=key)
+            f.addRow("Display:", self.scalar_combo)
+        else:
+            self.scalar_combo = None
 
         # ── stereonet style ───────────────────────────────────────────────
         self.style_combo = QComboBox()
@@ -131,6 +153,13 @@ class _PlotOptions(QGroupBox):
         f.addRow(self.colorbar_check)
 
     @property
+    def scalar(self) -> str:
+        """Currently selected anisotropy scalar key (e.g. 'vp', 'avs')."""
+        if self.scalar_combo is None:
+            return "vp"
+        return self.scalar_combo.currentData() or self.scalar_combo.currentText()
+
+    @property
     def style(self) -> str:
         return self.style_combo.currentText()
 
@@ -170,6 +199,7 @@ class EBSDTab(QWidget):
         self._worker = None
         self._phase_colors: dict[int, str] = {}   # phase_id → hex color
         self._phase_color_btns: dict[int, QPushButton] = {}
+        self._vrh_grid: dict | None = None          # cached stereonet grid after VRH
         self._build_ui()
 
     # ------------------------------------------------------------------
@@ -255,10 +285,30 @@ class EBSDTab(QWidget):
         filt_form.addRow("Downsample factor:", self.downsample_spin)
         lv.addWidget(filt_box)
 
-        # Stereonet options
+        # Stereonet options — scalar selector lives here so users can switch
+        # metrics and replot *without* rerunning the VRH calculation.
         self._sn_opts = _PlotOptions("Stereonet options", default_cmap="RdBu_r",
-                                     default_pt_size=2)
+                                     default_pt_size=2, show_scalar=True)
+        # Auto-replot when scalar, style or colormap changes (only if VRH is cached)
+        self._sn_opts.scalar_combo.currentIndexChanged.connect(
+            lambda _: self._replot_stereonet()
+        )
+        self._sn_opts.style_combo.currentTextChanged.connect(
+            lambda _: self._replot_stereonet()
+        )
+        self._sn_opts.cmap_combo.currentTextChanged.connect(
+            lambda _: self._replot_stereonet()
+        )
         lv.addWidget(self._sn_opts)
+
+        self._replot_btn = QPushButton("Replot stereonet")
+        self._replot_btn.setToolTip(
+            "Redraw the stereonet with the current style / colormap / scalar.\n"
+            "No VRH recalculation — uses the last computed result."
+        )
+        self._replot_btn.setEnabled(False)
+        self._replot_btn.clicked.connect(self._replot_stereonet)
+        lv.addWidget(self._replot_btn)
 
         # VRH
         vrh_box = QGroupBox("Texture averaging (VRH)")
@@ -520,6 +570,8 @@ class EBSDTab(QWidget):
         rows = self.eb.phase_rows()
         selected_phases = []
         for row, (idx, name, _) in enumerate(rows):
+            if idx == 0:       # unindexed pixels — must never enter VRH
+                continue
             combo = self.phase_material_table.cellWidget(row, 1)
             if combo:
                 selected_phases.append((idx, combo.currentText()))
@@ -540,28 +592,58 @@ class EBSDTab(QWidget):
         self.progress.setVisible(False)
         self.vrh_btn.setEnabled(True)
         self.ab.set_from_voigt(cij_gpa * 1e9, rho)
-        data = self.ab.compute_stereonet_data(step_deg=3.0)
-        if data is not None:
-            self._plot_stereonet(data, "vp", title="Vp — VRH textured aggregate")
+
+        # Cache the full Cartesian grid — all six scalars are pre-computed inside.
+        # _replot_stereonet() reads whichever scalar the user has selected.
+        self._vrh_grid = self.ab.compute_stereonet_grid(grid_size=300)
+        if self._vrh_grid is not None:
+            self._replot_btn.setEnabled(True)
+            self._replot_stereonet()
+
+        # 3-D surface (uses whichever scalar the combo shows)
         surf = self.ab.compute_velocity_surface()
         if surf is not None:
-            self.pv3d.plot_velocity_surface(surf, scalar="vp")
+            self.pv3d.plot_velocity_surface(surf, scalar=self._sn_opts.scalar)
 
     def _on_vrh_error(self, msg: str):
         self.progress.setVisible(False)
         self.vrh_btn.setEnabled(True)
         QMessageBox.critical(self, "VRH error", msg)
 
-    def _plot_stereonet(self, data: dict, scalar: str = "vp", title: str = "Stereonet"):
-        opts  = self._sn_opts
+    def _replot_stereonet(self):
+        """Re-render the stereonet from the cached VRH grid — no recalculation."""
+        if self._vrh_grid is None:
+            return
+        opts   = self._sn_opts
+        scalar = opts.scalar
 
-        # "Scatter (dots)" uses the x/y scatter data already in *data*;
-        # all other styles need the regular Cartesian grid.
+        # "Scatter (dots)" needs the raw scattered data, not the Cartesian grid.
+        if opts.style == "Scatter (dots)":
+            plot_data = self.ab.compute_stereonet_data(step_deg=2.0)
+            if plot_data is None:
+                return
+        else:
+            plot_data = self._vrh_grid
+
+        label = _SCALAR_LABELS.get(scalar, scalar.upper())
+        self._plot_stereonet(
+            plot_data, scalar,
+            title=f"{label} — VRH textured aggregate",
+        )
+
+        # Keep 3-D surface in sync with selected scalar
+        surf = self.ab.compute_velocity_surface()
+        if surf is not None:
+            self.pv3d.plot_velocity_surface(surf, scalar=scalar)
+
+    def _plot_stereonet(self, data: dict, scalar: str = "vp", title: str = "Stereonet"):
+        opts = self._sn_opts
+
+        # Ensure we always pass a grid to the heatmap / contour renderers
         if opts.style != "Scatter (dots)" and "xi" not in data:
             grid_data = self.ab.compute_stereonet_grid(grid_size=300)
             if grid_data is None:
                 return
-            # merge so make_stereonet_figure can also read scalar keys
             plot_data = grid_data
         else:
             plot_data = data

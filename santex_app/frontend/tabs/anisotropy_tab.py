@@ -132,6 +132,9 @@ class AnisotropyTab(QWidget):
 
         self._sn_opts = _PlotOptions("Stereonet options", default_cmap="RdBu_r",
                                      default_pt_size=3)
+        # Live re-plot when style or colormap changes (data already computed)
+        self._sn_opts.style_combo.currentTextChanged.connect(self._replot)
+        self._sn_opts.cmap_combo.currentTextChanged.connect(self._replot)
         rv.addWidget(self._sn_opts)
 
         self.vis_tabs = QTabWidget()

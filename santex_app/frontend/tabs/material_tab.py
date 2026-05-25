@@ -94,6 +94,13 @@ class MaterialTab(QWidget):
 
         self._sn_opts = _PlotOptions("Stereonet options", default_cmap="RdBu_r",
                                      default_pt_size=2)
+        # Live re-plot when appearance options change
+        self._sn_opts.style_combo.currentTextChanged.connect(
+            lambda _: self._replot_if_ready()
+        )
+        self._sn_opts.cmap_combo.currentTextChanged.connect(
+            lambda _: self._replot_if_ready()
+        )
         right_layout.addWidget(self._sn_opts)
 
         sn_btn_row = QHBoxLayout()
@@ -139,6 +146,11 @@ class MaterialTab(QWidget):
         self.info_label.setText(
             f"<b>{phase}</b>  |  ρ = {rho:.1f} kg/m³" if rho else f"<b>{phase}</b>"
         )
+
+    def _replot_if_ready(self):
+        """Re-render with current style/colormap if a tensor is already loaded."""
+        if self.ab.cijkl is not None:
+            self._plot_stereonet({})
 
     def _compute(self):
         phase = self._selected_phase()
