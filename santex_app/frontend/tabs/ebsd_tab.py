@@ -36,6 +36,29 @@ import plotly.graph_objects as go
 
 
 # ---------------------------------------------------------------------------
+# Helper: convert RGBA uint8 numpy array → base-64 PNG data URI
+# (used to embed the IPF colour-key legend as a Plotly layout image)
+# ---------------------------------------------------------------------------
+
+def _rgba_to_data_uri(rgba: "np.ndarray") -> str:
+    """Encode a (H, W, 4) uint8 RGBA array as a ``data:image/png;base64,...`` URI."""
+    import io, base64
+    try:
+        from PIL import Image as _PILImage
+        buf = io.BytesIO()
+        _PILImage.fromarray(rgba, mode="RGBA").save(buf, format="PNG")
+        b64 = base64.b64encode(buf.getvalue()).decode()
+        return f"data:image/png;base64,{b64}"
+    except ImportError:
+        # Pillow not available — return a tiny transparent placeholder
+        _EMPTY_PNG = (
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQI12NgAAIA"
+            "BQAABjE+ibYAAAAASUVORK5CYII="
+        )
+        return f"data:image/png;base64,{_EMPTY_PNG}"
+
+
+# ---------------------------------------------------------------------------
 # Specimen Reference Frame dialog  (mirrors the MTEX dialog)
 # ---------------------------------------------------------------------------
 
@@ -509,15 +532,20 @@ class EBSDTab(QWidget):
         ipf_box = QGroupBox("IPF map (Inverse Pole Figure coloring)")
         ipf_form = QFormLayout(ipf_box)
         self.ipf_phase_combo = QComboBox()
+        self.ipf_phase_combo.currentIndexChanged.connect(lambda _: self._update_ipf_sym_label())
         self.ipf_dir_combo   = QComboBox(); self.ipf_dir_combo.addItems(["ND (Z)", "RD (X)", "TD (Y)"])
-        self.ipf_sym_combo   = QComboBox()
-        for sym_name in ["D2h", "Oh", "D6h", "D4h", "D3d", "C2h", "Ci", "C1"]:
-            self.ipf_sym_combo.addItem(sym_name)
-        self.ipf_pt_size_spin = QSpinBox(); self.ipf_pt_size_spin.setRange(1,10); self.ipf_pt_size_spin.setValue(2)
+        # Auto-detected symmetry label (read-only, updated on file load)
+        self.ipf_sym_label = QLabel("—")
+        self.ipf_sym_label.setStyleSheet("color: #2a7ae2; font-weight: bold;")
+        self.ipf_sym_label.setToolTip("Crystal symmetry is auto-detected from the CTF phases table.")
+        # Color key selector
+        self.ipf_colorkey_combo = QComboBox()
+        self.ipf_colorkey_combo.addItem("TSL / HKL  (blue–green–red)", userData="tsl")
+        self.ipf_colorkey_combo.addItem("HSV  (white pole, rainbow)", userData="hsv")
         ipf_form.addRow("Phase:", self.ipf_phase_combo)
         ipf_form.addRow("Direction:", self.ipf_dir_combo)
-        ipf_form.addRow("Crystal symmetry:", self.ipf_sym_combo)
-        ipf_form.addRow("Point size:", self.ipf_pt_size_spin)
+        ipf_form.addRow("Symmetry (auto):", self.ipf_sym_label)
+        ipf_form.addRow("Color key:", self.ipf_colorkey_combo)
         ipf_form.addRow(QPushButton("Draw IPF map", clicked=self._draw_ipf_map))
         an_v.addWidget(ipf_box)
 
@@ -1053,9 +1081,27 @@ class EBSDTab(QWidget):
                 combo.addItem(f"[{idx}] {name}", userData=idx)
             combo.blockSignals(False)
 
+        # Update auto-detected symmetry label for the first indexed phase
+        self._update_ipf_sym_label()
+
     # ------------------------------------------------------------------
     # IPF map
     # ------------------------------------------------------------------
+
+    def _update_ipf_sym_label(self):
+        """Refresh the auto-detected symmetry label from the current IPF phase."""
+        if not self.eb.is_loaded:
+            self.ipf_sym_label.setText("—")
+            return
+        phase_idx = self.ipf_phase_combo.currentData()
+        if phase_idx is None:
+            self.ipf_sym_label.setText("—")
+            return
+        try:
+            label = self.eb.phase_symmetry_label(phase_idx)
+            self.ipf_sym_label.setText(label)
+        except Exception:
+            self.ipf_sym_label.setText("—")
 
     def _draw_ipf_map(self):
         if not self.eb.is_loaded:
@@ -1066,12 +1112,14 @@ class EBSDTab(QWidget):
             QMessageBox.warning(self, "No phase", "No phase selected.")
             return
         direction_str = self.ipf_dir_combo.currentText().split()[0]   # "ND", "RD", "TD"
-        sym_str = self.ipf_sym_combo.currentText()
-        ps = self.ipf_pt_size_spin.value()
+        color_key = self.ipf_colorkey_combo.currentData() or "tsl"
+
+        # Refresh label in case the phase combo changed without triggering update
+        self._update_ipf_sym_label()
 
         self.progress.setVisible(True)
         try:
-            result = self.eb.ipf_map_colors(phase_idx, direction_str, sym_str)
+            result = self.eb.ipf_map_colors(phase_idx, direction_str, color_key)
         except Exception as e:
             QMessageBox.critical(self, "IPF error", str(e))
             self.progress.setVisible(False)
@@ -1082,20 +1130,66 @@ class EBSDTab(QWidget):
             QMessageBox.information(self, "IPF map", "No data for selected phase.")
             return
 
-        fig = go.Figure()
-        fig.add_trace(go.Scattergl(
-            x=result["x"], y=result["y"],
-            mode="markers",
-            marker=dict(color=result["rgb_hex"], size=ps, opacity=0.9),
-            hovertemplate="X=%{x:.1f}<br>Y=%{y:.1f}<extra></extra>",
-            name=f"Phase {phase_idx} IPF-{direction_str}",
-        ))
-        fig.update_layout(
-            title=f"IPF map  — Phase {phase_idx}, direction {direction_str}",
-            xaxis_title="X (µm)", yaxis_title="Y (µm)",
-            yaxis=dict(scaleanchor="x", scaleratio=1),
-            hovermode="closest",
-        )
+        # ── Render as a pixel-accurate image (go.Image) ──────────────────
+        try:
+            from santex.ebsd.ipf_coloring import render_rgb_map, make_colorkey_image
+            img_rgba, x_min, x_max, y_min, y_max = render_rgb_map(
+                result["x"], result["y"],
+                result["r"], result["g"], result["b"],
+            )
+
+            sym_key = result.get("sym_key", "D2h")
+            ck_img  = make_colorkey_image(sym_key, color_key=color_key, n=180)
+
+            # Main IPF map
+            fig = go.Figure()
+            fig.add_trace(go.Image(
+                z=img_rgba,
+                x0=x_min, dx=(x_max - x_min) / max(img_rgba.shape[1] - 1, 1),
+                y0=y_min, dy=(y_max - y_min) / max(img_rgba.shape[0] - 1, 1),
+                hovertemplate="X=%{x:.1f}<br>Y=%{y:.1f}<extra></extra>",
+                name=f"Phase {phase_idx} IPF-{direction_str}",
+            ))
+
+            sym_label = self.ipf_sym_label.text()
+            fig.update_layout(
+                title=f"IPF map — Phase {phase_idx}  [{direction_str}]  {sym_label}",
+                xaxis_title="X (µm)", yaxis_title="Y (µm)",
+                xaxis=dict(range=[x_min, x_max]),
+                yaxis=dict(range=[y_min, y_max],
+                           scaleanchor="x", scaleratio=1,
+                           autorange="reversed"),
+                margin=dict(l=60, r=180, t=50, b=50),
+            )
+
+            # Colour-key legend inset (upper-right corner image)
+            n_ck = ck_img.shape[0]
+            fig.add_layout_image(dict(
+                source=_rgba_to_data_uri(ck_img),
+                xref="paper", yref="paper",
+                x=1.02, y=1.0,
+                sizex=0.22, sizey=0.22,
+                xanchor="left", yanchor="top",
+                layer="above",
+            ))
+
+        except Exception as e:
+            # Fallback to scatter if image rendering fails
+            fig = go.Figure()
+            fig.add_trace(go.Scattergl(
+                x=result["x"], y=result["y"],
+                mode="markers",
+                marker=dict(color=result["rgb_hex"], size=3, opacity=0.9),
+                hovertemplate="X=%{x:.1f}<br>Y=%{y:.1f}<extra></extra>",
+                name=f"Phase {phase_idx} IPF-{direction_str}",
+            ))
+            fig.update_layout(
+                title=f"IPF map — Phase {phase_idx}, direction {direction_str}",
+                xaxis_title="X (µm)", yaxis_title="Y (µm)",
+                yaxis=dict(scaleanchor="x", scaleratio=1),
+                hovermode="closest",
+            )
+
         self.ipf_plt.show_figure(fig)
         self._switch_to_tab("IPF map")
 

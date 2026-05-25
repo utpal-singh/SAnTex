@@ -10,6 +10,7 @@ from santex.ebsd.ebsd_operations import (
     simulate_ebsd,
     export_ctf, export_ang, export_csv, export_hdf5,
 )
+from santex.ebsd.ipf_coloring import spacegroup_to_laue
 
 
 # MTEX-style colours assigned in order to non-zero phases
@@ -18,23 +19,30 @@ _MTEX_COLORS = [
     "LightGreen", "Plum", "PeachPuff", "Thistle",
 ]
 
-# Laue group number → symmetry label
-_LAUE_LABEL = {
-    1:  "-1",      # triclinic
-    2:  "2/m",     # monoclinic
-    3:  "mmm",     # orthorhombic
-    5:  "4/mmm",   # tetragonal
-    7:  "-3m",     # trigonal
-    9:  "6/mmm",   # hexagonal
-    10: "m-3",     # cubic Th
-    11: "m-3m",    # cubic Oh
+# Laue-group key → Hermann–Mauguin symbol
+_LAUE_KEY_LABEL = {
+    "C1":  "1",
+    "Ci":  "-1",
+    "C2h": "2/m",
+    "D2h": "mmm",
+    "C4h": "4/m",
+    "D4h": "4/mmm",
+    "S6":  "-3",
+    "D3d": "-3m",
+    "C6h": "6/m",
+    "D6h": "6/mmm",
+    "Th":  "m-3",
+    "Oh":  "m-3m",
 }
 
-# Crystal reference frames for low-symmetry groups
-_CRYSTAL_REF = {
-    2:  "X||a*, Z||c*",
-    7:  "X||a, Y||b, Z||c*",
-    9:  "X||a, Y||b, Z||c",
+# Laue-group key → crystal reference frame note (non-cubic / non-orthorhombic)
+_LAUE_KEY_REF = {
+    "Ci":  "X||a*, Z||c",
+    "C2h": "X||a*, Z||c*",
+    "S6":  "X||a, Z||c*",
+    "D3d": "X||a, Z||c*",
+    "C6h": "X||a, Z||c",
+    "D6h": "X||a, Z||c",
 }
 
 
@@ -71,6 +79,36 @@ class EBSDBackend:
     # ------------------------------------------------------------------
     # Phase info
     # ------------------------------------------------------------------
+
+    def phase_symmetry(self, phase_index: int) -> str:
+        """Return the canonical Laue-group key for *phase_index* (auto-detected from CTF).
+
+        Reads the ``symmetry`` field (ITA space-group number 1–230, or Channel-5
+        Laue-group code 1–11) from the CTF phases table and converts it to a
+        canonical Laue key such as ``'D2h'``, ``'Oh'``, ``'D6h'``, etc.
+
+        Falls back to ``'D2h'`` (orthorhombic) when the phase is not found.
+        """
+        if self._phases_df is not None and phase_index in self._phases_df.index:
+            sg = self._phases_df.loc[phase_index].get("symmetry", 11)
+            return spacegroup_to_laue(sg)
+        return "D2h"
+
+    def phase_symmetries(self) -> dict[int, str]:
+        """Return {phase_index: laue_key} for every indexed phase in the dataset."""
+        if not self.is_loaded or self.data is None:
+            return {}
+        return {
+            idx: self.phase_symmetry(idx)
+            for idx in sorted(self.data["Phase"].unique())
+            if idx != 0
+        }
+
+    def phase_symmetry_label(self, phase_index: int) -> str:
+        """Human-readable symmetry string, e.g. ``'mmm (D2h)'``."""
+        key = self.phase_symmetry(phase_index)
+        hm  = _LAUE_KEY_LABEL.get(key, key)
+        return f"{hm} ({key})"
 
     def phase_rows(self) -> list[tuple[int, str, float]]:
         """Return list of (index, name, percentage) tuples for *indexed* phases.
@@ -218,12 +256,9 @@ class EBSDBackend:
                 if self._phases_df is not None and pid in self._phases_df.index:
                     row = self._phases_df.loc[pid]
                     mineral = str(row.get("phase", f"Phase{pid}")).strip()
-                    try:
-                        laue_num = int(float(str(row.get("symmetry", 11)).split()[0]))
-                    except (ValueError, TypeError):
-                        laue_num = 11
-                    sym = _LAUE_LABEL.get(laue_num, str(laue_num))
-                    ref = _CRYSTAL_REF.get(laue_num, "")
+                    laue_key = spacegroup_to_laue(row.get("symmetry", 11))
+                    sym = _LAUE_KEY_LABEL.get(laue_key, laue_key)
+                    ref = _LAUE_KEY_REF.get(laue_key, "")
                 else:
                     mineral = f"Phase{pid}"
                     sym = ""
@@ -293,12 +328,9 @@ class EBSDBackend:
                 if self._phases_df is not None and pid in self._phases_df.index:
                     row = self._phases_df.loc[pid]
                     mineral = str(row.get("phase", f"Phase{pid}")).strip()
-                    try:
-                        laue_num = int(float(str(row.get("symmetry", 11)).split()[0]))
-                    except (ValueError, TypeError):
-                        laue_num = 11
-                    sym = _LAUE_LABEL.get(laue_num, str(laue_num))
-                    ref = _CRYSTAL_REF.get(laue_num, "")
+                    laue_key = spacegroup_to_laue(row.get("symmetry", 11))
+                    sym = _LAUE_KEY_LABEL.get(laue_key, laue_key)
+                    ref = _LAUE_KEY_REF.get(laue_key, "")
                 else:
                     mineral = f"Phase{pid}"
                     sym = ""
@@ -466,11 +498,24 @@ class EBSDBackend:
 
     def ipf_map_colors(self, phase_index: int = 1,
                        direction: str = "ND",
-                       crystal_symmetry: str = "D2h") -> dict | None:
-        """Per-pixel IPF RGB colours for *phase_index* using orix."""
+                       color_key: str = "tsl") -> dict | None:
+        """Per-pixel IPF RGB colours for *phase_index*.
+
+        Crystal symmetry is auto-detected from the CTF phases table
+        (``symmetry`` field → ITA space-group number → Laue group).
+
+        Parameters
+        ----------
+        phase_index : int
+            Phase number (> 0).
+        direction   : ``'ND'`` (Z), ``'RD'`` (X), or ``'TD'`` (Y).
+        color_key   : ``'tsl'`` (blue-green-red corner interpolation, MTEX default)
+                      or ``'hsv'`` (white-at-pole, rainbow at boundary).
+        """
         if self.data is None:
             return None
-        return ipf_map_colors(self.data, phase_index, direction, crystal_symmetry)
+        sym = self.phase_symmetry(phase_index)
+        return ipf_map_colors(self.data, phase_index, direction, sym, color_key)
 
     def bc_bs_map_data(self) -> dict | None:
         """Band-contrast / band-slope map data for all indexed pixels."""
