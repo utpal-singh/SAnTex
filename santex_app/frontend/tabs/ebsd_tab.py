@@ -22,7 +22,8 @@ from PyQt5.QtWidgets import (
     QDoubleSpinBox, QSpinBox, QFormLayout, QComboBox,
     QProgressBar, QTableWidget, QTableWidgetItem, QHeaderView,
     QTextEdit, QTabWidget, QMessageBox, QSizePolicy, QColorDialog,
-    QScrollArea, QCheckBox,
+    QScrollArea, QCheckBox, QDialog, QDialogButtonBox, QRadioButton,
+    QButtonGroup, QFrame,
 )
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QFont, QColor
@@ -32,6 +33,187 @@ from frontend.tabs._stereonet import make_stereonet_figure, STEREONET_STYLES
 from frontend.widgets.pyvista_widget import PyVistaWidget
 
 import plotly.graph_objects as go
+
+
+# ---------------------------------------------------------------------------
+# Specimen Reference Frame dialog  (mirrors the MTEX dialog)
+# ---------------------------------------------------------------------------
+
+class SpecimenReferenceFrameDialog(QDialog):
+    """Modal dialog to choose how to align the CTF spatial frame with
+    the Euler (crystal) reference frame — mirroring the MTEX dialog that
+    appears when loading EBSD data with ``startupMTEX``.
+
+    The five options are:
+
+    1. **No correction** — use the file as-is (default for data that has
+       already been corrected, or when the frame is not important).
+    2. **convertEuler2SpatialReferenceFrame** *(MTEX default for CTF/CRC)* —
+       adds 180° to every Euler₃ (φ₂) value, rotating each orientation by
+       Rz(π) on the specimen side.  This re-expresses orientations from the
+       Euler-convention frame (Y up) into the CTF spatial frame (Y down,
+       raster-scan convention).
+    3. **convertSpatial2EulerReferenceFrame** — flips the Y spatial
+       coordinate (y ← y_max − y) so the scan map matches the Euler Y-up
+       convention without touching the orientations.
+    4. **Custom rotation → Euler angles** — applies an arbitrary Bunge ZXZ
+       rotation (entered as φ₁, Φ, φ₂ in degrees) to every pixel orientation
+       as a post-multiplication:  R_new = R_pixel · R_custom.
+    5. **Custom in-plane rotation → spatial coordinates** — rotates the (X, Y)
+       scan map coordinates by an angle (degrees, CCW) around the map centre.
+    """
+
+    # Maps internal method key → human-readable label
+    _OPTIONS = [
+        ("none",            "No correction  (use file as-is)"),
+        ("euler2spatial",   "convertEuler2SpatialReferenceFrame  "
+                            "(+180° to φ₂) — MTEX default for CTF"),
+        ("spatial2euler",   "convertSpatial2EulerReferenceFrame  "
+                            "(flip Y coordinate)"),
+        ("custom_euler",    "Custom rotation applied to Euler angles"),
+        ("custom_spatial",  "Custom in-plane rotation applied to spatial coordinates"),
+    ]
+
+    def __init__(self, filename: str = "", parent=None):
+        super().__init__(parent)
+        self.setWindowTitle("Select Specimen Reference Frame")
+        self.setMinimumWidth(560)
+        self.setModal(True)
+
+        vbox = QVBoxLayout(self)
+        vbox.setSpacing(8)
+
+        # ── header ──────────────────────────────────────────────────────
+        title_lbl = QLabel(
+            "<b>How should the Euler reference frame relate to the scan "
+            "coordinate frame?</b>"
+        )
+        title_lbl.setWordWrap(True)
+        vbox.addWidget(title_lbl)
+
+        if filename:
+            fn_lbl = QLabel(f"<small><i>File: {filename}</i></small>")
+            fn_lbl.setWordWrap(True)
+            vbox.addWidget(fn_lbl)
+
+        sep = QFrame(); sep.setFrameShape(QFrame.HLine); sep.setFrameShadow(QFrame.Sunken)
+        vbox.addWidget(sep)
+
+        # ── radio buttons ────────────────────────────────────────────────
+        self._btn_group = QButtonGroup(self)
+        self._radio_btns: list[QRadioButton] = []
+
+        for i, (key, label) in enumerate(self._OPTIONS):
+            rb = QRadioButton(label)
+            self._btn_group.addButton(rb, i)
+            self._radio_btns.append(rb)
+            vbox.addWidget(rb)
+
+        # Default: "euler2spatial" (index 1) — matches MTEX default
+        self._radio_btns[1].setChecked(True)
+
+        # ── custom rotation inputs ───────────────────────────────────────
+        sep2 = QFrame(); sep2.setFrameShape(QFrame.HLine); sep2.setFrameShadow(QFrame.Sunken)
+        vbox.addWidget(sep2)
+
+        self._custom_box = QGroupBox("Custom rotation  (Bunge ZXZ, degrees)")
+        custom_form = QFormLayout(self._custom_box)
+        custom_form.setSpacing(4)
+
+        self._phi1_spin = QDoubleSpinBox()
+        self._phi1_spin.setRange(0.0, 360.0); self._phi1_spin.setDecimals(2)
+        self._phi1_spin.setValue(0.0); self._phi1_spin.setSuffix("°")
+        custom_form.addRow("φ₁ (Euler1):", self._phi1_spin)
+
+        self._Phi_spin = QDoubleSpinBox()
+        self._Phi_spin.setRange(0.0, 180.0); self._Phi_spin.setDecimals(2)
+        self._Phi_spin.setValue(0.0); self._Phi_spin.setSuffix("°")
+        custom_form.addRow("Φ  (Euler2):", self._Phi_spin)
+
+        self._phi2_spin = QDoubleSpinBox()
+        self._phi2_spin.setRange(0.0, 360.0); self._phi2_spin.setDecimals(2)
+        self._phi2_spin.setValue(0.0); self._phi2_spin.setSuffix("°")
+        custom_form.addRow("φ₂ (Euler3)  /  in-plane angle for spatial:", self._phi2_spin)
+
+        note = QLabel(
+            "<small><i>For 'spatial' option only the φ₁ angle is used "
+            "(CCW in-plane rotation of the map).</i></small>"
+        )
+        note.setWordWrap(True)
+        custom_form.addRow(note)
+
+        vbox.addWidget(self._custom_box)
+
+        # ── description label ────────────────────────────────────────────
+        self._desc_lbl = QLabel()
+        self._desc_lbl.setWordWrap(True)
+        self._desc_lbl.setStyleSheet("color: #555; font-size: 10px;")
+        vbox.addWidget(self._desc_lbl)
+
+        # ── button box ───────────────────────────────────────────────────
+        bbox = QDialogButtonBox(
+            QDialogButtonBox.Ok | QDialogButtonBox.Cancel, Qt.Horizontal, self
+        )
+        bbox.accepted.connect(self.accept)
+        bbox.rejected.connect(self.reject)
+        vbox.addWidget(bbox)
+
+        # Wire radio buttons → show/hide custom box + update description
+        self._btn_group.buttonClicked.connect(self._on_radio_changed)
+        self._on_radio_changed()   # initialise state
+
+    # ── slots ──────────────────────────────────────────────────────────
+
+    _DESCRIPTIONS = {
+        "none": (
+            "The orientations and spatial coordinates are used exactly as "
+            "stored in the file.  Choose this if your data was already "
+            "corrected, or if the reference frame is not important."
+        ),
+        "euler2spatial": (
+            "Adds 180° to every φ₂ (Euler3) angle.  This re-expresses "
+            "crystal orientations from the Bunge convention (Y pointing up) "
+            "into the Oxford/HKL CTF spatial convention (Y pointing down "
+            "in the raster scan).  This is the MTEX default when loading "
+            "CTF files."
+        ),
+        "spatial2euler": (
+            "Flips the Y spatial coordinate: y ← y_max − y.  The scan map "
+            "is mirrored vertically so that it matches the Euler Y-up "
+            "convention.  The Euler angles themselves are not changed."
+        ),
+        "custom_euler": (
+            "Applies the ZXZ Bunge rotation (φ₁, Φ, φ₂) entered above to "
+            "every pixel orientation as a post-multiplication: "
+            "R_new = R_pixel · R_custom."
+        ),
+        "custom_spatial": (
+            "Rotates the scan map (X, Y) coordinates around the map centre "
+            "by φ₁ degrees (counter-clockwise).  Euler angles are not changed."
+        ),
+    }
+
+    def _on_radio_changed(self, _btn=None):
+        method = self.selected_method()
+        is_custom = method.startswith("custom_")
+        self._custom_box.setVisible(is_custom)
+        self._desc_lbl.setText(self._DESCRIPTIONS.get(method, ""))
+
+    # ── public API ──────────────────────────────────────────────────────
+
+    def selected_method(self) -> str:
+        idx = self._btn_group.checkedId()
+        if 0 <= idx < len(self._OPTIONS):
+            return self._OPTIONS[idx][0]
+        return "none"
+
+    def custom_rotation(self) -> tuple[float, float, float]:
+        """Return (φ₁, Φ, φ₂) in degrees for the custom rotation inputs."""
+        return (
+            self._phi1_spin.value(),
+            self._Phi_spin.value(),
+            self._phi2_spin.value(),
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -197,9 +379,11 @@ class EBSDTab(QWidget):
         self.mb = material_backend
         self.ab = anisotropy_backend
         self._worker = None
-        self._phase_colors: dict[int, str] = {}   # phase_id → hex color
+        self._phase_colors: dict[int, str] = {}
         self._phase_color_btns: dict[int, QPushButton] = {}
-        self._vrh_grid: dict | None = None          # cached stereonet grid after VRH
+        self._vrh_grid: dict | None = None
+        self._profile_x0 = self._profile_y0 = 0.0
+        self._profile_x1 = self._profile_y1 = 100.0
         self._build_ui()
 
     # ------------------------------------------------------------------
@@ -208,16 +392,16 @@ class EBSDTab(QWidget):
         splitter = QSplitter(Qt.Horizontal)
         root.addWidget(splitter)
 
-        # ---- Left: scrollable controls ----
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFixedWidth(390)
-        left = QWidget()
-        lv = QVBoxLayout(left)
-        lv.setContentsMargins(4, 4, 4, 4)
-        scroll.setWidget(left)
+        # ── Left panel: tabbed control groups ──────────────────────────
+        left_scroll = QScrollArea()
+        left_scroll.setWidgetResizable(True)
+        left_scroll.setFixedWidth(400)
+        left_w = QWidget()
+        lv = QVBoxLayout(left_w)
+        lv.setContentsMargins(2, 2, 2, 2)
+        left_scroll.setWidget(left_w)
 
-        # Dataset summary
+        # Dataset summary (always visible at top)
         summary_box = QGroupBox("Dataset summary")
         sl = QVBoxLayout(summary_box)
         self.summary_text = QTextEdit()
@@ -225,146 +409,307 @@ class EBSDTab(QWidget):
         mono = QFont("Courier New", 9)
         mono.setStyleHint(QFont.Monospace)
         self.summary_text.setFont(mono)
-        self.summary_text.setMinimumHeight(180)
+        self.summary_text.setMinimumHeight(160)
         sl.addWidget(self.summary_text)
         lv.addWidget(summary_box)
 
-        # Phase colour pickers
+        # Tabbed controls
+        ctrl_tabs = QTabWidget()
+        ctrl_tabs.setTabPosition(QTabWidget.North)
+        lv.addWidget(ctrl_tabs)
+
+        # ── Tab 0: Map ────────────────────────────────────────────────
+        map_w = QWidget(); map_v = QVBoxLayout(map_w); map_v.setContentsMargins(2, 2, 2, 2)
+
         self._phase_color_box = QGroupBox("Phase colours")
         self._phase_color_layout = QVBoxLayout(self._phase_color_box)
         self._phase_color_layout.addWidget(QLabel("Load an EBSD file to configure colours."))
-        lv.addWidget(self._phase_color_box)
+        map_v.addWidget(self._phase_color_box)
 
-        # Phase map options
         pm_opts = _PlotOptions("Phase map options", show_cmap=False, default_pt_size=3)
         self._pm_pt_size = pm_opts.pt_size_spin
-        lv.addWidget(pm_opts)
+        map_v.addWidget(pm_opts)
 
-        # ROI
         roi_box = QGroupBox("Region of Interest (ROI)")
         roi_form = QFormLayout(roi_box)
-        roi_form.addRow(QLabel(
-            "<small>Hover over the map to read X/Y, then enter the range here.</small>"
-        ))
-        self.roi_x_min = QDoubleSpinBox()
-        self.roi_x_min.setRange(-1e9, 1e9); self.roi_x_min.setDecimals(1)
-        self.roi_x_max = QDoubleSpinBox()
-        self.roi_x_max.setRange(-1e9, 1e9); self.roi_x_max.setDecimals(1)
-        self.roi_y_min = QDoubleSpinBox()
-        self.roi_y_min.setRange(-1e9, 1e9); self.roi_y_min.setDecimals(1)
-        self.roi_y_max = QDoubleSpinBox()
-        self.roi_y_max.setRange(-1e9, 1e9); self.roi_y_max.setDecimals(1)
-        roi_form.addRow("X min:", self.roi_x_min)
-        roi_form.addRow("X max:", self.roi_x_max)
-        roi_form.addRow("Y min:", self.roi_y_min)
-        roi_form.addRow("Y max:", self.roi_y_max)
-        roi_btn_row = QHBoxLayout()
-        self.clip_btn  = QPushButton("Clip to ROI")
-        self.clip_btn.clicked.connect(self._apply_roi)
-        self.reset_btn = QPushButton("Reset ROI")
-        self.reset_btn.clicked.connect(self._reset_roi)
-        roi_btn_row.addWidget(self.clip_btn)
-        roi_btn_row.addWidget(self.reset_btn)
-        roi_form.addRow(roi_btn_row)
-        lv.addWidget(roi_box)
+        roi_form.addRow(QLabel("<small>Hover over the map, read X/Y, enter range.</small>"))
+        self.roi_x_min = QDoubleSpinBox(); self.roi_x_min.setRange(-1e9,1e9); self.roi_x_min.setDecimals(1)
+        self.roi_x_max = QDoubleSpinBox(); self.roi_x_max.setRange(-1e9,1e9); self.roi_x_max.setDecimals(1)
+        self.roi_y_min = QDoubleSpinBox(); self.roi_y_min.setRange(-1e9,1e9); self.roi_y_min.setDecimals(1)
+        self.roi_y_max = QDoubleSpinBox(); self.roi_y_max.setRange(-1e9,1e9); self.roi_y_max.setDecimals(1)
+        roi_form.addRow("X min:", self.roi_x_min); roi_form.addRow("X max:", self.roi_x_max)
+        roi_form.addRow("Y min:", self.roi_y_min); roi_form.addRow("Y max:", self.roi_y_max)
+        _rrb = QHBoxLayout()
+        self.clip_btn  = QPushButton("Clip to ROI");  self.clip_btn.clicked.connect(self._apply_roi)
+        self.reset_btn = QPushButton("Reset ROI");    self.reset_btn.clicked.connect(self._reset_roi)
+        _rrb.addWidget(self.clip_btn); _rrb.addWidget(self.reset_btn)
+        roi_form.addRow(_rrb)
+        map_v.addWidget(roi_box)
+        map_v.addStretch()
+        ctrl_tabs.addTab(map_w, "Map")
 
-        # Pre-processing
-        filt_box = QGroupBox("Pre-processing")
+        # ── Tab 1: Pre-process ────────────────────────────────────────
+        pp_w = QWidget(); pp_v = QVBoxLayout(pp_w); pp_v.setContentsMargins(2, 2, 2, 2)
+
+        filt_box = QGroupBox("Filter / Threshold")
         filt_form = QFormLayout(filt_box)
         self.mad_spin = QDoubleSpinBox()
-        self.mad_spin.setRange(0.0, 5.0)
-        self.mad_spin.setValue(0.7)
-        self.mad_spin.setDecimals(2)
-        self.mad_spin.setSuffix("°")
+        self.mad_spin.setRange(0.0, 5.0); self.mad_spin.setValue(0.7)
+        self.mad_spin.setDecimals(2); self.mad_spin.setSuffix("°")
         filt_form.addRow("MAD threshold:", self.mad_spin)
-        filt_form.addRow(QPushButton("Apply MAD filter",
-                                     clicked=self._apply_filter))
-        self.downsample_spin = QSpinBox()
-        self.downsample_spin.setRange(1, 100)
-        self.downsample_spin.setValue(10)
+        filt_form.addRow(QPushButton("Apply MAD filter", clicked=self._apply_filter))
+        self.downsample_spin = QSpinBox(); self.downsample_spin.setRange(1,100); self.downsample_spin.setValue(10)
         filt_form.addRow("Downsample factor:", self.downsample_spin)
-        lv.addWidget(filt_box)
+        pp_v.addWidget(filt_box)
 
-        # Stereonet options — scalar selector lives here so users can switch
-        # metrics and replot *without* rerunning the VRH calculation.
+        denoise_box = QGroupBox("Denoising (mean orientation filter)")
+        dn_form = QFormLayout(denoise_box)
+        self.dn_kernel_spin = QSpinBox(); self.dn_kernel_spin.setRange(1,5); self.dn_kernel_spin.setValue(1)
+        self.dn_angle_spin  = QDoubleSpinBox(); self.dn_angle_spin.setRange(0.1,30.0); self.dn_angle_spin.setValue(5.0); self.dn_angle_spin.setSuffix("°")
+        dn_form.addRow("Kernel size:", self.dn_kernel_spin)
+        dn_form.addRow("Max angle:", self.dn_angle_spin)
+        dn_form.addRow(QLabel("<small>Replaces each orientation with the quaternion mean\nof same-phase neighbours within the kernel.</small>"))
+        dn_form.addRow(QPushButton("Apply denoising", clicked=self._apply_denoise))
+        pp_v.addWidget(denoise_box)
+
+        fill_box = QGroupBox("Fill missing data (phase 0 → indexed)")
+        fill_form = QFormLayout(fill_box)
+        self.fill_method_combo = QComboBox(); self.fill_method_combo.addItems(["nearest", "mean"])
+        fill_form.addRow("Method:", self.fill_method_combo)
+        fill_form.addRow(QLabel("<small>'nearest' — copy nearest indexed pixel.\n'mean' — quaternion mean of 5 nearest.</small>"))
+        fill_form.addRow(QPushButton("Fill missing data", clicked=self._apply_fill))
+        pp_v.addWidget(fill_box)
+
+        regrid_box = QGroupBox("Regrid / Resample")
+        rg_form = QFormLayout(regrid_box)
+        self.rg_mode_combo = QComboBox(); self.rg_mode_combo.addItems(["Scale factor", "Target step (µm)"])
+        self.rg_value_spin  = QDoubleSpinBox(); self.rg_value_spin.setRange(0.01, 100.0); self.rg_value_spin.setValue(1.0); self.rg_value_spin.setDecimals(3)
+        rg_form.addRow("Mode:", self.rg_mode_combo)
+        rg_form.addRow("Value:", self.rg_value_spin)
+        rg_form.addRow(QLabel("<small>Scale factor 0.5 = halve step (upsample);\n2.0 = double step (downsample).</small>"))
+        rg_form.addRow(QPushButton("Regrid data", clicked=self._apply_regrid))
+        pp_v.addWidget(regrid_box)
+
+        sel_box = QGroupBox("Select / Filter by condition")
+        sel_form = QFormLayout(sel_box)
+        self.sel_phase_combo  = QComboBox(); self.sel_phase_combo.addItem("All phases", userData=None)
+        self.sel_mad_max_spin = QDoubleSpinBox(); self.sel_mad_max_spin.setRange(0,10); self.sel_mad_max_spin.setValue(10); self.sel_mad_max_spin.setDecimals(2); self.sel_mad_max_spin.setSuffix("°")
+        self.sel_bc_min_spin  = QDoubleSpinBox(); self.sel_bc_min_spin.setRange(0,255); self.sel_bc_min_spin.setValue(0); self.sel_bc_min_spin.setDecimals(0)
+        sel_form.addRow("Phase:", self.sel_phase_combo)
+        sel_form.addRow("MAD max:", self.sel_mad_max_spin)
+        sel_form.addRow("BC min:", self.sel_bc_min_spin)
+        sel_form.addRow(QPushButton("Apply selection (clips data)", clicked=self._apply_selection))
+        pp_v.addWidget(sel_box)
+        pp_v.addStretch()
+        ctrl_tabs.addTab(pp_w, "Pre-process")
+
+        # ── Tab 2: Analysis ──────────────────────────────────────────
+        an_w = QWidget(); an_v = QVBoxLayout(an_w); an_v.setContentsMargins(2,2,2,2)
+
+        ipf_box = QGroupBox("IPF map (Inverse Pole Figure coloring)")
+        ipf_form = QFormLayout(ipf_box)
+        self.ipf_phase_combo = QComboBox()
+        self.ipf_dir_combo   = QComboBox(); self.ipf_dir_combo.addItems(["ND (Z)", "RD (X)", "TD (Y)"])
+        self.ipf_sym_combo   = QComboBox()
+        for sym_name in ["D2h", "Oh", "D6h", "D4h", "D3d", "C2h", "Ci", "C1"]:
+            self.ipf_sym_combo.addItem(sym_name)
+        self.ipf_pt_size_spin = QSpinBox(); self.ipf_pt_size_spin.setRange(1,10); self.ipf_pt_size_spin.setValue(2)
+        ipf_form.addRow("Phase:", self.ipf_phase_combo)
+        ipf_form.addRow("Direction:", self.ipf_dir_combo)
+        ipf_form.addRow("Crystal symmetry:", self.ipf_sym_combo)
+        ipf_form.addRow("Point size:", self.ipf_pt_size_spin)
+        ipf_form.addRow(QPushButton("Draw IPF map", clicked=self._draw_ipf_map))
+        an_v.addWidget(ipf_box)
+
+        bcbs_box = QGroupBox("Band Contrast / Band Slope map")
+        bcbs_form = QFormLayout(bcbs_box)
+        self.bcbs_scalar_combo = QComboBox(); self.bcbs_scalar_combo.addItems(["BC", "BS"])
+        self.bcbs_cmap_combo   = QComboBox()
+        from frontend.widgets.plotly_widget import COLORSCALES
+        self.bcbs_cmap_combo.addItems(COLORSCALES)
+        self.bcbs_pt_size_spin = QSpinBox(); self.bcbs_pt_size_spin.setRange(1,10); self.bcbs_pt_size_spin.setValue(2)
+        bcbs_form.addRow("Scalar:", self.bcbs_scalar_combo)
+        bcbs_form.addRow("Colormap:", self.bcbs_cmap_combo)
+        bcbs_form.addRow("Point size:", self.bcbs_pt_size_spin)
+        bcbs_form.addRow(QPushButton("Draw BC/BS map", clicked=self._draw_bcbs_map))
+        an_v.addWidget(bcbs_box)
+
+        kam_box = QGroupBox("KAM  (Kernel Average Misorientation)")
+        kam_form = QFormLayout(kam_box)
+        self.kam_kernel_spin = QSpinBox(); self.kam_kernel_spin.setRange(1,5); self.kam_kernel_spin.setValue(1)
+        self.kam_angle_spin  = QDoubleSpinBox(); self.kam_angle_spin.setRange(0.1,30); self.kam_angle_spin.setValue(5); self.kam_angle_spin.setSuffix("°")
+        self.kam_same_phase_chk = QCheckBox("Same phase only"); self.kam_same_phase_chk.setChecked(True)
+        self.kam_cmap_combo  = QComboBox(); self.kam_cmap_combo.addItems(COLORSCALES)
+        idx_v = COLORSCALES.index("Hot") if "Hot" in COLORSCALES else 0
+        self.kam_cmap_combo.setCurrentIndex(idx_v)
+        self.kam_pt_size_spin = QSpinBox(); self.kam_pt_size_spin.setRange(1,10); self.kam_pt_size_spin.setValue(2)
+        kam_form.addRow("Kernel size:", self.kam_kernel_spin)
+        kam_form.addRow("Max angle:", self.kam_angle_spin)
+        kam_form.addRow(self.kam_same_phase_chk)
+        kam_form.addRow("Colormap:", self.kam_cmap_combo)
+        kam_form.addRow("Point size:", self.kam_pt_size_spin)
+        kam_form.addRow(QPushButton("Compute & draw KAM", clicked=self._draw_kam))
+        an_v.addWidget(kam_box)
+
+        m2m_box = QGroupBox("Mis2Mean / GROD")
+        m2m_form = QFormLayout(m2m_box)
+        self.m2m_phase_combo = QComboBox()
+        self.m2m_cmap_combo  = QComboBox(); self.m2m_cmap_combo.addItems(COLORSCALES)
+        idx_v2 = COLORSCALES.index("RdBu_r") if "RdBu_r" in COLORSCALES else 0
+        self.m2m_cmap_combo.setCurrentIndex(idx_v2)
+        self.m2m_pt_size_spin = QSpinBox(); self.m2m_pt_size_spin.setRange(1,10); self.m2m_pt_size_spin.setValue(2)
+        m2m_form.addRow("Phase:", self.m2m_phase_combo)
+        m2m_form.addRow("Colormap:", self.m2m_cmap_combo)
+        m2m_form.addRow("Point size:", self.m2m_pt_size_spin)
+        m2m_form.addRow(QPushButton("Compute & draw Mis2Mean", clicked=self._draw_mis2mean))
+        an_v.addWidget(m2m_box)
+
+        euler_box = QGroupBox("Euler-space orientation scatter")
+        euler_form = QFormLayout(euler_box)
+        self.euler_phase_combo = QComboBox()
+        self.euler_ax1_combo   = QComboBox(); self.euler_ax1_combo.addItems(["Euler1","Euler2","Euler3"])
+        self.euler_ax2_combo   = QComboBox(); self.euler_ax2_combo.addItems(["Euler2","Euler1","Euler3"]); self.euler_ax2_combo.setCurrentIndex(0)
+        self.euler_npts_spin   = QSpinBox(); self.euler_npts_spin.setRange(100,20000); self.euler_npts_spin.setValue(3000); self.euler_npts_spin.setSingleStep(500)
+        euler_form.addRow("Phase:", self.euler_phase_combo)
+        euler_form.addRow("X axis:", self.euler_ax1_combo)
+        euler_form.addRow("Y axis:", self.euler_ax2_combo)
+        euler_form.addRow("Max points:", self.euler_npts_spin)
+        euler_form.addRow(QPushButton("Draw orientation scatter", clicked=self._draw_euler_scatter))
+        an_v.addWidget(euler_box)
+
+        prof_box = QGroupBox("Line profile")
+        prof_form = QFormLayout(prof_box)
+        self.prof_x0 = QDoubleSpinBox(); self.prof_x0.setRange(-1e9,1e9); self.prof_x0.setDecimals(1)
+        self.prof_y0 = QDoubleSpinBox(); self.prof_y0.setRange(-1e9,1e9); self.prof_y0.setDecimals(1)
+        self.prof_x1 = QDoubleSpinBox(); self.prof_x1.setRange(-1e9,1e9); self.prof_x1.setDecimals(1)
+        self.prof_y1 = QDoubleSpinBox(); self.prof_y1.setRange(-1e9,1e9); self.prof_y1.setDecimals(1)
+        self.prof_n_spin = QSpinBox(); self.prof_n_spin.setRange(10,1000); self.prof_n_spin.setValue(100)
+        self.prof_scalar_combo = QComboBox()
+        self.prof_scalar_combo.addItems(["Euler1","Euler2","Euler3","MAD","BC","BS"])
+        prof_form.addRow("Start X:", self.prof_x0); prof_form.addRow("Start Y:", self.prof_y0)
+        prof_form.addRow("End X:",   self.prof_x1); prof_form.addRow("End Y:",   self.prof_y1)
+        prof_form.addRow("Points:", self.prof_n_spin)
+        prof_form.addRow("Scalar:", self.prof_scalar_combo)
+        prof_form.addRow(QPushButton("Extract & draw profile", clicked=self._draw_profile))
+        an_v.addWidget(prof_box)
+        an_v.addStretch()
+        ctrl_tabs.addTab(an_w, "Analysis")
+
+        # ── Tab 3: Simulation ─────────────────────────────────────────
+        sim_w = QWidget(); sim_v = QVBoxLayout(sim_w); sim_v.setContentsMargins(2,2,2,2)
+
+        sim_box = QGroupBox("Simulate synthetic EBSD")
+        sim_form = QFormLayout(sim_box)
+        self.sim_ncols_spin = QSpinBox(); self.sim_ncols_spin.setRange(5,500); self.sim_ncols_spin.setValue(50)
+        self.sim_nrows_spin = QSpinBox(); self.sim_nrows_spin.setRange(5,500); self.sim_nrows_spin.setValue(50)
+        self.sim_step_spin  = QDoubleSpinBox(); self.sim_step_spin.setRange(0.01,100); self.sim_step_spin.setValue(1.0); self.sim_step_spin.setDecimals(3); self.sim_step_spin.setSuffix(" µm")
+        self.sim_noise_spin = QDoubleSpinBox(); self.sim_noise_spin.setRange(0,30); self.sim_noise_spin.setValue(0.5); self.sim_noise_spin.setDecimals(2); self.sim_noise_spin.setSuffix("°")
+        self.sim_src_combo  = QComboBox(); self.sim_src_combo.addItems(["Random (uniform)", "From current phase 1"])
+        sim_form.addRow("Columns:", self.sim_ncols_spin)
+        sim_form.addRow("Rows:", self.sim_nrows_spin)
+        sim_form.addRow("Step size:", self.sim_step_spin)
+        sim_form.addRow("Noise:", self.sim_noise_spin)
+        sim_form.addRow("Source:", self.sim_src_combo)
+        sim_form.addRow(QPushButton("Generate & load simulation", clicked=self._run_simulation))
+        sim_v.addWidget(sim_box)
+        sim_v.addStretch()
+        ctrl_tabs.addTab(sim_w, "Simulation")
+
+        # ── Tab 4: Anisotropy ─────────────────────────────────────────
+        anis_w = QWidget(); anis_v = QVBoxLayout(anis_w); anis_v.setContentsMargins(2,2,2,2)
+
         self._sn_opts = _PlotOptions("Stereonet options", default_cmap="RdBu_r",
                                      default_pt_size=2, show_scalar=True)
-        # Auto-replot when scalar, style or colormap changes (only if VRH is cached)
-        self._sn_opts.scalar_combo.currentIndexChanged.connect(
-            lambda _: self._replot_stereonet()
-        )
-        self._sn_opts.style_combo.currentTextChanged.connect(
-            lambda _: self._replot_stereonet()
-        )
-        self._sn_opts.cmap_combo.currentTextChanged.connect(
-            lambda _: self._replot_stereonet()
-        )
-        lv.addWidget(self._sn_opts)
+        self._sn_opts.scalar_combo.currentIndexChanged.connect(lambda _: self._replot_stereonet())
+        self._sn_opts.style_combo.currentTextChanged.connect(lambda _: self._replot_stereonet())
+        self._sn_opts.cmap_combo.currentTextChanged.connect(lambda _: self._replot_stereonet())
+        anis_v.addWidget(self._sn_opts)
 
         self._replot_btn = QPushButton("Replot stereonet")
-        self._replot_btn.setToolTip(
-            "Redraw the stereonet with the current style / colormap / scalar.\n"
-            "No VRH recalculation — uses the last computed result."
-        )
+        self._replot_btn.setToolTip("Redraw with current options — no VRH recalculation")
         self._replot_btn.setEnabled(False)
         self._replot_btn.clicked.connect(self._replot_stereonet)
-        lv.addWidget(self._replot_btn)
+        anis_v.addWidget(self._replot_btn)
 
-        # VRH
         vrh_box = QGroupBox("Texture averaging (VRH)")
         vrh_form = QFormLayout(vrh_box)
-        self.pressure_spin = QDoubleSpinBox()
-        self.pressure_spin.setRange(0, 300)
-        self.pressure_spin.setSuffix(" GPa")
-        self.pressure_spin.setDecimals(2)
-        vrh_form.addRow("Pressure:", self.pressure_spin)
-        self.temp_spin = QDoubleSpinBox()
-        self.temp_spin.setRange(0, 3000)
-        self.temp_spin.setSuffix(" K")
-        self.temp_spin.setValue(300)
-        self.temp_spin.setDecimals(1)
-        vrh_form.addRow("Temperature:", self.temp_spin)
-        self.method_combo = QComboBox()
-        self.method_combo.addItems(["voigt", "reuss", "hill"])
-        vrh_form.addRow("Method:", self.method_combo)
-        self.phase_material_table = QTableWidget()
-        self.phase_material_table.setColumnCount(2)
+        self.pressure_spin = QDoubleSpinBox(); self.pressure_spin.setRange(0,300); self.pressure_spin.setSuffix(" GPa"); self.pressure_spin.setDecimals(2)
+        self.temp_spin     = QDoubleSpinBox(); self.temp_spin.setRange(0,3000); self.temp_spin.setSuffix(" K"); self.temp_spin.setValue(300); self.temp_spin.setDecimals(1)
+        self.method_combo  = QComboBox(); self.method_combo.addItems(["voigt","reuss","hill"])
+        self.phase_material_table = QTableWidget(); self.phase_material_table.setColumnCount(2)
         self.phase_material_table.setHorizontalHeaderLabels(["EBSD phase", "Material"])
         self.phase_material_table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.phase_material_table.setMaximumHeight(150)
+        self.vrh_btn = QPushButton("Compute VRH average"); self.vrh_btn.clicked.connect(self._start_vrh)
+        vrh_form.addRow("Pressure:", self.pressure_spin)
+        vrh_form.addRow("Temperature:", self.temp_spin)
+        vrh_form.addRow("Method:", self.method_combo)
         vrh_form.addRow(self.phase_material_table)
-        self.vrh_btn = QPushButton("Compute VRH average")
-        self.vrh_btn.clicked.connect(self._start_vrh)
         vrh_form.addRow(self.vrh_btn)
-        lv.addWidget(vrh_box)
+        anis_v.addWidget(vrh_box)
+        anis_v.addStretch()
+        ctrl_tabs.addTab(anis_w, "Anisotropy")
 
-        self.progress = QProgressBar()
-        self.progress.setRange(0, 0)
-        self.progress.setVisible(False)
+        # ── Tab 5: Export ─────────────────────────────────────────────
+        exp_w = QWidget(); exp_v = QVBoxLayout(exp_w); exp_v.setContentsMargins(2,2,2,2)
+
+        exp_box = QGroupBox("Export EBSD data")
+        exp_form = QFormLayout(exp_box)
+        self.exp_fmt_combo = QComboBox(); self.exp_fmt_combo.addItems(["CSV (.csv)", "CTF (.ctf)", "ANG (.ang)", "HDF5 (.h5)"])
+        exp_form.addRow("Format:", self.exp_fmt_combo)
+        exp_form.addRow(QPushButton("Export…", clicked=self._export_data))
+        exp_v.addWidget(exp_box)
+        exp_v.addStretch()
+        ctrl_tabs.addTab(exp_w, "Export")
+
+        # Progress bar (shared)
+        self.progress = QProgressBar(); self.progress.setRange(0,0); self.progress.setVisible(False)
         lv.addWidget(self.progress)
-        lv.addStretch()
 
-        splitter.addWidget(scroll)
+        splitter.addWidget(left_scroll)
 
-        # ---- Right: visualisation tabs ----
+        # ── Right: visualisation tabs ──────────────────────────────────
         right = QWidget()
         rv = QVBoxLayout(right)
         self.vis_tabs = QTabWidget()
 
+        # Phase map
         self.phase_map_plt = PlotlyWidget()
         self.vis_tabs.addTab(self.phase_map_plt, "Phase map")
 
+        # IPF map
+        self.ipf_plt = PlotlyWidget()
+        self.vis_tabs.addTab(self.ipf_plt, "IPF map")
+
+        # BC/BS map
+        self.bcbs_plt = PlotlyWidget()
+        self.vis_tabs.addTab(self.bcbs_plt, "BC/BS map")
+
+        # KAM map
+        self.kam_plt = PlotlyWidget()
+        self.vis_tabs.addTab(self.kam_plt, "KAM")
+
+        # Mis2Mean map
+        self.m2m_plt = PlotlyWidget()
+        self.vis_tabs.addTab(self.m2m_plt, "Mis2Mean")
+
+        # Orientation scatter (Euler space)
+        self.euler_plt = PlotlyWidget()
+        self.vis_tabs.addTab(self.euler_plt, "Euler scatter")
+
+        # Line profile
+        self.profile_plt = PlotlyWidget()
+        self.vis_tabs.addTab(self.profile_plt, "Profile")
+
+        # Pole figure
         self.pf_plt = PlotlyWidget()
         self.vis_tabs.addTab(self.pf_plt, "Pole figure")
 
-        # Stereonet tab — wrap in a widget so we can add the "Open in browser" button
+        # Anisotropy stereonet
         sn_container = QWidget()
-        sn_vbox = QVBoxLayout(sn_container)
-        sn_vbox.setContentsMargins(0, 0, 0, 0)
-        sn_btn_row = QHBoxLayout()
-        sn_btn_row.addStretch()
+        sn_vbox = QVBoxLayout(sn_container); sn_vbox.setContentsMargins(0,0,0,0)
+        sn_btn_row = QHBoxLayout(); sn_btn_row.addStretch()
         self._sn_browser_btn = QPushButton("🌐 Open in browser")
-        self._sn_browser_btn.setToolTip("Open this stereonet in the system browser for a larger interactive view")
         self._sn_browser_btn.clicked.connect(lambda: self.stereonet_plt.open_in_browser())
         sn_btn_row.addWidget(self._sn_browser_btn)
         sn_vbox.addLayout(sn_btn_row)
@@ -372,23 +717,47 @@ class EBSDTab(QWidget):
         sn_vbox.addWidget(self.stereonet_plt)
         self.vis_tabs.addTab(sn_container, "Anisotropy stereonet")
 
+        # 3-D surface
         self.pv3d = PyVistaWidget()
         self.vis_tabs.addTab(self.pv3d, "3-D surface")
 
         rv.addWidget(self.vis_tabs)
         splitter.addWidget(right)
-        splitter.setSizes([390, 710])
+        splitter.setSizes([400, 700])
 
     # ------------------------------------------------------------------
     # Public slots
     # ------------------------------------------------------------------
 
     def on_file_loaded(self):
+        """Called by the main window after a new EBSD file has been loaded.
+
+        Shows the MTEX-style Specimen Reference Frame dialog first so the
+        user can choose the appropriate coordinate correction before the
+        phase map is drawn or any VRH calculation is attempted.
+        """
+        self._ask_reference_frame()
         self._update_summary()
         self._refresh_phase_list()
         self._rebuild_phase_color_ui()
+        self._refresh_phase_combos()
         self._draw_phase_map()
         self._init_roi_spinboxes()
+
+    def _ask_reference_frame(self):
+        """Show the Specimen Reference Frame dialog and apply the correction."""
+        filename = getattr(self.eb, 'filename', '') or ''
+        import os
+        dlg = SpecimenReferenceFrameDialog(
+            filename=os.path.basename(filename), parent=self
+        )
+        if dlg.exec_() == QDialog.Accepted:
+            method = dlg.selected_method()
+            euler_rot = dlg.custom_rotation() if method.startswith('custom_') else None
+            self.eb.apply_reference_frame_correction(method, euler_rot)
+            # Invalidate cached VRH grid (orientations may have changed)
+            self._vrh_grid = None
+            self._replot_btn.setEnabled(False)
 
     def update_grains_summary(self, grains_backend):
         ebsd_txt  = self.eb.mtex_ebsd_summary()
@@ -665,3 +1034,414 @@ class EBSDTab(QWidget):
             if "stereonet" in self.vis_tabs.tabText(i).lower():
                 self.vis_tabs.setCurrentIndex(i)
                 break
+
+    # ------------------------------------------------------------------
+    # Refresh phase-dependent combo boxes after file load
+    # ------------------------------------------------------------------
+
+    def _refresh_phase_combos(self):
+        """Re-populate all per-phase combo boxes (IPF, Mis2Mean, etc.)."""
+        rows = self.eb.phase_rows()   # [(idx, name, pct), ...]
+        combos = [self.ipf_phase_combo, self.m2m_phase_combo,
+                  self.euler_phase_combo, self.sel_phase_combo]
+        for combo in combos:
+            combo.blockSignals(True)
+            combo.clear()
+            if combo is self.sel_phase_combo:
+                combo.addItem("All phases", userData=None)
+            for idx, name, _ in rows:
+                combo.addItem(f"[{idx}] {name}", userData=idx)
+            combo.blockSignals(False)
+
+    # ------------------------------------------------------------------
+    # IPF map
+    # ------------------------------------------------------------------
+
+    def _draw_ipf_map(self):
+        if not self.eb.is_loaded:
+            QMessageBox.warning(self, "No data", "Load an EBSD file first.")
+            return
+        phase_idx = self.ipf_phase_combo.currentData()
+        if phase_idx is None:
+            QMessageBox.warning(self, "No phase", "No phase selected.")
+            return
+        direction_str = self.ipf_dir_combo.currentText().split()[0]   # "ND", "RD", "TD"
+        sym_str = self.ipf_sym_combo.currentText()
+        ps = self.ipf_pt_size_spin.value()
+
+        self.progress.setVisible(True)
+        try:
+            result = self.eb.ipf_map_colors(phase_idx, direction_str, sym_str)
+        except Exception as e:
+            QMessageBox.critical(self, "IPF error", str(e))
+            self.progress.setVisible(False)
+            return
+        self.progress.setVisible(False)
+
+        if result is None:
+            QMessageBox.information(self, "IPF map", "No data for selected phase.")
+            return
+
+        fig = go.Figure()
+        fig.add_trace(go.Scattergl(
+            x=result["x"], y=result["y"],
+            mode="markers",
+            marker=dict(color=result["rgb_hex"], size=ps, opacity=0.9),
+            hovertemplate="X=%{x:.1f}<br>Y=%{y:.1f}<extra></extra>",
+            name=f"Phase {phase_idx} IPF-{direction_str}",
+        ))
+        fig.update_layout(
+            title=f"IPF map  — Phase {phase_idx}, direction {direction_str}",
+            xaxis_title="X (µm)", yaxis_title="Y (µm)",
+            yaxis=dict(scaleanchor="x", scaleratio=1),
+            hovermode="closest",
+        )
+        self.ipf_plt.show_figure(fig)
+        self._switch_to_tab("IPF map")
+
+    # ------------------------------------------------------------------
+    # BC / BS map
+    # ------------------------------------------------------------------
+
+    def _draw_bcbs_map(self):
+        if not self.eb.is_loaded:
+            QMessageBox.warning(self, "No data", "Load an EBSD file first.")
+            return
+        result = self.eb.bc_bs_map_data()
+        if result is None:
+            QMessageBox.information(self, "BC/BS", "No BC/BS data in file.")
+            return
+        scalar_key = self.bcbs_scalar_combo.currentText().lower()
+        cmap = self.bcbs_cmap_combo.currentText()
+        ps   = self.bcbs_pt_size_spin.value()
+        vals = result.get(scalar_key)
+        if vals is None:
+            QMessageBox.information(self, "BC/BS", f"Column '{scalar_key.upper()}' not found.")
+            return
+        fig = go.Figure()
+        fig.add_trace(go.Scattergl(
+            x=result["x"], y=result["y"],
+            mode="markers",
+            marker=dict(color=vals, colorscale=cmap, showscale=True,
+                        colorbar=dict(title=scalar_key.upper()), size=ps, opacity=0.9),
+            hovertemplate=f"X=%{{x:.1f}}<br>Y=%{{y:.1f}}<br>{scalar_key.upper()}=%{{marker.color:.0f}}<extra></extra>",
+        ))
+        fig.update_layout(
+            title=f"{scalar_key.upper()} map",
+            xaxis_title="X (µm)", yaxis_title="Y (µm)",
+            yaxis=dict(scaleanchor="x", scaleratio=1),
+        )
+        self.bcbs_plt.show_figure(fig)
+        self._switch_to_tab("BC/BS map")
+
+    # ------------------------------------------------------------------
+    # KAM
+    # ------------------------------------------------------------------
+
+    def _draw_kam(self):
+        if not self.eb.is_loaded:
+            QMessageBox.warning(self, "No data", "Load an EBSD file first.")
+            return
+        self.progress.setVisible(True)
+        try:
+            kam = self.eb.compute_kam(
+                kernel_size=self.kam_kernel_spin.value(),
+                max_angle_deg=self.kam_angle_spin.value(),
+                same_phase_only=self.kam_same_phase_chk.isChecked(),
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "KAM error", str(e))
+            self.progress.setVisible(False)
+            return
+        self.progress.setVisible(False)
+        if kam is None:
+            return
+        data = self.eb.map_data()
+        valid = ~np.isnan(kam)
+        cmap = self.kam_cmap_combo.currentText()
+        ps   = self.kam_pt_size_spin.value()
+        fig = go.Figure()
+        fig.add_trace(go.Scattergl(
+            x=data["X"].values[valid], y=data["Y"].values[valid],
+            mode="markers",
+            marker=dict(color=kam[valid], colorscale=cmap, showscale=True,
+                        colorbar=dict(title="KAM (°)"), size=ps, opacity=0.9),
+            hovertemplate="X=%{x:.1f}<br>Y=%{y:.1f}<br>KAM=%{marker.color:.3f}°<extra></extra>",
+        ))
+        fig.update_layout(
+            title="KAM — Kernel Average Misorientation",
+            xaxis_title="X (µm)", yaxis_title="Y (µm)",
+            yaxis=dict(scaleanchor="x", scaleratio=1),
+        )
+        self.kam_plt.show_figure(fig)
+        self._switch_to_tab("KAM")
+
+    # ------------------------------------------------------------------
+    # Mis2Mean
+    # ------------------------------------------------------------------
+
+    def _draw_mis2mean(self):
+        if not self.eb.is_loaded:
+            QMessageBox.warning(self, "No data", "Load an EBSD file first.")
+            return
+        phase_idx = self.m2m_phase_combo.currentData()
+        if phase_idx is None:
+            return
+        self.progress.setVisible(True)
+        try:
+            m2m = self.eb.compute_mis2mean(phase_idx)
+        except Exception as e:
+            QMessageBox.critical(self, "Mis2Mean error", str(e))
+            self.progress.setVisible(False)
+            return
+        self.progress.setVisible(False)
+        if m2m is None:
+            return
+        data = self.eb.map_data()
+        valid = ~np.isnan(m2m)
+        cmap = self.m2m_cmap_combo.currentText()
+        ps   = self.m2m_pt_size_spin.value()
+        fig = go.Figure()
+        fig.add_trace(go.Scattergl(
+            x=data["X"].values[valid], y=data["Y"].values[valid],
+            mode="markers",
+            marker=dict(color=m2m[valid], colorscale=cmap, showscale=True,
+                        colorbar=dict(title="Mis2Mean (°)"), size=ps, opacity=0.9),
+            hovertemplate="X=%{x:.1f}<br>Y=%{y:.1f}<br>Mis2Mean=%{marker.color:.3f}°<extra></extra>",
+        ))
+        fig.update_layout(
+            title=f"Mis2Mean — Phase {phase_idx}",
+            xaxis_title="X (µm)", yaxis_title="Y (µm)",
+            yaxis=dict(scaleanchor="x", scaleratio=1),
+        )
+        self.m2m_plt.show_figure(fig)
+        self._switch_to_tab("Mis2Mean")
+
+    # ------------------------------------------------------------------
+    # Euler-space orientation scatter
+    # ------------------------------------------------------------------
+
+    def _draw_euler_scatter(self):
+        if not self.eb.is_loaded:
+            QMessageBox.warning(self, "No data", "Load an EBSD file first.")
+            return
+        phase_idx  = self.euler_phase_combo.currentData()
+        ax1        = self.euler_ax1_combo.currentText()
+        ax2        = self.euler_ax2_combo.currentText()
+        max_pts    = self.euler_npts_spin.value()
+        result = self.eb.orientation_scatter_data(phase_idx, (ax1, ax2), max_pts)
+        if result is None:
+            return
+        fig = go.Figure()
+        fig.add_trace(go.Scattergl(
+            x=result.get(ax1, []), y=result.get(ax2, []),
+            mode="markers",
+            marker=dict(size=3, color=result.get("Euler2", result.get(ax1)),
+                        colorscale="Viridis", showscale=True,
+                        colorbar=dict(title="Φ (°)")),
+            hovertemplate=f"{ax1}=%{{x:.1f}}°<br>{ax2}=%{{y:.1f}}°<extra></extra>",
+        ))
+        fig.update_layout(
+            title=f"Orientation scatter — Phase {phase_idx}",
+            xaxis_title=f"{ax1} (°)", yaxis_title=f"{ax2} (°)",
+        )
+        self.euler_plt.show_figure(fig)
+        self._switch_to_tab("Euler scatter")
+
+    # ------------------------------------------------------------------
+    # Line profile
+    # ------------------------------------------------------------------
+
+    def _draw_profile(self):
+        if not self.eb.is_loaded:
+            QMessageBox.warning(self, "No data", "Load an EBSD file first.")
+            return
+        x0 = self.prof_x0.value(); y0 = self.prof_y0.value()
+        x1 = self.prof_x1.value(); y1 = self.prof_y1.value()
+        n  = self.prof_n_spin.value()
+        col = self.prof_scalar_combo.currentText()
+
+        profile = self.eb.get_line_profile(x0, y0, x1, y1, n, scalars=[col])
+        if profile is None or col not in profile:
+            QMessageBox.information(self, "Profile", f"Column '{col}' not found.")
+            return
+
+        fig = go.Figure()
+        # Scalar plot along the profile
+        fig.add_trace(go.Scatter(
+            x=profile["distance"], y=profile[col],
+            mode="lines+markers",
+            marker=dict(size=4),
+            name=col,
+            hovertemplate="d=%{x:.1f} µm<br>" + col + "=%{y:.2f}<extra></extra>",
+        ))
+        fig.update_layout(
+            title=f"Line profile  ({x0:.0f},{y0:.0f}) → ({x1:.0f},{y1:.0f})",
+            xaxis_title="Distance (µm)",
+            yaxis_title=col,
+        )
+        self.profile_plt.show_figure(fig)
+        self._switch_to_tab("Profile")
+
+        # Overlay the profile line on the phase map
+        data = self.eb.map_data()
+        if data is not None:
+            import plotly.graph_objects as _go
+            fig2 = self.phase_map_plt._fig if hasattr(self.phase_map_plt, '_fig') else None
+            # re-draw phase map with the line overlaid
+            self._draw_phase_map()
+            # After redraw, add a shape for the line
+            self.phase_map_plt.fig_handle.add_shape(
+                type="line", xref="x", yref="y",
+                x0=x0, y0=y0, x1=x1, y1=y1,
+                line=dict(color="red", width=2, dash="dash"),
+            ) if hasattr(self.phase_map_plt, 'fig_handle') else None
+
+    # ------------------------------------------------------------------
+    # Pre-processing actions
+    # ------------------------------------------------------------------
+
+    def _apply_denoise(self):
+        if not self.eb.is_loaded:
+            QMessageBox.warning(self, "No data", "Load an EBSD file first.")
+            return
+        self.progress.setVisible(True)
+        try:
+            self.eb.denoise(
+                kernel_size=self.dn_kernel_spin.value(),
+                max_angle_deg=self.dn_angle_spin.value(),
+            )
+        except Exception as e:
+            QMessageBox.critical(self, "Denoise error", str(e))
+        finally:
+            self.progress.setVisible(False)
+        self._update_summary()
+        self._draw_phase_map()
+
+    def _apply_fill(self):
+        if not self.eb.is_loaded:
+            QMessageBox.warning(self, "No data", "Load an EBSD file first.")
+            return
+        self.progress.setVisible(True)
+        try:
+            self.eb.fill_missing(self.fill_method_combo.currentText())
+        except Exception as e:
+            QMessageBox.critical(self, "Fill error", str(e))
+        finally:
+            self.progress.setVisible(False)
+        self._update_summary()
+        self._draw_phase_map()
+
+    def _apply_regrid(self):
+        if not self.eb.is_loaded:
+            QMessageBox.warning(self, "No data", "Load an EBSD file first.")
+            return
+        self.progress.setVisible(True)
+        try:
+            val = self.rg_value_spin.value()
+            if self.rg_mode_combo.currentIndex() == 0:
+                self.eb.regrid_data(scale=val)
+            else:
+                self.eb.regrid_data(target_step=val)
+        except Exception as e:
+            QMessageBox.critical(self, "Regrid error", str(e))
+        finally:
+            self.progress.setVisible(False)
+        self._update_summary()
+        self._init_roi_spinboxes()
+        self._draw_phase_map()
+
+    def _apply_selection(self):
+        if not self.eb.is_loaded:
+            QMessageBox.warning(self, "No data", "Load an EBSD file first.")
+            return
+        phase_data = self.sel_phase_combo.currentData()
+        phase_val  = int(phase_data) if phase_data is not None else None
+        mad_max    = self.sel_mad_max_spin.value()
+        bc_min     = self.sel_bc_min_spin.value()
+
+        kwargs: dict = {}
+        if phase_val is not None:
+            kwargs["phase"] = phase_val
+        if mad_max < 10.0:
+            kwargs["mad_max"] = mad_max
+        if bc_min > 0:
+            kwargs["bc_min"] = bc_min
+
+        filtered = self.eb.select_by_condition(**kwargs)
+        if filtered is None or len(filtered) == 0:
+            QMessageBox.information(self, "Select", "No pixels match the condition.")
+            return
+        # Replace active data with selection
+        self.eb.data = filtered
+        self._update_summary()
+        self._draw_phase_map()
+
+    # ------------------------------------------------------------------
+    # Simulation
+    # ------------------------------------------------------------------
+
+    def _run_simulation(self):
+        import numpy as _np
+        n_cols = self.sim_ncols_spin.value()
+        n_rows = self.sim_nrows_spin.value()
+        step   = self.sim_step_spin.value()
+        noise  = self.sim_noise_spin.value()
+
+        if self.sim_src_combo.currentIndex() == 0:
+            # Uniform random orientations
+            rng = _np.random.default_rng(42)
+            eulers = rng.uniform([0, 0, 0], [360, 90, 360], size=(200, 3))
+        else:
+            # Use current phase-1 orientations
+            if not self.eb.is_loaded:
+                QMessageBox.warning(self, "No data", "Load an EBSD file first.")
+                return
+            ph1 = self.eb.euler_angles(1)
+            if ph1 is None or len(ph1) == 0:
+                QMessageBox.warning(self, "No data", "No phase-1 orientations found.")
+                return
+            eulers = ph1[["Euler1", "Euler2", "Euler3"]].to_numpy()
+
+        df = self.eb.simulate_from_euler(eulers, n_cols, n_rows, step, noise_deg=noise)
+        self.eb.load_synthetic(df)
+        self.on_file_loaded()
+        QMessageBox.information(self, "Simulation",
+                                f"Generated {n_cols}×{n_rows} = {len(df)} pixel synthetic map.")
+
+    # ------------------------------------------------------------------
+    # Export
+    # ------------------------------------------------------------------
+
+    def _export_data(self):
+        if not self.eb.is_loaded:
+            QMessageBox.warning(self, "No data", "Load an EBSD file first.")
+            return
+        from PyQt5.QtWidgets import QFileDialog
+        fmt_text = self.exp_fmt_combo.currentText()
+        fmt_map = {
+            "CSV (.csv)": ("csv", "CSV files (*.csv)"),
+            "CTF (.ctf)": ("ctf", "CTF files (*.ctf)"),
+            "ANG (.ang)": ("ang", "ANG files (*.ang)"),
+            "HDF5 (.h5)": ("hdf5", "HDF5 files (*.h5 *.hdf5)"),
+        }
+        fmt_key, file_filter = fmt_map.get(fmt_text, ("csv", "CSV files (*.csv)"))
+        path, _ = QFileDialog.getSaveFileName(self, "Export EBSD data", "", file_filter)
+        if not path:
+            return
+        try:
+            self.eb.export(path, fmt=fmt_key)
+            QMessageBox.information(self, "Export", f"Saved to:\n{path}")
+        except Exception as e:
+            QMessageBox.critical(self, "Export error", str(e))
+
+    # ------------------------------------------------------------------
+    # Helper: switch visible tab
+    # ------------------------------------------------------------------
+
+    def _switch_to_tab(self, tab_name: str):
+        """Activate the visualisation tab whose text contains *tab_name*."""
+        for i in range(self.vis_tabs.count()):
+            if tab_name.lower() in self.vis_tabs.tabText(i).lower():
+                self.vis_tabs.setCurrentIndex(i)
+                return
