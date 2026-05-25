@@ -19,6 +19,7 @@ from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from frontend.widgets.plotly_widget import PlotlyWidget, COLORSCALES
 from frontend.widgets.pyvista_widget import PyVistaWidget
 from frontend.tabs.ebsd_tab import _PlotOptions
+from frontend.tabs._stereonet import make_stereonet_figure
 
 import plotly.graph_objects as go
 
@@ -134,8 +135,23 @@ class AnisotropyTab(QWidget):
         rv.addWidget(self._sn_opts)
 
         self.vis_tabs = QTabWidget()
+
+        # 2-D stereonet tab — wrap to add "Open in browser" button
+        sn2d_container = QWidget()
+        sn2d_vbox = QVBoxLayout(sn2d_container)
+        sn2d_vbox.setContentsMargins(0, 0, 0, 0)
+        sn2d_btn_row = QHBoxLayout()
+        sn2d_btn_row.addStretch()
+        self._sn_browser_btn = QPushButton("🌐 Open in browser")
+        self._sn_browser_btn.setToolTip(
+            "Open this stereonet in the system browser for a larger interactive view")
+        self._sn_browser_btn.clicked.connect(lambda: self.mpl_2d.open_in_browser())
+        sn2d_btn_row.addWidget(self._sn_browser_btn)
+        sn2d_vbox.addLayout(sn2d_btn_row)
         self.mpl_2d = PlotlyWidget()
-        self.vis_tabs.addTab(self.mpl_2d, "2-D stereonet")
+        sn2d_vbox.addWidget(self.mpl_2d)
+        self.vis_tabs.addTab(sn2d_container, "2-D stereonet")
+
         self.pv3d = PyVistaWidget()
         self.vis_tabs.addTab(self.pv3d, "3-D surface")
         rv.addWidget(self.vis_tabs)
@@ -214,38 +230,26 @@ class AnisotropyTab(QWidget):
         self._plot_3d(scalar)
 
     def _plot_2d(self, scalar: str):
-        data = self.ab.compute_stereonet_data(step_deg=3.0)
-        if data is None:
+        opts = self._sn_opts
+
+        if opts.style == "Scatter (dots)":
+            plot_data = self.ab.compute_stereonet_data(step_deg=2.0)
+        else:
+            plot_data = self.ab.compute_stereonet_grid(grid_size=300)
+
+        if plot_data is None:
             return
-        opts  = self._sn_opts
-        vals  = data[scalar]
-        unit  = "km/s" if scalar in ("vp", "vs1", "vs2") else "%"
-        if unit == "km/s":
-            vals = vals / 1000.0
 
-        vmin = opts.vmin if opts.vmin is not None else float(np.nanmin(vals))
-        vmax = opts.vmax if opts.vmax is not None else float(np.nanmax(vals))
-        cb   = dict(title=f"{scalar} ({unit})") if opts.show_colorbar else None
-
-        fig = go.Figure()
-        fig.add_shape(type="circle", xref="x", yref="y",
-                      x0=-1, y0=-1, x1=1, y1=1,
-                      line=dict(color="black", width=1))
-        fig.add_trace(go.Scattergl(
-            x=data["x"], y=data["y"],
-            mode="markers",
-            marker=dict(color=vals, colorscale=opts.colorscale,
-                        cmin=vmin, cmax=vmax, size=opts.pt_size,
-                        colorbar=cb, showscale=opts.show_colorbar),
-            hovertemplate=f"{scalar}=%{{marker.color:.3f}} {unit}<extra></extra>",
-            name=scalar,
-        ))
-        fig.update_layout(
-            title=f"{scalar} — upper-hemisphere stereonet",
-            xaxis=dict(range=[-1.1, 1.1], showgrid=False, zeroline=False,
-                       showticklabels=False),
-            yaxis=dict(range=[-1.1, 1.1], scaleanchor="x", showgrid=False,
-                       zeroline=False, showticklabels=False),
+        fig = make_stereonet_figure(
+            data=plot_data,
+            scalar=scalar,
+            style=opts.style,
+            colorscale=opts.colorscale,
+            vmin=opts.vmin,
+            vmax=opts.vmax,
+            show_colorbar=opts.show_colorbar,
+            pt_size=opts.pt_size,
+            title=f"{scalar.upper()} — upper-hemisphere stereonet",
         )
         self.mpl_2d.show_figure(fig)
 

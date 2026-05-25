@@ -9,6 +9,7 @@ from PyQt5.QtCore import Qt
 
 from frontend.widgets.plotly_widget import PlotlyWidget, COLORSCALES
 from frontend.tabs.ebsd_tab import _PlotOptions
+from frontend.tabs._stereonet import make_stereonet_figure
 import plotly.graph_objects as go
 
 
@@ -94,7 +95,17 @@ class MaterialTab(QWidget):
         self._sn_opts = _PlotOptions("Stereonet options", default_cmap="RdBu_r",
                                      default_pt_size=2)
         right_layout.addWidget(self._sn_opts)
+
+        sn_btn_row = QHBoxLayout()
+        sn_btn_row.addStretch()
+        self._browser_btn = QPushButton("🌐 Open in browser")
+        self._browser_btn.setToolTip(
+            "Open this stereonet in the system browser for a larger interactive view")
+        sn_btn_row.addWidget(self._browser_btn)
+        right_layout.addLayout(sn_btn_row)
+
         self.mpl = PlotlyWidget()
+        self._browser_btn.clicked.connect(self.mpl.open_in_browser)
         right_layout.addWidget(self.mpl)
 
         splitter.addWidget(right)
@@ -166,32 +177,25 @@ class MaterialTab(QWidget):
             self.anis_table.setItem(row, 1, QTableWidgetItem(f"{v:.4f}" if isinstance(v, float) else str(v)))
 
     def _plot_stereonet(self, anis: dict):
-        import numpy as _np
-        data = self.ab.compute_stereonet_data(step_deg=3.0)
-        if data is None:
-            return
         opts = self._sn_opts
-        vals = data["vp"] / 1000.0
-        vmin = opts.vmin if opts.vmin is not None else float(_np.nanmin(vals))
-        vmax = opts.vmax if opts.vmax is not None else float(_np.nanmax(vals))
-        cb   = dict(title="Vp (km/s)") if opts.show_colorbar else None
-        fig = go.Figure()
-        fig.add_shape(type="circle", xref="x", yref="y",
-                      x0=-1, y0=-1, x1=1, y1=1,
-                      line=dict(color="black", width=1))
-        fig.add_trace(go.Scattergl(
-            x=data["x"], y=data["y"],
-            mode="markers",
-            marker=dict(color=vals, colorscale=opts.colorscale,
-                        cmin=vmin, cmax=vmax, size=opts.pt_size,
-                        colorbar=cb, showscale=opts.show_colorbar),
-            hovertemplate="Vp=%{marker.color:.3f} km/s<extra></extra>",
-        ))
-        fig.update_layout(
-            title="Vp stereonet (upper hemisphere)",
-            xaxis=dict(range=[-1.1, 1.1], showgrid=False, zeroline=False,
-                       showticklabels=False),
-            yaxis=dict(range=[-1.1, 1.1], scaleanchor="x", showgrid=False,
-                       zeroline=False, showticklabels=False),
+
+        if opts.style == "Scatter (dots)":
+            plot_data = self.ab.compute_stereonet_data(step_deg=2.0)
+        else:
+            plot_data = self.ab.compute_stereonet_grid(grid_size=300)
+
+        if plot_data is None:
+            return
+
+        fig = make_stereonet_figure(
+            data=plot_data,
+            scalar="vp",
+            style=opts.style,
+            colorscale=opts.colorscale,
+            vmin=opts.vmin,
+            vmax=opts.vmax,
+            show_colorbar=opts.show_colorbar,
+            pt_size=opts.pt_size,
+            title="Vp — upper-hemisphere stereonet",
         )
         self.mpl.show_figure(fig)

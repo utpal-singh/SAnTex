@@ -78,6 +78,76 @@ class AnisotropyBackend:
         }
 
     # ------------------------------------------------------------------
+    # Upper-hemisphere stereonet — regular Cartesian grid (for Heatmap)
+    # ------------------------------------------------------------------
+
+    def compute_stereonet_grid(
+        self, grid_size: int = 300, step_deg: float = 1.0
+    ) -> dict | None:
+        """
+        Return velocity data on a ``grid_size × grid_size`` Cartesian grid
+        in stereographic coordinates.  Values outside the unit disk are NaN.
+
+        Uses inverse-stereographic mapping + bilinear interpolation on the
+        regular (theta, phi) source grid — no scattered-data interpolation
+        needed, so there are no edge artefacts.
+        """
+        if self.cijkl is None or self.rho is None:
+            return None
+
+        from scipy.ndimage import map_coordinates
+
+        step = np.deg2rad(step_deg)
+        theta_arr = np.arange(0.0, np.pi / 2 + step, step)
+        phi_arr   = np.arange(0.0, 2 * np.pi + step, step)
+        n_th, n_ph = len(theta_arr), len(phi_arr)
+
+        th, ph = np.meshgrid(theta_arr, phi_arr, indexing="ij")
+        nx_g = np.sin(th) * np.cos(ph)
+        ny_g = np.sin(th) * np.sin(ph)
+        nz_g = np.cos(th)
+        n_flat = np.stack([nx_g.ravel(), ny_g.ravel(), nz_g.ravel()], axis=1)
+
+        tik   = np.einsum("ijkl,nj,nl->nik", self.cijkl, n_flat, n_flat)
+        evals = np.linalg.eigh(tik)[0][:, ::-1]
+
+        vp  = np.sqrt(np.maximum(evals[:, 0], 0) / self.rho).reshape(n_th, n_ph)
+        vs1 = np.sqrt(np.maximum(evals[:, 1], 0) / self.rho).reshape(n_th, n_ph)
+        vs2 = np.sqrt(np.maximum(evals[:, 2], 0) / self.rho).reshape(n_th, n_ph)
+        avs   = np.where((vs1 + vs2) > 0, 200 * (vs1 - vs2) / (vs1 + vs2), 0.0)
+        vpvs1 = np.where(vs1 > 0, vp / vs1, 0.0)
+        vpvs2 = np.where(vs2 > 0, vp / vs2, 0.0)
+
+        # ── output Cartesian grid ────────────────────────────────────────
+        xi = np.linspace(-1.0, 1.0, grid_size)
+        yi = np.linspace(-1.0, 1.0, grid_size)
+        XI, YI = np.meshgrid(xi, yi)                    # (grid, grid)
+
+        r2      = XI ** 2 + YI ** 2
+        outside = r2 > 1.0
+        r_safe  = np.sqrt(np.where(outside, 0.0, r2))
+
+        # Inverse stereographic: r = tan(θ/2)  →  θ = 2·atan(r)
+        theta_out = 2.0 * np.arctan(r_safe)             # [0, π/2]
+        phi_out   = np.arctan2(YI, XI) % (2 * np.pi)   # [0, 2π)
+
+        # Convert to fractional grid indices
+        th_idx = theta_out / (np.pi / 2) * (n_th - 1)
+        ph_idx = phi_out   / (2 * np.pi) * (n_ph - 1)
+
+        coords = [th_idx.ravel(), ph_idx.ravel()]
+
+        result = {"xi": xi, "yi": yi}
+        for key, src in [("vp", vp), ("vs1", vs1), ("vs2", vs2),
+                         ("avs", avs), ("vpvs1", vpvs1), ("vpvs2", vpvs2)]:
+            grid = map_coordinates(src, coords, order=2,
+                                   mode="nearest").reshape(grid_size, grid_size)
+            grid[outside] = np.nan
+            result[key] = grid
+
+        return result
+
+    # ------------------------------------------------------------------
     # Upper-hemisphere stereonet data for 2-D plots
     # ------------------------------------------------------------------
 

@@ -191,6 +191,12 @@ class PlotlyWidget(_make_base()):
                 "Run: <code>pip install PyQtWebEngine</code>"
             )
 
+    def open_in_browser(self) -> None:
+        """Open the current plot in the system's default web browser (larger view)."""
+        import webbrowser
+        url = QUrl.fromLocalFile(self._html_path).toString()
+        webbrowser.open(url)
+
     def clear(self) -> None:
         """Show an empty placeholder."""
         if _WEBENGINE_AVAILABLE:

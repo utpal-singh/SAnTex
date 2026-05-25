@@ -28,6 +28,7 @@ from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QFont, QColor
 
 from frontend.widgets.plotly_widget import PlotlyWidget, COLORSCALES, DEFAULT_PHASE_COLORS
+from frontend.tabs._stereonet import make_stereonet_figure, STEREONET_STYLES
 from frontend.widgets.pyvista_widget import PyVistaWidget
 
 import plotly.graph_objects as go
@@ -78,7 +79,7 @@ class _VRHWorker(QThread):
 # ---------------------------------------------------------------------------
 
 class _PlotOptions(QGroupBox):
-    """Reusable plot-options panel with colormap, vmin/vmax, point size, colorbar."""
+    """Reusable plot-options panel with colormap, style, vmin/vmax, point size, colorbar."""
 
     def __init__(self, title: str = "Plot options",
                  show_cmap: bool = True,
@@ -88,6 +89,12 @@ class _PlotOptions(QGroupBox):
         super().__init__(title, parent)
         f = QFormLayout(self)
         f.setSpacing(3)
+
+        # ── stereonet style ───────────────────────────────────────────────
+        self.style_combo = QComboBox()
+        self.style_combo.addItems(STEREONET_STYLES)
+        self.style_combo.setCurrentIndex(0)  # "Smooth fill" default
+        f.addRow("Style:", self.style_combo)
 
         if show_cmap:
             self.cmap_combo = QComboBox()
@@ -122,6 +129,10 @@ class _PlotOptions(QGroupBox):
         self.colorbar_check = QCheckBox("Show colorbar")
         self.colorbar_check.setChecked(True)
         f.addRow(self.colorbar_check)
+
+    @property
+    def style(self) -> str:
+        return self.style_combo.currentText()
 
     @property
     def colorscale(self) -> str:
@@ -296,8 +307,20 @@ class EBSDTab(QWidget):
         self.pf_plt = PlotlyWidget()
         self.vis_tabs.addTab(self.pf_plt, "Pole figure")
 
+        # Stereonet tab — wrap in a widget so we can add the "Open in browser" button
+        sn_container = QWidget()
+        sn_vbox = QVBoxLayout(sn_container)
+        sn_vbox.setContentsMargins(0, 0, 0, 0)
+        sn_btn_row = QHBoxLayout()
+        sn_btn_row.addStretch()
+        self._sn_browser_btn = QPushButton("🌐 Open in browser")
+        self._sn_browser_btn.setToolTip("Open this stereonet in the system browser for a larger interactive view")
+        self._sn_browser_btn.clicked.connect(lambda: self.stereonet_plt.open_in_browser())
+        sn_btn_row.addWidget(self._sn_browser_btn)
+        sn_vbox.addLayout(sn_btn_row)
         self.stereonet_plt = PlotlyWidget()
-        self.vis_tabs.addTab(self.stereonet_plt, "Anisotropy stereonet")
+        sn_vbox.addWidget(self.stereonet_plt)
+        self.vis_tabs.addTab(sn_container, "Anisotropy stereonet")
 
         self.pv3d = PyVistaWidget()
         self.vis_tabs.addTab(self.pv3d, "3-D surface")
@@ -531,42 +554,32 @@ class EBSDTab(QWidget):
 
     def _plot_stereonet(self, data: dict, scalar: str = "vp", title: str = "Stereonet"):
         opts  = self._sn_opts
-        vals  = data[scalar]
-        unit  = "km/s" if scalar in ("vp", "vs1", "vs2") else "%"
-        if unit == "km/s":
-            vals = vals / 1000.0
 
-        vmin = opts.vmin if opts.vmin is not None else float(np.nanmin(vals))
-        vmax = opts.vmax if opts.vmax is not None else float(np.nanmax(vals))
+        # "Scatter (dots)" uses the x/y scatter data already in *data*;
+        # all other styles need the regular Cartesian grid.
+        if opts.style != "Scatter (dots)" and "xi" not in data:
+            grid_data = self.ab.compute_stereonet_grid(grid_size=300)
+            if grid_data is None:
+                return
+            # merge so make_stereonet_figure can also read scalar keys
+            plot_data = grid_data
+        else:
+            plot_data = data
 
-        # Reference circle
-        theta = np.linspace(0, 2 * np.pi, 300)
-        fig = go.Figure()
-        fig.add_shape(type="circle", xref="x", yref="y",
-                      x0=-1, y0=-1, x1=1, y1=1,
-                      line=dict(color="black", width=1))
-
-        cb = dict(title=f"{scalar} ({unit})") if opts.show_colorbar else None
-        fig.add_trace(go.Scattergl(
-            x=data["x"], y=data["y"],
-            mode="markers",
-            marker=dict(
-                color=vals,
-                colorscale=opts.colorscale,
-                cmin=vmin, cmax=vmax,
-                size=opts.pt_size,
-                colorbar=cb,
-                showscale=opts.show_colorbar,
-            ),
-            hovertemplate=f"x=%{{x:.3f}}<br>y=%{{y:.3f}}<br>{scalar}=%{{marker.color:.3f}}<extra></extra>",
-            name=scalar,
-        ))
-        fig.update_layout(
+        fig = make_stereonet_figure(
+            data=plot_data,
+            scalar=scalar,
+            style=opts.style,
+            colorscale=opts.colorscale,
+            vmin=opts.vmin,
+            vmax=opts.vmax,
+            show_colorbar=opts.show_colorbar,
+            pt_size=opts.pt_size,
             title=title,
-            xaxis=dict(range=[-1.1, 1.1], showgrid=False, zeroline=False,
-                       showticklabels=False),
-            yaxis=dict(range=[-1.1, 1.1], scaleanchor="x", showgrid=False,
-                       zeroline=False, showticklabels=False),
         )
         self.stereonet_plt.show_figure(fig)
-        self.vis_tabs.setCurrentWidget(self.stereonet_plt)
+        # switch to the stereonet container tab
+        for i in range(self.vis_tabs.count()):
+            if "stereonet" in self.vis_tabs.tabText(i).lower():
+                self.vis_tabs.setCurrentIndex(i)
+                break
