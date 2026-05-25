@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300" width="300" height="300">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#dbeafe"/>
+      <stop offset="100%" stop-color="#f0f9ff"/>
+    </radialGradient>
+    <radialGradient id="warm" cx="50%" cy="50%" r="50%">
+      <stop offset="0%"   stop-color="#ef4444" stop-opacity="0.9"/>
+      <stop offset="40%"  stop-color="#f97316" stop-opacity="0.7"/>
+      <stop offset="70%"  stop-color="#3b82f6" stop-opacity="0.6"/>
+      <stop offset="100%" stop-color="#1d4ed8" stop-opacity="0.5"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Background circle -->
+  <circle cx="150" cy="150" r="140" fill="url(#bg)"/>
+
+  <!-- Velocity surface — concentric oval "lobes" like a Vp stereonet -->
+  <!-- Outer lobe -->
+  <ellipse cx="150" cy="150" rx="125" ry="90"  fill="none" stroke="#1d4ed8" stroke-width="1.2" opacity="0.25" transform="rotate(-15,150,150)"/>
+  <!-- Mid lobes  -->
+  <ellipse cx="150" cy="150" rx="108" ry="75"  fill="none" stroke="#2563eb" stroke-width="1.4" opacity="0.30" transform="rotate(-15,150,150)"/>
+  <ellipse cx="150" cy="150" rx="88"  ry="58"  fill="none" stroke="#3b82f6" stroke-width="1.4" opacity="0.40" transform="rotate(-15,150,150)"/>
+  <ellipse cx="150" cy="150" rx="67"  ry="42"  fill="none" stroke="#60a5fa" stroke-width="1.5" opacity="0.50" transform="rotate(-15,150,150)"/>
+  <ellipse cx="150" cy="150" rx="47"  ry="28"  fill="none" stroke="#f97316" stroke-width="2"   opacity="0.60" transform="rotate(-15,150,150)"/>
+  <ellipse cx="150" cy="150" rx="28"  ry="16"  fill="none" stroke="#ef4444" stroke-width="2.5" opacity="0.75" transform="rotate(-15,150,150)"/>
+
+  <!-- Sphere boundary -->
+  <circle cx="150" cy="150" r="138" fill="none" stroke="#1e6db5" stroke-width="2.5"/>
+
+  <!-- Axes -->
+  <line x1="12"  y1="150" x2="288" y2="150" stroke="#1e6db5" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.35"/>
+  <line x1="150" y1="12"  x2="150" y2="288" stroke="#1e6db5" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.35"/>
+
+  <!-- Corner labels -->
+  <text x="16"  y="28"  font-family="sans-serif" font-size="14" fill="#1e6db5" opacity="0.7">N</text>
+  <text x="270" y="165" font-family="sans-serif" font-size="14" fill="#1e6db5" opacity="0.7">E</text>
+
+  <!-- Center -->
+  <circle cx="150" cy="150" r="5" fill="#1e6db5"/>
+</svg>

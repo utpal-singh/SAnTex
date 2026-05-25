@@ -23,6 +23,12 @@ Features
 
 .. toctree::
    :maxdepth: 2
+   :caption: GUI Application Guide
+
+   gui_application.md
+
+.. toctree::
+   :maxdepth: 2
    :caption: Installation
 
    install.rst

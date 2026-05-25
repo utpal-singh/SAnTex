@@ -1,19 +1,12 @@
-import numpy as np
 import math
-from ..tensor import Tensor
-from matplotlib import pyplot as plt
+
 import numpy as np
-from .vtkplotter import Plotter
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-
-from .plot_vel_grid import plot_velocity_grid
-from .utils import christoffel_tensor, wave_property
-
+from matplotlib import pyplot as plt
 from scipy.interpolate import griddata
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-import math
+from ..tensor import Tensor
+from .utils import christoffel_tensor, wave_property
 
 class Anisotropy:
     """
@@ -206,10 +199,9 @@ class Anisotropy:
 
         if method == "array":
             anis_mat = []
-            for i in stiffness_matrix:
+            for i in range(len(stiffness_matrix)):
                 anis = Anisotropy(stiffness_matrix[i], density[i])
-                anis_mat.append(self.anisotropy_values(anis))
-                self.anisotropy_values(anis)
+                anis_mat.append(anis.anisotropy_values())
             return anis_mat
 
         vp, vs1, vs2 = self.velocities()
@@ -333,6 +325,7 @@ class Anisotropy:
         Example:
             >>> anisotropy.plot_velocities((0, 100), (500, 1000), 'maxvp', is_ebsd=True, phase='phase1', filename='velocity_plot.png', 'ro-')
         """
+        from .plot_vel_grid import plot_velocity_grid
         return plot_velocity_grid(pressure_range=pressure_range, temperature_range=temperature_range, return_type=return_type, is_ebsd=is_ebsd, phase=phase, grid=grid, filename=filename, *args)
 
     def plot(self, colormap="RdBu", step=180, savefig=False, figname=None, dpi=300, save_format='svg', vmin_vmax=None, show_box=False, show_contour_labels=False):
@@ -405,9 +398,9 @@ class Anisotropy:
             plot_keys = ['vpvs1', 'vp', 'vs1', 'vs2', 'vpvs2', 'avs']
 
             # texts for each subplot
-            texts = ['Ratio of VP to VS1', 'Velocity of P-waves (VP)', 'Velocity of S1-waves (VS1)', 
-                    'Velocity of S2-waves (VS2)', 'Anisotropy measure for VP and VS1', 
-                    'Anisotropy measure for VP and VS2']
+            texts = ['Ratio of VP to VS1', 'Velocity of P-waves (VP)', 'Velocity of S1-waves (VS1)',
+                    'Velocity of S2-waves (VS2)', 'Ratio of VP to VS2',
+                    'S-wave anisotropy (AVS)']
             
             for i, ax in enumerate(axs.flat):
                 x = []
@@ -539,7 +532,8 @@ class Anisotropy:
             plotter = anisotropy_instance.plotly()
         """
         try:
-            fig = go.Figure()
+            import plotly.graph_objects as go
+            from plotly.subplots import make_subplots
 
             step = math.pi / 180
 
@@ -610,6 +604,7 @@ class Anisotropy:
             density (float): The density of the material.
             voigt_stiffness (float): The Voigt stiffness of the material.
         """
+        from .vtkplotter import Plotter
         Plotter.plot_vs_splitting(voigt_stiffness, density)
 
     def plotter_vp(self, density, voigt_stiffness):
@@ -620,7 +615,7 @@ class Anisotropy:
             density (float): The density of the material.
             voigt_stiffness (float): The Voigt stiffness of the material.
         """
-
+        from .vtkplotter import Plotter
         Plotter.plot_vp(voigt_stiffness, density)
 
     def plotter_vs1(self, density, voigt_stiffness):
@@ -631,8 +626,8 @@ class Anisotropy:
             density (float): The density of the material.
             voigt_stiffness (float): The Voigt stiffness of the material.
         """
-
-        Plotter.plot_vp(voigt_stiffness, density)
+        from .vtkplotter import Plotter
+        Plotter.plot_vs1(voigt_stiffness, density)
 
     def plotter_vs2(self, density, voigt_stiffness):
         """
@@ -642,8 +637,8 @@ class Anisotropy:
             density (float): The density of the material.
             voigt_stiffness (float): The Voigt stiffness of the material.
         """
-
-        Plotter.plot_vp(voigt_stiffness, density)
+        from .vtkplotter import Plotter
+        Plotter.plot_vs2(voigt_stiffness, density)
 
     def voigt_velocity(self):
         tensor = Tensor()

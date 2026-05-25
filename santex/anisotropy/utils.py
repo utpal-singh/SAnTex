@@ -12,7 +12,7 @@ def christoffel_tensor(cijkl, n):
     return tik
 
 def wave_property(tik):
-    eigenvalues, eigenvectors = np.linalg.eig(tik)
+    eigenvalues, eigenvectors = np.linalg.eigh(tik)
     indices = np.argsort(eigenvalues)[::-1]
     wave_moduli = []
     polarization_directions = []

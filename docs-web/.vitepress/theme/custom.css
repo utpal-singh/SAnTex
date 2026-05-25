@@ -1,0 +1,91 @@
+/* ── Brand colours ───────────────────────────────────────────────────── */
+:root {
+  --vp-c-brand-1: #1e6db5;
+  --vp-c-brand-2: #1559a0;
+  --vp-c-brand-3: #d6e8f9;
+  --vp-c-brand-soft: rgba(30, 109, 181, 0.12);
+
+  --vp-button-brand-bg: var(--vp-c-brand-1);
+  --vp-button-brand-hover-bg: var(--vp-c-brand-2);
+  --vp-button-brand-active-bg: var(--vp-c-brand-2);
+  --vp-button-brand-border: var(--vp-c-brand-1);
+  --vp-button-brand-text: #fff;
+
+  --vp-home-hero-name-color: transparent;
+  --vp-home-hero-name-background: linear-gradient(135deg, #1e6db5 0%, #0ea5e9 100%);
+  --vp-home-hero-image-background-image: radial-gradient(ellipse at center, #d6e8f9 0%, #f0f7ff 70%);
+  --vp-home-hero-image-filter: blur(44px);
+}
+
+.dark {
+  --vp-c-brand-1: #60aef5;
+  --vp-c-brand-2: #7ec3ff;
+  --vp-c-brand-soft: rgba(96, 174, 245, 0.14);
+  --vp-home-hero-name-background: linear-gradient(135deg, #60aef5 0%, #a8d8ff 100%);
+  --vp-home-hero-image-background-image: radial-gradient(ellipse at center, #1a3a5c 0%, #0f1923 70%);
+}
+
+/* ── Hero section ────────────────────────────────────────────────────── */
+.VPHero .tagline {
+  font-size: 1.1rem;
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.7;
+  color: var(--vp-c-text-2);
+}
+
+/* ── Feature cards ───────────────────────────────────────────────────── */
+.VPFeature {
+  border: 1px solid var(--vp-c-divider);
+  border-radius: 12px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.VPFeature:hover {
+  border-color: var(--vp-c-brand-1);
+  box-shadow: 0 4px 20px rgba(30, 109, 181, 0.12);
+}
+
+/* ── Badge in nav ────────────────────────────────────────────────────── */
+.VPBadge.tip {
+  background-color: var(--vp-c-brand-soft);
+  color: var(--vp-c-brand-1);
+  border-color: var(--vp-c-brand-1);
+}
+
+/* ── Code blocks ─────────────────────────────────────────────────────── */
+.vp-doc div[class*='language-'] {
+  border-radius: 10px;
+}
+
+/* ── Math ────────────────────────────────────────────────────────────── */
+.katex-display {
+  overflow-x: auto;
+  padding: 0.5em 0;
+}
+
+/* ── Tables ──────────────────────────────────────────────────────────── */
+.vp-doc table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.vp-doc th {
+  background: var(--vp-c-brand-soft);
+  font-weight: 600;
+}
+
+.vp-doc tr:nth-child(even) td {
+  background: var(--vp-c-bg-soft);
+}
+
+/* ── Sidebar active item ─────────────────────────────────────────────── */
+.VPSidebarItem.is-active > .item .link {
+  color: var(--vp-c-brand-1);
+  font-weight: 600;
+}
+
+/* ── Custom admonitions ──────────────────────────────────────────────── */
+.custom-block.tip {
+  border-color: var(--vp-c-brand-1);
+}

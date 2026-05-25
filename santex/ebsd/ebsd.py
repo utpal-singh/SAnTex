@@ -312,15 +312,15 @@ class EBSD:
 
         if method == 1:
 
-            average_tensor, density_averaged = self.getVoigtReussHill(cij=cij, euler_angles=euler_angles, density=density, melt=melt, density_melt=density_melt, method = 'voigt')
+            average_tensor, density_averaged = self.get_voigt_reuss_hill(cij=cij, euler_angles=euler_angles, density=density, melt=melt, density_melt=density_melt, method = 'voigt')
             return average_tensor, density_averaged
-        
+
         elif method == 2:
-            average_tensor, density_averaged = self.getVoigtReussHill(cij=cij, euler_angles=euler_angles, density=density, melt=melt, density_melt=density_melt, method = 'reuss')
+            average_tensor, density_averaged = self.get_voigt_reuss_hill(cij=cij, euler_angles=euler_angles, density=density, melt=melt, density_melt=density_melt, method = 'reuss')
             return average_tensor, density_averaged
-        
+
         elif method == 3:
-            average_tensor, density_averaged = self.getVoigtReussHill(cij=cij, euler_angles=euler_angles, density=density, melt=melt, density_melt=density_melt, method = 'hill')
+            average_tensor, density_averaged = self.get_voigt_reuss_hill(cij=cij, euler_angles=euler_angles, density=density, melt=melt, density_melt=density_melt, method = 'hill')
             return average_tensor, density_averaged
 
         else:
@@ -417,19 +417,20 @@ class EBSD:
                 alpha, beta, gamma = row['Euler1'], row['Euler2'], row['Euler3']
 
                 rotated_C = tensor.rotate_tensor(tensor_list[idx], alpha, beta, gamma)
-                rotated_S = np.linalg.inv(rotated_C)
+                rotated_C_voigt = tensor.tensor_to_voigt(rotated_C)
+                rotated_S_voigt = np.linalg.inv(rotated_C_voigt)
 
-                rotated_C_list.append(rotated_C * volume_fraction)
-                rotated_S_list.append(rotated_S * volume_fraction)
+                rotated_C_list.append(rotated_C_voigt * volume_fraction)
+                rotated_S_list.append(rotated_S_voigt * volume_fraction)
 
-        # Voigt
+        # Voigt average (stiffness)
         C_voigt = np.sum(rotated_C_list, axis=0)
 
-        # Reuss
+        # Reuss average (compliance → stiffness)
         S_reuss_avg = np.sum(rotated_S_list, axis=0)
         C_reuss = np.linalg.inv(S_reuss_avg)
 
-        # Hill
+        # Hill average
         C_hill = 0.5 * (C_voigt + C_reuss)
 
         average_density = np.sum(np.multiply(density, len_euler)) / total_grains
@@ -445,11 +446,11 @@ class EBSD:
             average_density = (1 - melt_frac) * average_density + melt_frac * density_melt
 
         if method == 'voigt':
-            return tensor.tensor_to_voigt(C_voigt), average_density
+            return C_voigt, average_density
         elif method == 'reuss':
-            return tensor.tensor_to_voigt(C_reuss), average_density
+            return C_reuss, average_density
         elif method == 'hill':
-            return tensor.tensor_to_voigt(C_hill), average_density
+            return C_hill, average_density
 
     
 
@@ -503,7 +504,7 @@ class EBSD:
         else:
             df
 
-        grain_indices = assign_to_grains_parallel(df[['Euler1', 'Euler2', 'Euler3']], threshold)
+        grain_indices = assign_to_grains_parallel(df, threshold)
         df['Grain'] = pd.Series(grain_indices)
         for grain_idx, group in df.groupby('Grain'):
             phase_counts = group['Phase'].value_counts()

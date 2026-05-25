@@ -1,0 +1,17 @@
+{
+  "name": "santex-docs",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "SAnTex — Seismic Anisotropy Toolbox documentation",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview"
+  },
+  "devDependencies": {
+    "vitepress": "^1.3.4"
+  },
+  "dependencies": {
+    "markdown-it-mathjax3": "^4.3.2"
+  }
+}

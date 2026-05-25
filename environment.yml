@@ -1,0 +1,34 @@
+name: santex
+
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  - python=3.10
+  # --- scientific core (conda-forge builds are well-tested) ---
+  - numpy>=1.23
+  - scipy>=1.9
+  - pandas>=1.5
+  - matplotlib>=3.6
+  # --- VTK (conda-forge version avoids build issues on Windows) ---
+  - vtk>=9.1
+  # --- Qt binding ---
+  - pyqt>=5.15
+  # --- EBSD / crystallography ---
+  - orix>=0.12
+  # --- machine learning / utilities ---
+  - scikit-learn>=1.1
+  - joblib>=1.2
+  - tqdm>=4.64
+  - tabulate>=0.9
+  # --- interactive plots ---
+  - plotly>=5.11
+  # --- pip-only packages ---
+  - pip
+  - pip:
+    - pyvista>=0.40
+    - pyvistaqt>=0.11
+    - PyQt5-sip>=12.11
+    # Install santex itself in editable mode
+    - -e .

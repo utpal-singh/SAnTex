@@ -20,6 +20,7 @@ templates_path = ['_templates']
 exclude_patterns = ['_build', '**.ipynb_checkpoints']
 
 extensions = [
+   'myst_parser',
    'nbsphinx',
    'sphinx_copybutton',
    'sphinx.ext.duration',
@@ -28,6 +29,13 @@ extensions = [
    'sphinx.ext.autosummary',
    'sphinx.ext.mathjax',
 ]
+
+# MyST-Parser settings — allow Markdown math and anchored headings
+myst_enable_extensions = [
+    "dollarmath",
+    "colon_fence",
+]
+myst_heading_anchors = 3
 
 
 # -- Options for HTML output -------------------------------------------------

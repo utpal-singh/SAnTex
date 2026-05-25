@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" width="120" height="120">
+  <!-- Outer sphere ring -->
+  <ellipse cx="60" cy="60" rx="52" ry="52" fill="none" stroke="#1e6db5" stroke-width="3.5"/>
+  <!-- Velocity wave contours (simplified stereonet) -->
+  <ellipse cx="60" cy="60" rx="38" ry="22" fill="none" stroke="#1e6db5" stroke-width="2" opacity="0.6" transform="rotate(-20,60,60)"/>
+  <ellipse cx="60" cy="60" rx="28" ry="14" fill="none" stroke="#0ea5e9" stroke-width="2" opacity="0.5" transform="rotate(-20,60,60)"/>
+  <ellipse cx="60" cy="60" rx="16" ry="7"  fill="none" stroke="#38bdf8" stroke-width="2" opacity="0.4" transform="rotate(-20,60,60)"/>
+  <!-- Horizontal equator -->
+  <line x1="8" y1="60" x2="112" y2="60" stroke="#1e6db5" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.4"/>
+  <!-- Vertical meridian -->
+  <line x1="60" y1="8" x2="60" y2="112" stroke="#1e6db5" stroke-width="1.5" stroke-dasharray="4,3" opacity="0.4"/>
+  <!-- Center dot -->
+  <circle cx="60" cy="60" r="4" fill="#1e6db5"/>
+</svg>
