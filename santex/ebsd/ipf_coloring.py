@@ -378,6 +378,98 @@ del _key, _sec, _c, _n, _r
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# Sector corner labels  (used for IPF colour-key annotation)
+# ─────────────────────────────────────────────────────────────────────────────
+# Each entry is a list of (xyz_direction, label_text) pairs in order:
+#   first entry = pole direction ([001] / [0001]) — displayed near the apex
+#   remaining  = equatorial vertices
+
+_SECTOR_CORNER_LABELS: dict[str, list[tuple[list[float], str]]] = {
+    "C1":  [([0, 0, 1], "[001]")],
+    "Ci":  [([0, 0, 1], "[001]"), ([1, 0, 0], "[100]")],
+    "C2h": [([0, 0, 1], "[001]"), ([1, 0, 0], "[100]")],
+    "D2h": [([0, 0, 1], "[001]"), ([0, 1, 0], "[010]"), ([1, 0, 0], "[100]")],
+    "C4h": [([0, 0, 1], "[001]"), ([1, 0, 0], "[100]")],
+    "D4h": [([0, 0, 1], "[001]"), ([1, 0, 0], "[100]"),
+            ([1/_s2, 1/_s2, 0], "[110]")],
+    "S6":  [([0, 0, 1], "[0001]"), ([1, 0, 0], "[10̐10]")],
+    "D3d": [([0, 0, 1], "[0001]"), ([1, 0, 0], "[10̐10]"),
+            ([0.5, _s3/2., 0], "[11̐2̄0]")],
+    "C6h": [([0, 0, 1], "[0001]"), ([1, 0, 0], "[10̐10]")],
+    "D6h": [([0, 0, 1], "[0001]"), ([1, 0, 0], "[10̐10]"),
+            ([_s3/2., 0.5, 0], "[11̐2̄0]")],
+    "Th":  [([0, 0, 1], "[001]"), ([0, 1/_s2, 1/_s2], "[011]"),
+            ([1/_s3, 1/_s3, 1/_s3], "[111]")],
+    "Oh":  [([0, 0, 1], "[001]"), ([0, 1/_s2, 1/_s2], "[011]"),
+            ([1/_s3, 1/_s3, 1/_s3], "[111]")],
+}
+
+
+def sector_corner_pixels(
+    sector_key: str,
+    n: int = 256,
+) -> list[tuple[str, int, int, str, str]]:
+    """Return annotation data for each fundamental-sector corner.
+
+    Pixel coordinates correspond to the output of
+    ``make_colorkey_image(sector_key, n=n)``.
+
+    Parameters
+    ----------
+    sector_key : canonical Laue-group key (e.g. ``'Oh'``, ``'D2h'``)
+    n          : image side length (pixels) — must match ``make_colorkey_image``
+
+    Returns
+    -------
+    list of (label, col_px, row_px, xanchor, yanchor)
+        Plotly-compatible anchor strings to position the label *away* from
+        the centre of the triangle.
+    """
+    corners_info = _SECTOR_CORNER_LABELS.get(sector_key, [([0, 0, 1], "[001]")])
+    cx = n // 2   # image centre column
+    cy = n // 2   # image centre row
+
+    result: list[tuple[str, int, int, str, str]] = []
+    for xyz, label in corners_info:
+        v   = np.asarray(xyz, dtype=np.float64)
+        nrm = np.linalg.norm(v)
+        if nrm < 1e-10:                      # degenerate
+            result.append((label, cx, cy, "center", "bottom"))
+            continue
+
+        v   = v / nrm
+        z   = float(np.clip(v[2], -1.0, 1.0))
+        # Lambert equal-area: r = √2 · sin(θ/2)
+        theta  = np.arccos(z)
+        r      = np.sqrt(2.0) * np.sin(theta / 2.0)
+        phi    = np.arctan2(v[1], v[0])
+        xi     = r * np.cos(phi)
+        yi     = r * np.sin(phi)
+
+        # Convert Lambert grid (−1 … 1) → pixel index (0 … n−1)
+        col_px = int(round((xi + 1.0) / 2.0 * (n - 1)))
+        row_px = int(round((yi + 1.0) / 2.0 * (n - 1)))
+
+        # Anchor: push label AWAY from the image centre
+        dx = col_px - cx
+        dy = row_px - cy
+        thresh = n // 6
+
+        if abs(dx) <= thresh and abs(dy) <= thresh:
+            # Near centre — always put text above
+            xanchor, yanchor = "center", "bottom"
+        else:
+            xanchor = "left"  if dx >  thresh else (
+                      "right" if dx < -thresh else "center")
+            yanchor = "top"   if dy >  thresh else (
+                      "bottom" if dy < -thresh else "middle")
+
+        result.append((label, col_px, row_px, xanchor, yanchor))
+
+    return result
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # 6a.  Batch direction folding
 # ─────────────────────────────────────────────────────────────────────────────
 

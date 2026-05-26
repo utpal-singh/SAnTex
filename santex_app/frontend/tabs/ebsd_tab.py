@@ -59,6 +59,142 @@ def _rgba_to_data_uri(rgba: "np.ndarray") -> str:
 
 
 # ---------------------------------------------------------------------------
+# IPF figure builder  — map + labelled colour-key triangle (MTEX style)
+# ---------------------------------------------------------------------------
+
+def _build_ipf_figure(result: dict, phase_idx: int,
+                      direction_str: str, color_key: str,
+                      sym_label: str):
+    """Build a Plotly figure with the IPF map on the left and the labelled
+    colour-key triangle on the right, matching the MTEX IPF display style.
+
+    Parameters
+    ----------
+    result       : dict returned by ``EBSDBackend.ipf_map_colors()``
+                   keys: x, y, r, g, b, rgb_hex, sym_key
+    phase_idx    : phase number (for title)
+    direction_str: 'ND', 'RD', or 'TD'
+    color_key    : 'tsl' or 'hsv'
+    sym_label    : human-readable symmetry, e.g. 'mmm (D2h)'
+    """
+    from plotly.subplots import make_subplots
+    from santex.ebsd.ipf_coloring import (
+        render_rgb_map, make_colorkey_image, sector_corner_pixels,
+    )
+
+    sym_key = result.get("sym_key", "D2h")
+    ck_n    = 260    # colour-key image side (pixels)
+
+    # ── 1. Pixel-accurate EBSD map ─────────────────────────────────────
+    img_rgba, x_min, x_max, y_min, y_max = render_rgb_map(
+        result["x"], result["y"],
+        result["r"], result["g"], result["b"],
+    )
+    map_h, map_w = img_rgba.shape[:2]
+    dx_map = (x_max - x_min) / max(map_w - 1, 1)
+    dy_map = (y_max - y_min) / max(map_h - 1, 1)
+
+    # ── 2. Colour-key triangle image ───────────────────────────────────
+    ck_img   = make_colorkey_image(sym_key, color_key=color_key, n=ck_n)
+    corners  = sector_corner_pixels(sym_key, n=ck_n)   # (label, col, row, xa, ya)
+
+    # ── 3. Build subplot layout  [map | colour key] ────────────────────
+    ck_title = (
+        f"IPF-{direction_str} · {sym_label}<br>"
+        f"<sup>{'TSL (HKL)' if color_key == 'tsl' else 'HSV (MTEX)'}</sup>"
+    )
+    fig = make_subplots(
+        rows=1, cols=2,
+        column_widths=[0.76, 0.24],
+        horizontal_spacing=0.04,
+        subplot_titles=["", ck_title],
+    )
+
+    # ── 4. IPF map trace ───────────────────────────────────────────────
+    fig.add_trace(
+        go.Image(
+            z=img_rgba,
+            x0=x_min, dx=dx_map,
+            y0=y_min, dy=dy_map,
+            hovertemplate="X=%{x:.2f} µm<br>Y=%{y:.2f} µm<extra></extra>",
+            name=f"Phase {phase_idx} IPF-{direction_str}",
+        ),
+        row=1, col=1,
+    )
+    fig.update_xaxes(
+        title_text="X (µm)", range=[x_min, x_max],
+        row=1, col=1,
+    )
+    # Reversed range (y_max first) → y increases downward, matching scan raster
+    fig.update_yaxes(
+        title_text="Y (µm)",
+        range=[y_max, y_min],          # explicit reverse: y_min at top
+        scaleanchor="x", scaleratio=1,
+        row=1, col=1,
+    )
+
+    # ── 5. Colour-key triangle trace ───────────────────────────────────
+    _PAD = 8
+    fig.add_trace(
+        go.Image(
+            z=ck_img,
+            hoverinfo="skip",
+            name="Color key",
+        ),
+        row=1, col=2,
+    )
+    fig.update_xaxes(
+        showticklabels=False, showgrid=False, zeroline=False,
+        range=[-_PAD, ck_n + _PAD],
+        row=1, col=2,
+    )
+    # Reversed range → row 0 at top (standard image convention)
+    fig.update_yaxes(
+        showticklabels=False, showgrid=False, zeroline=False,
+        range=[ck_n + _PAD, -_PAD],   # explicit reverse: row 0 at top
+        scaleanchor="x2", scaleratio=1,
+        row=1, col=2,
+    )
+
+    # ── 6. Corner-direction annotations ───────────────────────────────
+    _FONT_CK = dict(size=12, color="#111111", family="Arial")
+    for label, col_px, row_px, xanchor, yanchor in corners:
+        # Small offset so the text doesn't sit on the coloured pixel
+        pad_x = {"left": 5, "right": -5, "center": 0}[xanchor]
+        pad_y = {"top": 5, "bottom": -5, "middle": 0}[yanchor]
+        fig.add_annotation(
+            x=col_px + pad_x,
+            y=row_px + pad_y,
+            text=f"<b>{label}</b>",
+            xref="x2", yref="y2",
+            showarrow=False,
+            font=_FONT_CK,
+            xanchor=xanchor,
+            yanchor=yanchor,
+            bgcolor="rgba(255,255,255,0.80)",
+            bordercolor="rgba(0,0,0,0.25)",
+            borderwidth=1,
+            borderpad=3,
+        )
+
+    # ── 7. Figure-level layout ─────────────────────────────────────────
+    fig.update_layout(
+        title_text=(
+            f"IPF map — Phase {phase_idx}  [{direction_str}]  {sym_label}"
+        ),
+        title_font_size=14,
+        showlegend=False,
+        # Transparent background on colour-key subplot so the RGBA alpha
+        # channel (outside-sector pixels) shows as plot background
+        plot_bgcolor="white",
+        paper_bgcolor="#f8f8f8",
+        margin=dict(l=60, r=20, t=70, b=50),
+    )
+
+    return fig
+
+
+# ---------------------------------------------------------------------------
 # Specimen Reference Frame dialog  (mirrors the MTEX dialog)
 # ---------------------------------------------------------------------------
 
@@ -1130,51 +1266,13 @@ class EBSDTab(QWidget):
             QMessageBox.information(self, "IPF map", "No data for selected phase.")
             return
 
-        # ── Render as a pixel-accurate image (go.Image) ──────────────────
+        sym_label = self.ipf_sym_label.text()
+
         try:
-            from santex.ebsd.ipf_coloring import render_rgb_map, make_colorkey_image
-            img_rgba, x_min, x_max, y_min, y_max = render_rgb_map(
-                result["x"], result["y"],
-                result["r"], result["g"], result["b"],
-            )
-
-            sym_key = result.get("sym_key", "D2h")
-            ck_img  = make_colorkey_image(sym_key, color_key=color_key, n=180)
-
-            # Main IPF map
-            fig = go.Figure()
-            fig.add_trace(go.Image(
-                z=img_rgba,
-                x0=x_min, dx=(x_max - x_min) / max(img_rgba.shape[1] - 1, 1),
-                y0=y_min, dy=(y_max - y_min) / max(img_rgba.shape[0] - 1, 1),
-                hovertemplate="X=%{x:.1f}<br>Y=%{y:.1f}<extra></extra>",
-                name=f"Phase {phase_idx} IPF-{direction_str}",
-            ))
-
-            sym_label = self.ipf_sym_label.text()
-            fig.update_layout(
-                title=f"IPF map — Phase {phase_idx}  [{direction_str}]  {sym_label}",
-                xaxis_title="X (µm)", yaxis_title="Y (µm)",
-                xaxis=dict(range=[x_min, x_max]),
-                yaxis=dict(range=[y_min, y_max],
-                           scaleanchor="x", scaleratio=1,
-                           autorange="reversed"),
-                margin=dict(l=60, r=180, t=50, b=50),
-            )
-
-            # Colour-key legend inset (upper-right corner image)
-            n_ck = ck_img.shape[0]
-            fig.add_layout_image(dict(
-                source=_rgba_to_data_uri(ck_img),
-                xref="paper", yref="paper",
-                x=1.02, y=1.0,
-                sizex=0.22, sizey=0.22,
-                xanchor="left", yanchor="top",
-                layer="above",
-            ))
-
+            fig = _build_ipf_figure(result, phase_idx, direction_str,
+                                    color_key, sym_label)
         except Exception as e:
-            # Fallback to scatter if image rendering fails
+            # Fallback to plain scatter
             fig = go.Figure()
             fig.add_trace(go.Scattergl(
                 x=result["x"], y=result["y"],
@@ -1184,10 +1282,10 @@ class EBSDTab(QWidget):
                 name=f"Phase {phase_idx} IPF-{direction_str}",
             ))
             fig.update_layout(
-                title=f"IPF map — Phase {phase_idx}, direction {direction_str}",
+                title=f"IPF map — Phase {phase_idx}, direction {direction_str}  "
+                      f"[fallback: {e}]",
                 xaxis_title="X (µm)", yaxis_title="Y (µm)",
                 yaxis=dict(scaleanchor="x", scaleratio=1),
-                hovermode="closest",
             )
 
         self.ipf_plt.show_figure(fig)
