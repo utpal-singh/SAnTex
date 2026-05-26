@@ -72,6 +72,39 @@ class EBSDBackend:
         except Exception:
             self._phases_df = None
 
+    def load_from_project(self, project: "EBSDProject", dataset_id: str) -> None:
+        """Load a dataset from an EBSDProject using its LRU cache.
+
+        This avoids re-reading the CTF file from disk when the dataset is
+        already cached.  The working copy (``self.data``) is separate from
+        the cached raw DataFrame so that filters / ROI clips do not
+        contaminate the cache entry for other backends.
+
+        Parameters
+        ----------
+        project     : EBSDProject
+        dataset_id  : str  UUID of the dataset to load
+        """
+        from backend.ebsd_project import EBSDProject   # local import avoids circularity
+
+        meta = project.get_meta(dataset_id)
+        if meta is None:
+            raise ValueError(f"Dataset {dataset_id!r} not found in project.")
+
+        # Build EBSD wrapper (fast — no file read in __init__)
+        self.ebsd    = EBSD(meta.path)
+        self.filename = meta.path
+
+        # Get data from LRU cache (loads from disk only on cache miss)
+        raw_df = project.get_data(dataset_id)
+        if raw_df is None:
+            raise RuntimeError(f"Could not load data for dataset {dataset_id!r}.")
+
+        self.data             = raw_df.copy()   # working copy (mutable)
+        self._data_original   = raw_df.copy()   # for ROI reset
+        self._phases_df       = meta.phases_df
+        self._header_data     = meta.header_data
+
     @property
     def is_loaded(self) -> bool:
         return self.ebsd is not None and self.data is not None
@@ -116,11 +149,14 @@ class EBSDBackend:
         Phase 0 (unindexed / NaN pixels) is intentionally excluded: those
         pixels carry no valid orientation and must never contribute to any
         elastic-tensor average.
+
+        Passes ``self.data`` to ``EBSD.phases()`` so that the CTF file is
+        never re-read from disk (important when data comes from the LRU cache).
         """
         if not self.is_loaded:
             return []
         return [(idx, name, pct)
-                for idx, name, pct in self.ebsd.phases()
+                for idx, name, pct in self.ebsd.phases(df_phases=self.data)
                 if idx != 0]   # skip unindexed pixels
 
     def phase_names(self) -> list[str]:

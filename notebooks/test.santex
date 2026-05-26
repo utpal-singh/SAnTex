@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "max_in_ram": 2,
+  "datasets": [
+    {
+      "id": "7090ceaf-8657-458b-a05f-b8b82c501216",
+      "path": "D:\\Github\\SAnTex\\notebooks\\ebsd.ctf",
+      "name": "ebsd",
+      "active": false
+    },
+    {
+      "id": "9a4e551a-580b-4718-8450-93afe0f6a6c4",
+      "path": "D:\\Github\\SAnTex\\notebooks\\fdmrn02x01.ctf",
+      "name": "fdmrn02x01",
+      "active": true
+    },
+    {
+      "id": "2b4c40ba-5198-49d6-ad90-f24ee817857a",
+      "path": "D:\\Github\\SAnTex\\notebooks\\Forsterite.ctf",
+      "name": "Forsterite",
+      "active": true
+    }
+  ]
+}
