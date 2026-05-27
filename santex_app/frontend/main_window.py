@@ -84,6 +84,7 @@ class MainWindow(QMainWindow):
         from frontend.tabs.grains_tab     import GrainsTab
         from frontend.tabs.odf_tab        import ODFTab
         from frontend.tabs.project_tab    import ProjectTab
+        from frontend.tabs.crystal_tab    import CrystalTab
 
         self.tabs = QTabWidget()
         self.tabs.setDocumentMode(True)
@@ -105,6 +106,7 @@ class MainWindow(QMainWindow):
             self.grains_backend, self.ebsd_backend, ebsd_tab=self.ebsd_tab
         )
         self.odf_tab        = ODFTab(self.odf_backend, self.ebsd_backend)
+        self.crystal_tab    = CrystalTab()
 
         self.tabs.addTab(self.project_tab,    "📁 Project")
         self.tabs.addTab(self.material_tab,   "Material Database")
@@ -113,6 +115,7 @@ class MainWindow(QMainWindow):
         self.tabs.addTab(self.modal_rock_tab, "Modal Rock")
         self.tabs.addTab(self.grains_tab,     "Grains")
         self.tabs.addTab(self.odf_tab,        "ODF & PF")
+        self.tabs.addTab(self.crystal_tab,    "🔷 Crystal Viewer")
 
         self.setCentralWidget(self.tabs)
 

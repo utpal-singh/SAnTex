@@ -28,7 +28,9 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QThread, pyqtSignal
 from PyQt5.QtGui import QFont, QColor
 
-from frontend.widgets.plotly_widget import PlotlyWidget, COLORSCALES, DEFAULT_PHASE_COLORS
+from frontend.widgets.plotly_widget import (
+    PlotlyWidget, COLORSCALES, DEFAULT_PHASE_COLORS, ColorscaleComboBox,
+)
 from frontend.tabs._stereonet import make_stereonet_figure, STEREONET_STYLES
 from frontend.widgets.pyvista_widget import PyVistaWidget
 
@@ -460,10 +462,7 @@ class _PlotOptions(QGroupBox):
         f.addRow("Style:", self.style_combo)
 
         if show_cmap:
-            self.cmap_combo = QComboBox()
-            self.cmap_combo.addItems(COLORSCALES)
-            idx = COLORSCALES.index(default_cmap) if default_cmap in COLORSCALES else 0
-            self.cmap_combo.setCurrentIndex(idx)
+            self.cmap_combo = ColorscaleComboBox(default=default_cmap)
             f.addRow("Colormap:", self.cmap_combo)
         else:
             self.cmap_combo = None
@@ -506,7 +505,10 @@ class _PlotOptions(QGroupBox):
 
     @property
     def colorscale(self) -> str:
-        return self.cmap_combo.currentText() if self.cmap_combo else "Viridis"
+        if self.cmap_combo is None:
+            return "Viridis"
+        # ColorscaleComboBox exposes .colorscale; plain QComboBox uses .currentText()
+        return getattr(self.cmap_combo, "colorscale", self.cmap_combo.currentText())
 
     @property
     def vmin(self) -> float | None:
@@ -688,9 +690,7 @@ class EBSDTab(QWidget):
         bcbs_box = QGroupBox("Band Contrast / Band Slope map")
         bcbs_form = QFormLayout(bcbs_box)
         self.bcbs_scalar_combo = QComboBox(); self.bcbs_scalar_combo.addItems(["BC", "BS"])
-        self.bcbs_cmap_combo   = QComboBox()
-        from frontend.widgets.plotly_widget import COLORSCALES
-        self.bcbs_cmap_combo.addItems(COLORSCALES)
+        self.bcbs_cmap_combo   = ColorscaleComboBox(default="Greys")
         self.bcbs_pt_size_spin = QSpinBox(); self.bcbs_pt_size_spin.setRange(1,10); self.bcbs_pt_size_spin.setValue(2)
         bcbs_form.addRow("Scalar:", self.bcbs_scalar_combo)
         bcbs_form.addRow("Colormap:", self.bcbs_cmap_combo)
@@ -703,9 +703,7 @@ class EBSDTab(QWidget):
         self.kam_kernel_spin = QSpinBox(); self.kam_kernel_spin.setRange(1,5); self.kam_kernel_spin.setValue(1)
         self.kam_angle_spin  = QDoubleSpinBox(); self.kam_angle_spin.setRange(0.1,30); self.kam_angle_spin.setValue(5); self.kam_angle_spin.setSuffix("°")
         self.kam_same_phase_chk = QCheckBox("Same phase only"); self.kam_same_phase_chk.setChecked(True)
-        self.kam_cmap_combo  = QComboBox(); self.kam_cmap_combo.addItems(COLORSCALES)
-        idx_v = COLORSCALES.index("Hot") if "Hot" in COLORSCALES else 0
-        self.kam_cmap_combo.setCurrentIndex(idx_v)
+        self.kam_cmap_combo  = ColorscaleComboBox(default="Hot")
         self.kam_pt_size_spin = QSpinBox(); self.kam_pt_size_spin.setRange(1,10); self.kam_pt_size_spin.setValue(2)
         kam_form.addRow("Kernel size:", self.kam_kernel_spin)
         kam_form.addRow("Max angle:", self.kam_angle_spin)
@@ -718,9 +716,7 @@ class EBSDTab(QWidget):
         m2m_box = QGroupBox("Mis2Mean / GROD")
         m2m_form = QFormLayout(m2m_box)
         self.m2m_phase_combo = QComboBox()
-        self.m2m_cmap_combo  = QComboBox(); self.m2m_cmap_combo.addItems(COLORSCALES)
-        idx_v2 = COLORSCALES.index("RdBu_r") if "RdBu_r" in COLORSCALES else 0
-        self.m2m_cmap_combo.setCurrentIndex(idx_v2)
+        self.m2m_cmap_combo  = ColorscaleComboBox(default="RdBu_r")
         self.m2m_pt_size_spin = QSpinBox(); self.m2m_pt_size_spin.setRange(1,10); self.m2m_pt_size_spin.setValue(2)
         m2m_form.addRow("Phase:", self.m2m_phase_combo)
         m2m_form.addRow("Colormap:", self.m2m_cmap_combo)

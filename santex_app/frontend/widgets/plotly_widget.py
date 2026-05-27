@@ -211,13 +211,112 @@ class PlotlyWidget(_make_base()):
 # Shared constants for UI dropdowns
 # ---------------------------------------------------------------------------
 
+# Organised by category so the combo stays navigable
 COLORSCALES: list[str] = [
+    # ── Perceptually uniform (sequential) ──────────────────────────────
     "Viridis", "Plasma", "Inferno", "Magma", "Cividis", "Turbo",
-    "Hot",     "Jet",    "Rainbow",
-    "RdBu_r",  "RdYlBu_r", "Spectral_r",
-    "Greys",   "Blues",  "Reds",  "Greens",
-    "Picnic",  "Portland", "Electric",
+    # ── Warm sequential ────────────────────────────────────────────────
+    "Hot", "Reds", "Oranges", "YlOrRd", "YlOrBr", "OrRd",
+    # ── Cool sequential ────────────────────────────────────────────────
+    "Blues", "Greens", "Purples", "BuPu", "GnBu", "YlGnBu",
+    # ── Earth / geoscience ─────────────────────────────────────────────
+    "Earth", "speed", "deep", "dense", "amp", "thermal", "haline",
+    # ── Diverging ──────────────────────────────────────────────────────
+    "RdBu", "RdBu_r", "RdYlBu", "RdYlBu_r",
+    "Spectral", "Spectral_r", "BrBG", "PuOr", "RdGy_r", "PiYG",
+    "balance", "delta", "curl", "oxy",
+    # ── Classic / legacy ───────────────────────────────────────────────
+    "Greys", "Jet", "Rainbow", "HSV", "Picnic", "Portland", "Electric",
+    # ── Cyclic ─────────────────────────────────────────────────────────
+    "twilight", "mrybm", "mygbm",
+    # ── Misc ───────────────────────────────────────────────────────────
+    "IceFire", "phase", "ice", "matter",
 ]
+
+# ---------------------------------------------------------------------------
+# Colorscale preview helpers
+# ---------------------------------------------------------------------------
+
+def _make_colorscale_pixmap(name: str, width: int = 120, height: int = 14):
+    """Return a QPixmap showing a horizontal gradient for *name*.
+
+    Falls back to a plain grey pixmap if anything goes wrong (missing Plotly
+    colour data, NumPy not available, etc.).
+    """
+    from PyQt5.QtGui import QImage, QPixmap
+    try:
+        import numpy as np
+        import plotly.colors as pc
+        t_vals = np.linspace(0, 1, width)
+        raw = pc.sample_colorscale(name, list(t_vals), colortype="tuple")
+        # raw is a list of (r, g, b) with values in [0, 1]
+        arr = np.zeros((height, width, 4), dtype=np.uint8)
+        for i, rgb in enumerate(raw):
+            r, g, b = rgb
+            arr[:, i, 0] = int(r * 255 + 0.5)
+            arr[:, i, 1] = int(g * 255 + 0.5)
+            arr[:, i, 2] = int(b * 255 + 0.5)
+            arr[:, i, 3] = 255
+        qimg = QImage(
+            arr.tobytes(), width, height, width * 4, QImage.Format_RGBA8888
+        )
+        return QPixmap.fromImage(qimg)
+    except Exception:
+        px = QPixmap(width, height)
+        px.fill()           # white fallback
+        return px
+
+
+# Cache so we don't regenerate pixmaps on every combo instantiation
+_CS_PIXMAP_CACHE: dict[str, object] = {}
+
+
+def _get_cs_pixmap(name: str, width: int = 120, height: int = 14):
+    key = (name, width, height)
+    if key not in _CS_PIXMAP_CACHE:
+        _CS_PIXMAP_CACHE[key] = _make_colorscale_pixmap(name, width, height)
+    return _CS_PIXMAP_CACHE[key]
+
+
+from PyQt5.QtWidgets import QComboBox as _QComboBox
+from PyQt5.QtGui import QIcon as _QIcon
+from PyQt5.QtCore import QSize as _QSize
+
+
+class ColorscaleComboBox(_QComboBox):
+    """Drop-in replacement for a plain QComboBox populated with COLORSCALES.
+
+    Each entry shows a small horizontal gradient preview so the user can
+    see the colour ramp before selecting it.
+
+    Usage::
+
+        combo = ColorscaleComboBox()
+        combo.set_colorscale("Viridis")
+        current = combo.colorscale   # → str
+    """
+
+    _ICON_W = 120
+    _ICON_H = 14
+
+    def __init__(self, default: str = "Viridis", parent=None):
+        super().__init__(parent)
+        self.setIconSize(_QSize(self._ICON_W, self._ICON_H))
+        self.setMinimumWidth(190)
+        for cs in COLORSCALES:
+            pix = _get_cs_pixmap(cs, self._ICON_W, self._ICON_H)
+            self.addItem(_QIcon(pix), cs)
+        self.set_colorscale(default)
+
+    def set_colorscale(self, name: str):
+        idx = self.findText(name)
+        if idx >= 0:
+            self.setCurrentIndex(idx)
+
+    @property
+    def colorscale(self) -> str:
+        return self.currentText()
+
 
 # Default per-phase discrete colours (Plotly D3 palette + extras)
 DEFAULT_PHASE_COLORS: list[str] = [
